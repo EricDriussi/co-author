@@ -1,3 +1,4 @@
+mod author;
 pub mod authors {
     pub fn run() -> bool {
         return true;
