@@ -2,7 +2,7 @@ use std::error::Error;
 
 mod cli;
 fn main() -> Result<(), Box<dyn Error>> {
-    let aliases = cli::ask_for_aliases();
+    let aliases = cli::ask_for_aliases(None);
     for alias in aliases {
         println!("Alias: {}", alias);
     }

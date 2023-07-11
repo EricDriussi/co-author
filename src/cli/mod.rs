@@ -12,10 +12,10 @@ pub fn ask_for_commit_message(input: Option<&mut dyn BufRead>) -> Result<String,
     }
 }
 
-pub fn ask_for_aliases() -> Vec<&str> {
-    let aliases = reader::prompt_user("Enter co-authors aliases separated by spaces:", None);
+pub fn ask_for_aliases(input: Option<&mut dyn BufRead>) -> Vec<String> {
+    let aliases = reader::prompt_user("Enter co-authors aliases separated by spaces:", input);
 
-    aliases.split_whitespace().collect()
+    return aliases.split_whitespace().map(|s| s.to_string()).collect();
 }
 
 #[cfg(test)]
