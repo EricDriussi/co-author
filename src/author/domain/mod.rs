@@ -1,14 +1,14 @@
 use colored::Colorize;
 use std::fmt::Display;
 
-struct Author {
+pub struct Author {
     alias: String,
     name: String,
     email: String,
 }
 
 impl Author {
-    pub fn new(alias: &str, name: &str, email: &str) -> Self {
+    fn new(alias: &str, name: &str, email: &str) -> Self {
         Self {
             alias: String::from(alias),
             name: String::from(name),
@@ -16,7 +16,7 @@ impl Author {
         }
     }
 
-    pub fn signature(&self) -> String {
+    fn signature(&self) -> String {
         return String::from(format!("Co-Authored by: {} <{}>", self.name, self.email));
     }
 }
@@ -41,6 +41,11 @@ impl Display for Author {
             self.name
         )
     }
+}
+
+pub trait Repository {
+    fn find_authors(aliases: Vec<String>) -> Result<Vec<Author>, String>;
+    fn all_authors() -> Result<Vec<Author>, String>;
 }
 
 #[cfg(test)]
