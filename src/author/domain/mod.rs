@@ -1,6 +1,7 @@
 use colored::Colorize;
 use std::fmt::Display;
 
+#[derive(Debug)]
 pub struct Author {
     alias: String,
     name: String,
@@ -8,7 +9,7 @@ pub struct Author {
 }
 
 impl Author {
-    fn new(alias: &str, name: &str, email: &str) -> Self {
+    pub fn new(alias: &str, name: &str, email: &str) -> Self {
         Self {
             alias: String::from(alias),
             name: String::from(name),
@@ -44,8 +45,8 @@ impl Display for Author {
 }
 
 pub trait Repository {
-    fn find_authors(aliases: Vec<String>) -> Result<Vec<Author>, String>;
-    fn all_authors() -> Result<Vec<Author>, String>;
+    fn find_authors(&self, aliases: Vec<&str>) -> Vec<Author>;
+    fn all_authors(&self) -> Vec<Author>;
 }
 
 #[cfg(test)]
