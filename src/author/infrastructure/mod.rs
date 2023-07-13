@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{BufRead, BufReader},
+    io::{BufRead, BufReader, Lines, Result},
     path::PathBuf,
 };
 
@@ -17,65 +17,46 @@ impl FSRepo {
         }
     }
 
-    fn read_file(&self) -> Vec<String> {
-        match self.src.to_str() {
-            Some(path) => {
-                match File::open(path) {
-                    Ok(file) => {
-                        let reader = BufReader::new(file);
-                        let lines: Vec<String> = reader.lines().map(|line| line.unwrap()).collect();
-                        return lines;
-                    }
-                    Err(_) => return Vec::new(),
-                };
-            }
-            None => return Vec::new(),
-        };
+    fn read_lines(&self) -> Result<Lines<BufReader<File>>> {
+        let file = File::open(&self.src)?;
+        Ok(BufReader::new(file).lines())
+    }
+
+    fn filter_by_alias(&self, line: &str, aliases: &[&str]) -> bool {
+        aliases.iter().any(|alias| line.starts_with(*alias))
+    }
+
+    fn parse_author(&self, line: &str) -> Option<Author> {
+        let fields: Vec<&str> = line.split(',').collect();
+
+        if fields.len() == 3 {
+            Some(Author::new(fields[0], fields[1], fields[2]))
+        } else {
+            None
+        }
     }
 }
 
 impl Repository for FSRepo {
     fn find_authors(&self, aliases: Vec<&str>) -> Vec<Author> {
-        match self.src.to_str() {
-            Some(path) => {
-                match File::open(path) {
-                    Ok(file) => {
-                        let reader = BufReader::new(file);
-                        let authors: Vec<Author> = reader
-                            .lines()
-                            .filter_map(|line| line.ok())
-                            .filter(|line| aliases.iter().any(|prefix| line.starts_with(*prefix)))
-                            .filter_map(|line| {
-                                let parts: Vec<&str> = line.split(',').collect();
-                                if parts.len() == 3 {
-                                    Some(Author::new(parts[0], parts[1], parts[2]))
-                                } else {
-                                    None
-                                }
-                            })
-                            .collect();
-                        return authors;
-                    }
-                    Err(_) => return Vec::new(),
-                };
-            }
-            None => return Vec::new(),
-        };
+        match self.read_lines() {
+            Ok(lines) => lines
+                .filter_map(Result::ok)
+                .filter(|line| self.filter_by_alias(line, &aliases))
+                .filter_map(|matching_line| self.parse_author(matching_line.as_str()))
+                .collect(),
+            Err(_) => Vec::new(),
+        }
     }
 
     fn all_authors(&self) -> Vec<Author> {
-        let list = self.read_file();
-
-        let mut array: Vec<Author> = Vec::new();
-
-        for line in list {
-            let fields: Vec<&str> = line.split(',').collect();
-
-            let person = Author::new(fields[0], fields[1], fields[2]);
-            array.push(person);
+        match self.read_lines() {
+            Ok(lines) => lines
+                .filter_map(Result::ok)
+                .filter_map(|line| self.parse_author(line.as_str()))
+                .collect(),
+            Err(_) => Vec::new(),
         }
-
-        return array;
     }
 }
 
