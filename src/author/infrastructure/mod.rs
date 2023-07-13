@@ -11,7 +11,7 @@ pub struct FSRepo {
 }
 
 impl FSRepo {
-    fn new(src: &str) -> Self {
+    pub fn new(src: &str) -> Self {
         Self {
             src: PathBuf::from(src),
         }

@@ -1,7 +1,7 @@
 use colored::Colorize;
 use std::fmt::Display;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Author {
     alias: String,
     name: String,
