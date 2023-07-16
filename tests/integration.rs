@@ -8,9 +8,9 @@ fn authors() {
     let repo = FSRepo::new("tests/data/authors");
     let app_service = Service::new(repo);
 
-    let authors = app_service.get_available_authors();
+    let authors = app_service.find_authors(Vec::from(["a"]));
 
-    assert!(authors.len() == 2);
+    assert_eq!(authors.len(), 1);
 }
 
 #[test]
