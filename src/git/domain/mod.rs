@@ -29,7 +29,7 @@ impl Display for CommitBody {
 }
 
 pub trait GitRepo {
-    fn commit(&self, body: CommitBody) -> Result<(), git2::Error>;
+    fn commit(&self, body: CommitBody) -> Result<(), String>;
 }
 
 #[cfg(test)]
