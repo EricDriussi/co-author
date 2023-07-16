@@ -1,10 +1,10 @@
 use std::io::{self, BufRead};
 
-pub fn prompt_user(prompt: &str, input: Option<&mut dyn BufRead>) -> String {
+pub fn prompt_user(prompt: &str, test_input: Option<&mut dyn BufRead>) -> String {
     println!("{}", prompt);
 
     let mut user_input = String::new();
-    input
+    test_input
         .unwrap_or(&mut default_to_stdin())
         .read_line(&mut user_input)
         .expect("Failed to read user input");
