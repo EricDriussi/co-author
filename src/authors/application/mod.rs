@@ -15,7 +15,7 @@ impl Service {
         self.repo.all_authors()
     }
 
-    pub fn find_authors(&self, aliases: Vec<&str>) -> Vec<Author> {
+    pub fn find_authors(&self, aliases: Vec<String>) -> Vec<Author> {
         self.repo.find_authors(aliases)
     }
 

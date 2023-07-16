@@ -22,8 +22,8 @@ impl FSRepo {
         Ok(BufReader::new(file).lines())
     }
 
-    fn filter_by_alias(&self, line: &str, aliases: &[&str]) -> bool {
-        aliases.iter().any(|alias| line.starts_with(*alias))
+    fn filter_by_alias(&self, line: &str, aliases: &[String]) -> bool {
+        aliases.iter().any(|alias| line.starts_with(alias))
     }
 
     fn parse_author(&self, line: &str) -> Option<Author> {
@@ -38,7 +38,7 @@ impl FSRepo {
 }
 
 impl Repository for FSRepo {
-    fn find_authors(&self, aliases: Vec<&str>) -> Vec<Author> {
+    fn find_authors(&self, aliases: Vec<String>) -> Vec<Author> {
         match self.read_lines() {
             Ok(lines) => lines
                 .filter_map(Result::ok)

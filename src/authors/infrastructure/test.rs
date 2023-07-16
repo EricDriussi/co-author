@@ -14,10 +14,10 @@ fn should_read_lines() {
 fn should_filter_by_alias() {
     let fs_repo = FSRepo::new("no_file_needed");
 
-    let matching_alias = fs_repo.filter_by_alias("a,John,Doe", &["a"]);
+    let matching_alias = fs_repo.filter_by_alias("a,John,Doe", &[String::from("a")]);
     assert_eq!(matching_alias, true);
 
-    let no_matching_alias = fs_repo.filter_by_alias("b,Jane,Dane", &["a"]);
+    let no_matching_alias = fs_repo.filter_by_alias("b,Jane,Dane", &[String::from("a")]);
     assert_eq!(no_matching_alias, false);
 }
 
@@ -53,7 +53,7 @@ fn should_fetch_authors_based_on_alias() {
     let alias = "b";
     let expected_authors = Vec::from([Author::new(alias, "username", "something@gmail.com")]);
 
-    let actual_authors = repo.find_authors(Vec::from([alias]));
+    let actual_authors = repo.find_authors(Vec::from([String::from(alias)]));
 
     assert_eq!(actual_authors, expected_authors);
 }

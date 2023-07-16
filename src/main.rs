@@ -13,9 +13,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     app_service.print_available();
 
     let aliases = cli::ask_for_aliases(None);
-    for alias in aliases {
-        println!("Alias: {}", alias);
+    let found_authors = app_service.find_authors(aliases);
+    for author in found_authors {
+        println!("Alias: {}", author);
     }
+
     let commit_body = cli::ask_for_commit_message(None)?;
     println!("Commit body: {}", commit_body);
     Ok(())

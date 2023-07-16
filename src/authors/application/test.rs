@@ -10,7 +10,7 @@ fn should_get_all_available_authors() {
 #[test]
 fn should_find_requested_authors() {
     let author_service = Service::new(MockRepo::new());
-    let actual_authors = author_service.find_authors(Vec::from(["a"]));
+    let actual_authors = author_service.find_authors(Vec::from([String::from("a")]));
     let expected_author = MockRepo::hardcoded_authors()[0].clone();
     assert!(actual_authors.len() == 1);
     assert!(actual_authors.contains(&expected_author));
@@ -32,12 +32,12 @@ impl MockRepo {
 }
 
 impl Repository for MockRepo {
-    fn find_authors(&self, aliases: Vec<&str>) -> Vec<Author> {
+    fn find_authors(&self, aliases: Vec<String>) -> Vec<Author> {
         let mut authors = Vec::new();
-        if aliases.contains(&"a") {
+        if aliases.contains(&"a".to_string()) {
             authors.push(MockRepo::hardcoded_authors()[0].clone());
         }
-        if aliases.contains(&"b") {
+        if aliases.contains(&"b".to_string()) {
             authors.push(MockRepo::hardcoded_authors()[1].clone());
         }
         return authors;

@@ -45,7 +45,7 @@ impl Display for Author {
 }
 
 pub trait Repository {
-    fn find_authors(&self, aliases: Vec<&str>) -> Vec<Author>;
+    fn find_authors(&self, aliases: Vec<String>) -> Vec<Author>;
     fn all_authors(&self) -> Vec<Author>;
 }
 
