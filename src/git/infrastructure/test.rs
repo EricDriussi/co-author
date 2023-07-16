@@ -7,8 +7,9 @@ use std::{
 };
 
 #[test]
-fn commit_should() {
-    let git_repo = prepare_mock_git_repo();
+fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
+    let git_repo = prepare_mock_git_repo("/var/tmp/coa_ok");
+    add_file_to_git_tree(&git_repo);
 
     let repo = Git2Repo::new(git_repo);
     let authors = vec!["random author".to_string()];
@@ -19,15 +20,27 @@ fn commit_should() {
     assert!(result.is_ok());
 }
 
-fn prepare_mock_git_repo() -> Repository {
-    let git_repo = init_repo();
+#[test]
+fn should_error_out_if_no_changes_are_staged() {
+    let git_repo = prepare_mock_git_repo("/var/tmp/coa_err");
+
+    let repo = Git2Repo::new(git_repo);
+    let authors = vec!["random author".to_string()];
+    let commit_body = CommitBody::new("irrelevant message", authors);
+
+    let result = repo.commit(commit_body);
+
+    assert!(result.is_err());
+}
+
+fn prepare_mock_git_repo(path: &str) -> Repository {
+    let git_repo = init_repo(path);
     add_commit(&git_repo);
-    add_file_to_git_tree(&git_repo);
     return git_repo;
 }
 
-fn init_repo() -> Repository {
-    let dir = PathBuf::from("/var/tmp/coa");
+fn init_repo(path: &str) -> Repository {
+    let dir = PathBuf::from(path);
     fs::remove_dir_all(&dir).ok();
     return Repository::init_opts(&dir, &RepositoryInitOptions::new()).unwrap();
 }
