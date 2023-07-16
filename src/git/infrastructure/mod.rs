@@ -28,7 +28,7 @@ impl GitRepo for Git2Repo {
         // Check if there are any changes staged for commit
         let head = self.repo.head()?;
         let tree = head.peel_to_tree()?;
-        let index = &mut self.repo.index()?;
+        let mut index = self.repo.index()?;
         let diff = self
             .repo
             .diff_tree_to_index(Some(&tree), Some(&index), None)?;
