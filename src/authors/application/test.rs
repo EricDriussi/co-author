@@ -31,7 +31,7 @@ impl MockRepo {
     }
 }
 
-impl Repository for MockRepo {
+impl AuthorRepo for MockRepo {
     fn find_authors(&self, aliases: Vec<String>) -> Vec<Author> {
         let mut authors = Vec::new();
         if aliases.contains(&"a".to_string()) {

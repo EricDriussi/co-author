@@ -4,7 +4,7 @@ use std::{
     path::PathBuf,
 };
 
-use super::domain::{Author, Repository};
+use super::domain::{Author, AuthorRepo};
 
 pub struct FSRepo {
     src: PathBuf,
@@ -37,7 +37,7 @@ impl FSRepo {
     }
 }
 
-impl Repository for FSRepo {
+impl AuthorRepo for FSRepo {
     fn find_authors(&self, aliases: Vec<String>) -> Vec<Author> {
         match self.read_lines() {
             Ok(lines) => lines

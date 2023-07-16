@@ -1,11 +1,11 @@
-use super::domain::{Author, Repository};
+use super::domain::{Author, AuthorRepo};
 
 pub struct Service {
-    repo: Box<dyn Repository>,
+    repo: Box<dyn AuthorRepo>,
 }
 
 impl Service {
-    pub fn new(repo: impl Repository + 'static) -> Self {
+    pub fn new(repo: impl AuthorRepo + 'static) -> Self {
         Self {
             repo: Box::new(repo),
         }
