@@ -1,4 +1,4 @@
-use crate::author::domain::{Author, Repository};
+use crate::authors::domain::{Author, Repository};
 
 use super::FSRepo;
 

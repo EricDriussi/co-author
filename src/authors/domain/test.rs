@@ -1,7 +1,7 @@
 use super::Author;
 
 #[test]
-fn should_omit_email_when_printing() {
+fn should_omit_email_presenting_author() {
     let alias = "a";
     let name = "alice";
     let email = "alice@wonderland.not";
