@@ -12,6 +12,14 @@ impl CommitBody {
             signatures,
         }
     }
+
+    pub fn get_message(&self) -> String {
+        self.message.clone()
+    }
+
+    pub fn get_signatures(&self) -> Vec<String> {
+        self.signatures.clone()
+    }
 }
 
 impl Display for CommitBody {
@@ -21,7 +29,7 @@ impl Display for CommitBody {
 }
 
 pub trait GitRepo {
-    fn commit(&self);
+    fn commit(&self, body: CommitBody) -> Result<(), git2::Error>;
 }
 
 #[cfg(test)]
