@@ -15,5 +15,5 @@ fn authors() {
 
 #[test]
 fn git_runs() {
-    assert!(git::run());
+    assert!(git::application::run());
 }
