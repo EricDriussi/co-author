@@ -28,7 +28,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn setup_authors_service() -> Service {
+fn setup_authors_service() -> Service<FSRepo> {
     let home_dir = env::var("HOME").unwrap();
     let file_path = format!("{}/.config/coa/authors", home_dir);
 

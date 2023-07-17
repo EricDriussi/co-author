@@ -1,14 +1,12 @@
 use super::domain::{Author, AuthorRepo};
 
-pub struct Service {
-    repo: Box<dyn AuthorRepo>,
+pub struct Service<T: AuthorRepo> {
+    repo: T,
 }
 
-impl Service {
-    pub fn new(repo: impl AuthorRepo + 'static) -> Self {
-        Self {
-            repo: Box::new(repo),
-        }
+impl<T: AuthorRepo> Service<T> {
+    pub fn new(repo: T) -> Self {
+        Self { repo }
     }
 
     fn get_available_authors(&self) -> Vec<Author> {
