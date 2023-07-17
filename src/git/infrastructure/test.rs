@@ -9,7 +9,7 @@ use std::{
 #[test]
 fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
     let git_repo = prepare_mock_git_repo("/var/tmp/coa_ok");
-    add_file_to_git_tree(&git_repo);
+    add_change_to_git_tree(&git_repo);
 
     let repo = Git2Repo::new(git_repo);
     let authors = vec!["random author".to_string()];
@@ -54,7 +54,7 @@ fn add_commit(repo: &Repository) {
         .unwrap();
 }
 
-fn add_file_to_git_tree(git_repo: &Repository) {
+fn add_change_to_git_tree(git_repo: &Repository) {
     // Create file
     let root = git_repo.path().parent().unwrap();
     File::create(&root.join("foo")).unwrap();

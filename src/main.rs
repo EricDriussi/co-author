@@ -1,15 +1,20 @@
-use std::{env, error::Error};
+use std::{env, error::Error, process};
 
 use co_author::authors::{application::Service, infrastructure::FSRepo};
 
 mod cli;
-fn main() -> Result<(), Box<dyn Error>> {
-    let home_dir = env::var("HOME").unwrap();
-    let file_path = format!("{}/.config/coa/authors", home_dir);
+fn main() {
+    match run() {
+        Ok(_) => (),
+        Err(e) => {
+            eprintln!("[Error] {}", e);
+            process::exit(1);
+        }
+    }
+}
 
-    let repo = FSRepo::new(file_path.as_str());
-    let app_service = Service::new(repo);
-
+fn run() -> Result<(), Box<dyn Error>> {
+    let app_service = setup_authors_service();
     app_service.print_available();
 
     let aliases = cli::ask_for_aliases(None);
@@ -21,4 +26,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let commit_body = cli::ask_for_commit_message(None)?;
     println!("Commit body: {}", commit_body);
     Ok(())
+}
+
+fn setup_authors_service() -> Service {
+    let home_dir = env::var("HOME").unwrap();
+    let file_path = format!("{}/.config/coa/authors", home_dir);
+
+    let repo = FSRepo::new(file_path.as_str());
+    return Service::new(repo);
 }
