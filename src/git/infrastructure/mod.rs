@@ -27,6 +27,13 @@ impl GitRepo for Git2Repo {
             Err(_) => return Err(String::from("Something went wrong!")),
         };
     }
+
+    fn is_valid(path: String) -> bool {
+        match Repository::open(path) {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
 }
 
 impl Git2Repo {

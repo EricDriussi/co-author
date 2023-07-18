@@ -7,6 +7,15 @@ use std::{
 };
 
 #[test]
+fn should_validate_if_path_is_git_repo() {
+    let is_valid = Git2Repo::is_valid(String::from("."));
+    assert!(is_valid);
+
+    let is_not_valid = !Git2Repo::is_valid(String::from("/path"));
+    assert!(is_not_valid);
+}
+
+#[test]
 fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
     let git_repo = prepare_mock_git_repo("/var/tmp/coa_ok");
     add_change_to_git_tree(&git_repo);
