@@ -32,6 +32,3 @@ pub trait GitRepo {
     fn commit(&self, body: CommitBody) -> Result<(), String>;
     fn is_valid(path: String) -> bool;
 }
-
-#[cfg(test)]
-mod test;

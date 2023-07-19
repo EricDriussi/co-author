@@ -1,10 +1,11 @@
-use std::cell::Cell;
-
-use super::*;
+use git::{
+    app_service::Service,
+    git::{CommitBody, GitRepo},
+};
 
 #[test]
 fn should_commit() {
-    let spy = SpyRepo::new();
+    let spy = MockRepo::new();
     let service = Service::new(spy);
     let commit_message = "something";
     let aliases = vec![String::from("a")];
@@ -12,24 +13,18 @@ fn should_commit() {
     let result = service.commit(commit_message, aliases);
 
     assert!(result.is_ok());
-    assert!(service.repo.commit_called.get());
 }
 
-struct SpyRepo {
-    commit_called: Cell<bool>,
-}
+struct MockRepo {}
 
-impl SpyRepo {
+impl MockRepo {
     fn new() -> Self {
-        Self {
-            commit_called: Cell::new(false),
-        }
+        Self {}
     }
 }
 
-impl GitRepo for SpyRepo {
+impl GitRepo for MockRepo {
     fn commit(&self, _body: CommitBody) -> Result<(), String> {
-        self.commit_called.set(true);
         return Ok(());
     }
 

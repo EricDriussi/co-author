@@ -6,3 +6,9 @@ edition = "2021"
 [dependencies]
 colored = "2.0.4"
 git2 = "0.17.2"
+git = { path = "src/git" }
+
+[workspace]
+members = [
+    "src/git",
+]

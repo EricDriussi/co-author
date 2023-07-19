@@ -1,11 +1,11 @@
-use super::domain::{CommitBody, GitRepo};
+use crate::git::{CommitBody, GitRepo};
 
-struct Service<T: GitRepo> {
+pub struct Service<T: GitRepo> {
     repo: T,
 }
 
 impl<T: GitRepo> Service<T> {
-    fn new(repo: T) -> Service<T> {
+    pub fn new(repo: T) -> Service<T> {
         Service { repo }
     }
 
@@ -21,6 +21,3 @@ impl<T: GitRepo> Service<T> {
 pub fn run() -> bool {
     return true;
 }
-
-#[cfg(test)]
-mod test;

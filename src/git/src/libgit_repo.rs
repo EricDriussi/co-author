@@ -1,12 +1,12 @@
 use git2::{Repository, Signature};
 
-use super::domain::{CommitBody, GitRepo};
+use crate::git::{CommitBody, GitRepo};
 
-pub struct Git2Repo {
+pub struct LibGitRepo {
     repo: Repository,
 }
 
-impl GitRepo for Git2Repo {
+impl GitRepo for LibGitRepo {
     fn commit(&self, commit_body: CommitBody) -> Result<(), String> {
         match self.no_staged_changes() {
             Ok(no_changes) => {
@@ -28,6 +28,7 @@ impl GitRepo for Git2Repo {
         };
     }
 
+    // TODO: Check behavior when subdir of git repo
     fn is_valid(path: String) -> bool {
         match Repository::open(path) {
             Ok(_) => true,
@@ -36,7 +37,7 @@ impl GitRepo for Git2Repo {
     }
 }
 
-impl Git2Repo {
+impl LibGitRepo {
     pub fn new(repo: Repository) -> Self {
         Self { repo }
     }
@@ -75,6 +76,3 @@ impl Git2Repo {
             .map(|_| ())
     }
 }
-
-#[cfg(test)]
-mod test;

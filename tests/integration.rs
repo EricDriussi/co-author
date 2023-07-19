@@ -1,7 +1,4 @@
-use co_author::{
-    authors::{application::Service, infrastructure::FSRepo},
-    git,
-};
+use co_author::authors::{application::Service, infrastructure::FSRepo};
 
 #[test]
 fn authors() {
@@ -15,5 +12,5 @@ fn authors() {
 
 #[test]
 fn git_runs() {
-    assert!(git::application::run());
+    assert!(git::app_service::run());
 }
