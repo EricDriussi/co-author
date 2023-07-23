@@ -1,12 +1,12 @@
 use git::{
-    app_service::Service,
+    app_service::GitService,
     git::{CommitBody, GitRepo},
 };
 
 #[test]
 fn should_commit() {
     let spy = MockRepo::new();
-    let service = Service::new(spy);
+    let service = GitService::new(spy);
     let commit_message = "something";
     let aliases = vec![String::from("a")];
 
@@ -26,9 +26,5 @@ impl MockRepo {
 impl GitRepo for MockRepo {
     fn commit(&self, _body: CommitBody) -> Result<(), String> {
         return Ok(());
-    }
-
-    fn is_valid(_path: String) -> bool {
-        return true;
     }
 }

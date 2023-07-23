@@ -1,16 +1,12 @@
 use crate::git::{CommitBody, GitRepo};
 
-pub struct Service<T: GitRepo> {
+pub struct GitService<T: GitRepo> {
     repo: T,
 }
 
-impl<T: GitRepo> Service<T> {
-    pub fn new(repo: T) -> Service<T> {
-        Service { repo }
-    }
-
-    pub fn is_valid_git_repo(&self, path: String) -> bool {
-        return T::is_valid(path);
+impl<T: GitRepo> GitService<T> {
+    pub fn new(repo: T) -> GitService<T> {
+        GitService { repo }
     }
 
     pub fn commit(&self, message: &str, aliases: Vec<String>) -> Result<(), String> {

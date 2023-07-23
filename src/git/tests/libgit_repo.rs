@@ -9,12 +9,12 @@ use std::{
 };
 
 #[test]
-fn should_validate_if_path_is_git_repo() {
-    let is_valid = LibGitRepo::is_valid(String::from("../.."));
-    assert!(is_valid);
+fn should_determine_if_is_valid_git_repo() {
+    let valid_repo = LibGitRepo::new(PathBuf::from("../.."));
+    assert!(valid_repo.open_if_valid().is_some());
 
-    let is_not_valid = !LibGitRepo::is_valid(String::from("/path"));
-    assert!(is_not_valid);
+    let valid_repo = LibGitRepo::new(PathBuf::from("/path"));
+    assert!(valid_repo.open_if_valid().is_none());
 }
 
 #[test]
@@ -22,7 +22,7 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
     let git_repo = prepare_mock_git_repo("/var/tmp/coa_ok");
     add_change_to_git_tree(&git_repo);
 
-    let repo = LibGitRepo::new(git_repo);
+    let repo = LibGitRepo::from(git_repo);
     let authors = vec!["random author".to_string()];
     let commit_body = CommitBody::new("irrelevant message", authors);
 
@@ -35,7 +35,7 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 fn should_error_out_if_no_changes_are_staged() {
     let git_repo = prepare_mock_git_repo("/var/tmp/coa_err");
 
-    let repo = LibGitRepo::new(git_repo);
+    let repo = LibGitRepo::from(git_repo);
     let authors = vec!["random author".to_string()];
     let commit_body = CommitBody::new("irrelevant message", authors);
 

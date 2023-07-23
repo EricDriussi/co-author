@@ -1,9 +1,12 @@
+use std::path::PathBuf;
+
 use git2::{Repository, Signature};
 
 use crate::git::{CommitBody, GitRepo};
 
 pub struct LibGitRepo {
-    repo: Repository,
+    repo: Option<Repository>,
+    path: PathBuf,
 }
 
 impl GitRepo for LibGitRepo {
@@ -17,7 +20,7 @@ impl GitRepo for LibGitRepo {
             Err(_) => return Err(String::from("Something went wrong!")),
         };
 
-        let signature = match self.repo.signature() {
+        let signature = match self.repo.as_ref().unwrap().signature() {
             Ok(sig) => sig,
             Err(_) => return Err(String::from("User name and/or email not set")),
         };
@@ -27,28 +30,37 @@ impl GitRepo for LibGitRepo {
             Err(_) => return Err(String::from("Something went wrong!")),
         };
     }
-
-    // TODO: Check behavior when subdir of git repo
-    fn is_valid(path: String) -> bool {
-        match Repository::open(path) {
-            Ok(_) => true,
-            Err(_) => false,
-        }
-    }
 }
 
 impl LibGitRepo {
-    pub fn new(repo: Repository) -> Self {
-        Self { repo }
+    pub fn new(path: PathBuf) -> Self {
+        Self { path, repo: None }
+    }
+
+    pub fn from(repo: Repository) -> Self {
+        Self {
+            path: repo.path().to_path_buf(),
+            repo: Some(repo),
+        }
+    }
+
+    // TODO: Check behavior when subdir of git repo
+    pub fn open_if_valid(&self) -> Option<LibGitRepo> {
+        match Repository::open(self.path.clone()) {
+            Ok(repo) => Some(Self::from(repo)),
+            Err(_) => None,
+        }
     }
 
     fn no_staged_changes(&self) -> Result<bool, git2::Error> {
-        let head = self.repo.head()?;
+        let head = self.repo.as_ref().unwrap().head()?;
         let tree = head.peel_to_tree()?;
-        let index = self.repo.index()?;
-        let diff = self
-            .repo
-            .diff_tree_to_index(Some(&tree), Some(&index), None)?;
+        let index = self.repo.as_ref().unwrap().index()?;
+        let diff =
+            self.repo
+                .as_ref()
+                .unwrap()
+                .diff_tree_to_index(Some(&tree), Some(&index), None)?;
         return Ok(diff.deltas().count() == 0);
     }
 
@@ -61,10 +73,12 @@ impl LibGitRepo {
         let formatted_commit_message =
             format!("{}\n\n{}", commit_body.get_message(), authors_string);
 
-        let oid = self.repo.index()?.write_tree()?;
-        let tree = self.repo.find_tree(oid)?;
-        let parent_commit = self.repo.head()?.peel_to_commit()?;
+        let oid = self.repo.as_ref().unwrap().index()?.write_tree()?;
+        let tree = self.repo.as_ref().unwrap().find_tree(oid)?;
+        let parent_commit = self.repo.as_ref().unwrap().head()?.peel_to_commit()?;
         self.repo
+            .as_ref()
+            .unwrap()
             .commit(
                 Some("HEAD"),
                 &signature,

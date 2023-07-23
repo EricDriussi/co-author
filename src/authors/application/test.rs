@@ -2,18 +2,18 @@ use super::*;
 
 #[test]
 fn should_get_all_available_authors() {
-    let author_service = Service::new(MockRepo::new());
+    let author_service = AuthService::new(MockRepo::new());
     let actual_authors = author_service.get_available_authors();
     assert_eq!(actual_authors, MockRepo::hardcoded_authors());
 }
 
 #[test]
 fn should_find_requested_authors() {
-    let author_service = Service::new(MockRepo::new());
+    let author_service = AuthService::new(MockRepo::new());
     let actual_authors = author_service.find_authors(Vec::from([String::from("a")]));
-    let expected_author = MockRepo::hardcoded_authors()[0].clone();
+    let expected_signature = MockRepo::hardcoded_authors()[0].signature().clone();
     assert!(actual_authors.len() == 1);
-    assert!(actual_authors.contains(&expected_author));
+    assert!(actual_authors.contains(&expected_signature));
 }
 
 struct MockRepo {}

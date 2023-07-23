@@ -17,7 +17,7 @@ impl Author {
         }
     }
 
-    fn signature(&self) -> String {
+    pub fn signature(&self) -> String {
         return String::from(format!("Co-Authored by: {} <{}>", self.name, self.email));
     }
 }

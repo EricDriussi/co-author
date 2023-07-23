@@ -1,10 +1,10 @@
 use super::domain::{Author, AuthorRepo};
 
-pub struct Service<T: AuthorRepo> {
+pub struct AuthService<T: AuthorRepo> {
     repo: T,
 }
 
-impl<T: AuthorRepo> Service<T> {
+impl<T: AuthorRepo> AuthService<T> {
     pub fn new(repo: T) -> Self {
         Self { repo }
     }
@@ -13,8 +13,12 @@ impl<T: AuthorRepo> Service<T> {
         self.repo.all_authors()
     }
 
-    pub fn find_authors(&self, aliases: Vec<String>) -> Vec<Author> {
-        self.repo.find_authors(aliases)
+    pub fn find_authors(&self, aliases: Vec<String>) -> Vec<String> {
+        self.repo
+            .find_authors(aliases)
+            .iter()
+            .map(|author| author.signature())
+            .collect()
     }
 
     pub fn print_available(&self) {
