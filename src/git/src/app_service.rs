@@ -13,7 +13,3 @@ impl<T: GitRepo> GitService<T> {
         return self.repo.commit(CommitBody::new(message, aliases));
     }
 }
-
-pub fn run() -> bool {
-    return true;
-}
