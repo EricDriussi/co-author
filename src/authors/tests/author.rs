@@ -1,4 +1,4 @@
-use super::Author;
+use authors::author::Author;
 
 #[test]
 fn should_omit_email_presenting_author() {

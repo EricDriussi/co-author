@@ -1,4 +1,4 @@
-use super::domain::{Author, AuthorRepo};
+use crate::author::{Author, AuthorRepo};
 
 pub struct AuthService<T: AuthorRepo> {
     repo: T,
@@ -9,7 +9,7 @@ impl<T: AuthorRepo> AuthService<T> {
         Self { repo }
     }
 
-    fn get_available_authors(&self) -> Vec<Author> {
+    pub fn get_available_authors(&self) -> Vec<Author> {
         self.repo.all_authors()
     }
 
@@ -30,6 +30,3 @@ impl<T: AuthorRepo> AuthService<T> {
         println!();
     }
 }
-
-#[cfg(test)]
-mod test;

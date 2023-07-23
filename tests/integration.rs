@@ -1,4 +1,4 @@
-use co_author::authors_old::{application::AuthService, infrastructure::FSRepo};
+use authors::{app_service::AuthService, fs_repo::FSRepo};
 
 #[test]
 fn authors() {

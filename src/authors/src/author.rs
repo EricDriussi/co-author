@@ -48,6 +48,3 @@ pub trait AuthorRepo {
     fn find_authors(&self, aliases: Vec<String>) -> Vec<Author>;
     fn all_authors(&self) -> Vec<Author>;
 }
-
-#[cfg(test)]
-mod test;
