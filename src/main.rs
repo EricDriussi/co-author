@@ -1,6 +1,6 @@
 use std::{env, error::Error, process};
 
-use co_author::authors::{application::AuthService, infrastructure::FSRepo};
+use co_author::authors_old::{application::AuthService, infrastructure::FSRepo};
 use git::{app_service::GitService, libgit_repo::LibGitRepo};
 
 mod cli;

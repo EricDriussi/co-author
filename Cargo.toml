@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-colored = "2.0.4"
-git2 = "0.17.2"
 git = { path = "src/git" }
+authors = { path = "src/authors" }
 
 [workspace]
 members = [
     "src/git",
+    "src/authors",
 ]

@@ -1,7 +1,7 @@
 [package]
-name = "git"
+name = "authors"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-git2 = "0.17.2"
+colored = "2.0.4"
