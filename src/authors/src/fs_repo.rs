@@ -23,6 +23,7 @@ impl FSRepo {
     }
 
     fn filter_by_alias(&self, line: &str, aliases: &[String]) -> bool {
+        // FIXME. starts_with -> split by ',' and === first item
         aliases.iter().any(|alias| line.starts_with(alias))
     }
 
