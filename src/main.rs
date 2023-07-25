@@ -1,9 +1,14 @@
-use std::{env, error::Error, process};
+use std::{
+    env,
+    error::Error,
+    io::{stdin, stdout},
+    process,
+};
 
 use authors::{app_service::AuthService, fs_repo::FSRepo};
+use co_author::{cli::Cli, run_with_cli};
 use git::{app_service::GitService, libgit_repo::LibGitRepo};
 
-mod cli;
 fn main() {
     match run() {
         Ok(_) => (),
@@ -16,21 +21,14 @@ fn main() {
 
 fn run() -> Result<(), Box<dyn Error>> {
     let git_service = setup_git_service()?;
-
-    let app_service = setup_authors_service();
-    app_service.print_available();
-
-    let aliases = cli::ask_for_aliases(None);
-    let found_authors = app_service.find_authors(aliases);
-
-    let commit_body = cli::ask_for_commit_message(None)?;
-
-    git_service.commit(commit_body.as_str(), found_authors)?;
-    Ok(())
+    let authors_service = setup_authors_service();
+    let cli = Cli::new(stdin().lock(), stdout().lock());
+    return run_with_cli(git_service, authors_service, cli);
 }
 
 fn setup_authors_service() -> AuthService<FSRepo> {
     let home_dir = env::var("HOME").unwrap();
+    // TODO.handle author file location by param
     let file_path = format!("{}/.config/coa/authors", home_dir);
 
     let repo = FSRepo::new(file_path.as_str());
