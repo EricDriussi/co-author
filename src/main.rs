@@ -5,7 +5,7 @@ use std::{
     process,
 };
 
-use authors::{app_service::AuthService, fs_repo::FSRepo};
+use authors::{app_service::AuthorsService, fs_repo::FSRepo};
 use co_author::{cli::Cli, run_with_cli};
 use git::{app_service::GitService, libgit_repo::LibGitRepo};
 
@@ -20,19 +20,21 @@ fn main() {
 }
 
 fn run() -> Result<(), Box<dyn Error>> {
+    // TODO.Substitute with GitService::setup()
     let git_service = setup_git_service()?;
+    // TODO.Substitute with AuthorsService::setup()
     let authors_service = setup_authors_service();
     let cli = Cli::new(stdin().lock(), stdout().lock());
     return run_with_cli(git_service, authors_service, cli);
 }
 
-fn setup_authors_service() -> AuthService<FSRepo> {
+fn setup_authors_service() -> AuthorsService<FSRepo> {
     let home_dir = env::var("HOME").unwrap();
     // TODO.handle author file location by param
     let file_path = format!("{}/.config/coa/authors", home_dir);
 
     let repo = FSRepo::new(file_path.as_str());
-    return AuthService::new(repo);
+    return AuthorsService::new(repo);
 }
 
 fn setup_git_service() -> Result<GitService<LibGitRepo>, String> {

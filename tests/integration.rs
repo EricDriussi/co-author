@@ -1,9 +1,8 @@
 use std::io::{sink, Cursor};
 
 use authors::{
-    app_service::AuthService,
-    author::{Author, AuthorRepo},
-    fs_repo::FSRepo,
+    app_service::AuthorsService,
+    author::{Author, AuthorsRepo},
 };
 use co_author::{cli::Cli, run_with_cli};
 use git::{
@@ -11,22 +10,11 @@ use git::{
     git::{CommitBody, GitRepo},
 };
 
-// TODO.This test makes more sens in author crate
-#[test]
-fn authors() {
-    let repo = FSRepo::new("tests/data/authors");
-    let app_service = AuthService::new(repo);
-
-    let authors = app_service.find_authors(Vec::from([String::from("a")]));
-
-    assert_eq!(authors.len(), 1);
-}
-
 // TODO.Also test without mocks? Only mock cli?
 #[test]
 fn mocked_cli_flow() {
     let git_service = GitService::new(MockGitRepo::new());
-    let auth_service = AuthService::new(MockAuthorRepo::new());
+    let authors_service = AuthorsService::new(MockAuthorRepo::new());
     let nothing = sink();
     let raw_input = Cursor::new(format!(
         "{}{}{}{}",
@@ -34,7 +22,7 @@ fn mocked_cli_flow() {
     ));
     let cli = Cli::new(raw_input, nothing);
 
-    let result = run_with_cli(git_service, auth_service, cli);
+    let result = run_with_cli(git_service, authors_service, cli);
 
     assert!(result.is_ok());
 }
@@ -61,15 +49,15 @@ impl MockAuthorRepo {
     }
 }
 
-impl AuthorRepo for MockAuthorRepo {
-    fn find_authors(&self, _aliases: Vec<String>) -> Vec<Author> {
+impl AuthorsRepo for MockAuthorRepo {
+    fn find(&self, _aliases: Vec<String>) -> Vec<Author> {
         return Vec::from([
             Author::new("a", "John", "Doe"),
             Author::new("b", "Jane", "Smith"),
         ]);
     }
 
-    fn all_authors(&self) -> Vec<Author> {
+    fn all(&self) -> Vec<Author> {
         return Vec::from([
             Author::new("a", "John", "Doe"),
             Author::new("b", "Jane", "Smith"),

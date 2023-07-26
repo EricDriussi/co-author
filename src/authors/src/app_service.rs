@@ -1,28 +1,28 @@
-use crate::author::{Author, AuthorRepo};
+use crate::author::{Author, AuthorsRepo};
 
-pub struct AuthService<T: AuthorRepo> {
+pub struct AuthorsService<T: AuthorsRepo> {
     repo: T,
 }
 
-impl<T: AuthorRepo> AuthService<T> {
+impl<T: AuthorsRepo> AuthorsService<T> {
     pub fn new(repo: T) -> Self {
         Self { repo }
     }
 
-    pub fn get_available_authors(&self) -> Vec<Author> {
-        self.repo.all_authors()
+    pub fn all_available(&self) -> Vec<Author> {
+        self.repo.all()
     }
 
-    pub fn find_authors(&self, aliases: Vec<String>) -> Vec<String> {
+    pub fn signatures_of(&self, aliases: Vec<String>) -> Vec<String> {
         self.repo
-            .find_authors(aliases)
+            .find(aliases)
             .iter()
             .map(|author| author.signature())
             .collect()
     }
 
-    pub fn print_available(&self) {
-        let authors = self.get_available_authors();
+    pub fn print_all(&self) {
+        let authors = self.all_available();
         println!();
         for author in &authors {
             println!("{}", author);

@@ -1,5 +1,5 @@
 use authors::{
-    author::{Author, AuthorRepo},
+    author::{Author, AuthorsRepo},
     fs_repo::FSRepo,
 };
 
@@ -7,13 +7,12 @@ use authors::{
 fn should_fetch_all_available_authors() {
     let repo = FSRepo::new("tests/data/authors");
 
+    let actual_authors = repo.all();
+
     let expected_authors = Vec::from([
         Author::new("a", "Name Surname", "someone@users.noreply.github.com"),
         Author::new("b", "username", "something@gmail.com"),
     ]);
-
-    let actual_authors = repo.all_authors();
-
     assert_eq!(actual_authors, expected_authors);
 }
 
@@ -22,9 +21,8 @@ fn should_fetch_authors_based_on_alias() {
     let repo = FSRepo::new("tests/data/authors");
 
     let alias = "b";
+    let actual_authors = repo.find(Vec::from([String::from(alias)]));
+
     let expected_authors = Vec::from([Author::new(alias, "username", "something@gmail.com")]);
-
-    let actual_authors = repo.find_authors(Vec::from([String::from(alias)]));
-
     assert_eq!(actual_authors, expected_authors);
 }

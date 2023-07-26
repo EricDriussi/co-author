@@ -4,7 +4,7 @@ use std::{
     path::PathBuf,
 };
 
-use crate::author::{Author, AuthorRepo};
+use crate::author::{Author, AuthorsRepo};
 
 pub struct FSRepo {
     src: PathBuf,
@@ -38,8 +38,8 @@ impl FSRepo {
     }
 }
 
-impl AuthorRepo for FSRepo {
-    fn find_authors(&self, aliases: Vec<String>) -> Vec<Author> {
+impl AuthorsRepo for FSRepo {
+    fn find(&self, aliases: Vec<String>) -> Vec<Author> {
         match self.read_lines() {
             Ok(lines) => lines
                 .filter_map(Result::ok)
@@ -50,7 +50,7 @@ impl AuthorRepo for FSRepo {
         }
     }
 
-    fn all_authors(&self) -> Vec<Author> {
+    fn all(&self) -> Vec<Author> {
         match self.read_lines() {
             Ok(lines) => lines
                 .filter_map(Result::ok)
