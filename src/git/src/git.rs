@@ -13,12 +13,8 @@ impl CommitBody {
         }
     }
 
-    pub fn get_message(&self) -> String {
-        self.message.clone()
-    }
-
-    pub fn get_signatures(&self) -> Vec<String> {
-        self.signatures.clone()
+    pub fn formatted_body(&self) -> String {
+        return format!("{}\n\n{}", self.message, self.signatures.join("\n"));
     }
 }
 

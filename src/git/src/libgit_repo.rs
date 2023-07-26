@@ -44,7 +44,7 @@ impl LibGitRepo {
         }
     }
 
-    // TODO: Check behavior when subdir of git repo
+    // TODO.Check behavior when subdir of git repo
     pub fn open_if_valid(&self) -> Option<LibGitRepo> {
         match Repository::open(self.path.clone()) {
             Ok(repo) => Some(Self::from(repo)),
@@ -69,10 +69,6 @@ impl LibGitRepo {
         signature: Signature,
         commit_body: CommitBody,
     ) -> Result<(), git2::Error> {
-        let authors_string = commit_body.get_signatures().join("\n");
-        let formatted_commit_message =
-            format!("{}\n\n{}", commit_body.get_message(), authors_string);
-
         let oid = self.repo.as_ref().unwrap().index()?.write_tree()?;
         let tree = self.repo.as_ref().unwrap().find_tree(oid)?;
         let parent_commit = self.repo.as_ref().unwrap().head()?.peel_to_commit()?;
@@ -83,7 +79,7 @@ impl LibGitRepo {
                 Some("HEAD"),
                 &signature,
                 &signature,
-                &formatted_commit_message,
+                &commit_body.formatted_body(),
                 &tree,
                 &[&parent_commit],
             )

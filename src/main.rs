@@ -9,6 +9,7 @@ use authors::{app_service::AuthorsService, fs_repo::FSRepo};
 use co_author::{cli::Cli, run_with_cli};
 use git::{app_service::GitService, libgit_repo::LibGitRepo};
 
+// TODO.Review &str vs String
 fn main() {
     match run() {
         Ok(_) => (),
