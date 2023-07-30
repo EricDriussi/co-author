@@ -11,10 +11,8 @@ pub struct FSRepo {
 }
 
 impl FSRepo {
-    pub fn new(src: &str) -> Self {
-        Self {
-            src: PathBuf::from(src),
-        }
+    pub fn new(src: PathBuf) -> Self {
+        Self { src }
     }
 
     fn read_lines(&self) -> Result<Lines<BufReader<File>>> {
@@ -69,7 +67,7 @@ mod test {
 
     #[test]
     fn should_read_lines() {
-        let repo = FSRepo::new("tests/data/authors");
+        let repo = FSRepo::new(PathBuf::from("tests/data/authors"));
         let contents = repo.read_lines();
 
         assert!(contents.is_ok());
@@ -77,7 +75,7 @@ mod test {
 
     #[test]
     fn should_filter_by_alias() {
-        let fs_repo = FSRepo::new("no_file_needed");
+        let fs_repo = FSRepo::new(PathBuf::from("no_file_needed"));
 
         let matching_alias = fs_repo.filter_by_alias("a,John,Doe", &[String::from("a")]);
         assert_eq!(matching_alias, true);
@@ -88,7 +86,7 @@ mod test {
 
     #[test]
     fn should_parse_author() {
-        let fs_repo = FSRepo::new("no_file_needed");
+        let fs_repo = FSRepo::new(PathBuf::from("no_file_needed"));
 
         let valid_result = fs_repo.parse_author("a,John,Doe");
         assert_eq!(valid_result, Some(Author::new("a", "John", "Doe")));
