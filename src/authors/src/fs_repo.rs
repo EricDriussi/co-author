@@ -23,8 +23,10 @@ impl FSRepo {
     }
 
     fn filter_by_alias(&self, line: &str, aliases: &[String]) -> bool {
-        // FIXME.Starts_with -> split by ',' and === first item
-        aliases.iter().any(|alias| line.starts_with(alias))
+        aliases.iter().any(|given_alias| {
+            let found_alias: &str = line.split(',').collect::<Vec<&str>>()[0];
+            return given_alias.eq_ignore_ascii_case(found_alias.trim());
+        })
     }
 
     fn parse_author(&self, line: &str) -> Option<Author> {

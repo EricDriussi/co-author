@@ -5,7 +5,6 @@ use std::{
 
 use co_author::{cli::Cli, run_with_cli};
 
-// TODO.Review &str vs String
 fn main() {
     match run() {
         Ok(_) => (),

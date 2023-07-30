@@ -10,7 +10,6 @@ use git::{
     git::{CommitBody, GitRepo},
 };
 
-// TODO.Also test without mocks? Only mock cli?
 #[test]
 fn mocked_cli_flow() {
     let git_service = GitService::new(MockGitRepo::new());
