@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use authors::{
     author::{Author, AuthorsRepo},
     fs_repo::FSRepo,
@@ -7,7 +5,7 @@ use authors::{
 
 #[test]
 fn should_fetch_all_available_authors() {
-    let repo = FSRepo::new(PathBuf::from("tests/data/authors"));
+    let repo = FSRepo::from(Some("tests/data/authors".to_string())).unwrap();
 
     let actual_authors = repo.all();
 
@@ -22,7 +20,7 @@ fn should_fetch_all_available_authors() {
 
 #[test]
 fn should_fetch_authors_based_on_alias() {
-    let repo = FSRepo::new(PathBuf::from("tests/data/authors"));
+    let repo = FSRepo::from(Some("tests/data/authors".to_string())).unwrap();
 
     let alias = "a";
     let actual_authors = repo.find(Vec::from([String::from(alias)]));
@@ -37,7 +35,7 @@ fn should_fetch_authors_based_on_alias() {
 
 #[test]
 fn should_fetch_all_authors_for_a_given_alias() {
-    let repo = FSRepo::new(PathBuf::from("tests/data/authors"));
+    let repo = FSRepo::from(Some("tests/data/authors".to_string())).unwrap();
 
     let alias = "b";
     let actual_authors = repo.find(Vec::from([String::from(alias)]));

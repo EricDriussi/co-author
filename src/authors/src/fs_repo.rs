@@ -44,14 +44,14 @@ impl FSRepo {
         Ok(BufReader::new(file).lines())
     }
 
-    fn filter_by_alias(&self, line: &str, aliases: &[String]) -> bool {
+    fn filter_by_alias(line: &str, aliases: &[String]) -> bool {
         aliases.iter().any(|given_alias| {
             let found_alias: &str = line.split(',').collect::<Vec<&str>>()[0];
             return given_alias.eq_ignore_ascii_case(found_alias.trim());
         })
     }
 
-    fn parse_author(&self, line: &str) -> Option<Author> {
+    fn parse_author(line: &str) -> Option<Author> {
         let fields: Vec<&str> = line.split(',').collect();
 
         if fields.len() == 3 {
@@ -67,8 +67,8 @@ impl AuthorsRepo for FSRepo {
         match self.read_lines() {
             Ok(lines) => lines
                 .filter_map(Result::ok)
-                .filter(|line| self.filter_by_alias(line, &aliases))
-                .filter_map(|matching_line| self.parse_author(matching_line.as_str()))
+                .filter(|line| Self::filter_by_alias(line, &aliases))
+                .filter_map(|matching_line| Self::parse_author(matching_line.as_str()))
                 .collect(),
             Err(_) => Vec::new(),
         }
@@ -78,7 +78,7 @@ impl AuthorsRepo for FSRepo {
         match self.read_lines() {
             Ok(lines) => lines
                 .filter_map(Result::ok)
-                .filter_map(|line| self.parse_author(line.as_str()))
+                .filter_map(|line| Self::parse_author(line.as_str()))
                 .collect(),
             Err(_) => Vec::new(),
         }
@@ -91,7 +91,7 @@ mod test {
 
     #[test]
     fn should_read_lines() {
-        let repo = FSRepo::new(PathBuf::from("tests/data/authors"));
+        let repo = FSRepo::from(Some("tests/data/authors".to_string())).unwrap();
         let contents = repo.read_lines();
 
         assert!(contents.is_ok());
@@ -99,23 +99,19 @@ mod test {
 
     #[test]
     fn should_filter_by_alias() {
-        let fs_repo = FSRepo::new(PathBuf::from("no_file_needed"));
-
-        let matching_alias = fs_repo.filter_by_alias("a,John,Doe", &[String::from("a")]);
+        let matching_alias = FSRepo::filter_by_alias("a,John,Doe", &[String::from("a")]);
         assert_eq!(matching_alias, true);
 
-        let no_matching_alias = fs_repo.filter_by_alias("b,Jane,Dane", &[String::from("a")]);
+        let no_matching_alias = FSRepo::filter_by_alias("b,Jane,Dane", &[String::from("a")]);
         assert_eq!(no_matching_alias, false);
     }
 
     #[test]
     fn should_parse_author() {
-        let fs_repo = FSRepo::new(PathBuf::from("no_file_needed"));
-
-        let valid_result = fs_repo.parse_author("a,John,Doe");
+        let valid_result = FSRepo::parse_author("a,John,Doe");
         assert_eq!(valid_result, Some(Author::new("a", "John", "Doe")));
 
-        let invalid_result = fs_repo.parse_author("hi,invalid_line");
+        let invalid_result = FSRepo::parse_author("hi,invalid_line");
         assert_eq!(invalid_result, None);
     }
 }
