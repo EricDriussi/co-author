@@ -10,11 +10,14 @@ use std::{
 
 #[test]
 fn should_determine_if_is_valid_git_repo() {
-    let valid_repo = LibGitRepo::new(PathBuf::from("../.."));
-    assert!(valid_repo.open_if_valid().is_some());
+    let repo_from_sub_dir = LibGitRepo::new(PathBuf::from(".").canonicalize().unwrap());
+    assert!(repo_from_sub_dir.open_if_valid().is_some());
 
-    let valid_repo = LibGitRepo::new(PathBuf::from("/path"));
-    assert!(valid_repo.open_if_valid().is_none());
+    let repo_from_root_dir = LibGitRepo::new(PathBuf::from("../..").canonicalize().unwrap());
+    assert!(repo_from_root_dir.open_if_valid().is_some());
+
+    let invalid_repo = LibGitRepo::new(PathBuf::from("/path"));
+    assert!(invalid_repo.open_if_valid().is_none());
 }
 
 #[test]

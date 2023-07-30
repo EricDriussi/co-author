@@ -44,11 +44,27 @@ impl LibGitRepo {
         }
     }
 
-    // TODO.Check behavior when subdir of git repo
+    fn find_git_root(mut path: PathBuf) -> Option<PathBuf> {
+        loop {
+            let git_dir = path.join(".git");
+            if git_dir.is_dir() {
+                return Some(path);
+            }
+
+            if !path.pop() {
+                break;
+            }
+        }
+        None
+    }
+
     pub fn open_if_valid(&self) -> Option<LibGitRepo> {
-        match Repository::open(self.path.clone()) {
-            Ok(repo) => Some(Self::from(repo)),
-            Err(_) => None,
+        if let Ok(repo) = Repository::open(&self.path) {
+            Some(Self::from(repo))
+        } else if let Some(root) = Self::find_git_root(self.path.clone()) {
+            Repository::open(&root).ok().map(Self::from)
+        } else {
+            None
         }
     }
 
