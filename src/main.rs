@@ -15,6 +15,19 @@ struct Args {
     path: Option<String>,
 }
 
+// TODO: modify --path -> --file
+// TODO: pass list of aliases as arg (--list)
+// TODO: option to add all aliases in file (--all), don't ask for aliases
+// TODO: option to open commit buffer instead of asking for commit message (--editor), pre-populated with co-authors OR...
+// TODO: add dedicated flag for commit message (--message), else ☝️
+// TODO: option to pre-populate with last commit message (--pre-populate), for both -m and -e
+// TODO: make current default cli prompting a specific use case/flag (--interactive)
+// TODO: running co-authors on its own should print the help menu (let matches = App::new("myprog").setting(AppSettings::ArgRequiredElseHelp).get_matches();)
+// TODO: sort authors by name when printing
+// TODO: automatically create aliases for authors
+// TODO: look at config-rs for config/paths handling
+// TODO: use with fzf or add fuzzy finding
+
 fn main() {
     let args = Args::parse();
     match run(args) {
