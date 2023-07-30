@@ -1,4 +1,5 @@
 use std::{
+    env,
     fs::File,
     io::{BufRead, BufReader, Lines, Result},
     path::PathBuf,
@@ -13,6 +14,29 @@ pub struct FSRepo {
 impl FSRepo {
     pub fn new(src: PathBuf) -> Self {
         Self { src }
+    }
+
+    pub fn from(authors_file: Option<String>) -> std::result::Result<Self, String> {
+        if authors_file.is_some() {
+            let path = PathBuf::from(authors_file.unwrap());
+            if path.is_file() {
+                Ok(Self { src: path })
+            } else {
+                Err(format!("No file found at path {:?}", path.to_str()))
+            }
+        } else if authors_file.is_none() {
+            let home_dir = env::var("HOME").unwrap();
+            let file_path = PathBuf::from(format!("{}/.config/coa/authors", home_dir));
+            if file_path.exists() {
+                Ok(Self { src: file_path })
+            } else {
+                Ok(Self {
+                    src: PathBuf::from(env::current_dir().unwrap()),
+                })
+            }
+        } else {
+            Err("FileSystem error!".to_string())
+        }
     }
 
     fn read_lines(&self) -> Result<Lines<BufReader<File>>> {

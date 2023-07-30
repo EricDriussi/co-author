@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 git = { path = "src/git" }
 authors = { path = "src/authors" }
+clap = { version = "4.3.19", features = ["derive"] }
 
 [workspace]
 members = [
