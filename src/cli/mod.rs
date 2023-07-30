@@ -20,10 +20,9 @@ impl<R: BufRead, W: Write> Cli<R, W> {
         );
 
         if commit_message.is_empty() {
-            Err("Commit message cannot be empty.")
-        } else {
-            Ok(commit_message)
+            return Err("Commit message cannot be empty.");
         }
+        return Ok(commit_message);
     }
 
     pub fn ask_for_aliases(&mut self) -> Vec<String> {

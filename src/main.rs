@@ -1,5 +1,4 @@
 use std::{
-    error::Error,
     io::{stdin, stdout},
     process,
 };
@@ -17,7 +16,7 @@ fn main() {
     }
 }
 
-fn run() -> Result<(), Box<dyn Error>> {
+fn run() -> Result<(), String> {
     let git_service = git::libgit_setup()?;
     let authors_service = authors::fs_setup();
     let cli = Cli::new(stdin().lock(), stdout().lock());
