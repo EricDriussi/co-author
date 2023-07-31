@@ -1,4 +1,5 @@
 use std::fs;
+use serial_test::serial;
 use authors::{
     author::{Author, AuthorsRepo},
     fs_repo::FSRepo,
@@ -17,6 +18,7 @@ fn should_not_init_if_a_given_file_is_non_existent() {
 }
 
 #[test]
+#[serial]
 fn should_default_to_cwd_when_looking_for_a_authors_file(){
 	let authors_file_in_cwd = "./authors";
 	fs::File::create(authors_file_in_cwd).unwrap();
@@ -28,6 +30,7 @@ fn should_default_to_cwd_when_looking_for_a_authors_file(){
 }
 
 #[test]
+#[serial]
 fn should_fail_to_init_when_no_valid_file_is_found(){
 	let repo = FSRepo::from(None);
 	assert!(repo.is_err());

@@ -1,4 +1,9 @@
-use std::{env, fs::File, io::{BufRead, BufReader, Lines, Result}, path::PathBuf};
+use std::{
+    env,
+    fs::File,
+    io::{BufRead, BufReader, Lines, Result},
+    path::PathBuf,
+};
 
 use crate::author::{Author, AuthorsRepo};
 
@@ -12,33 +17,38 @@ impl FSRepo {
     }
 
     pub fn from(authors_file: Option<String>) -> std::result::Result<Self, String> {
-        if authors_file.is_some() {
-            let path = PathBuf::from(authors_file.unwrap());
-            if path.is_file() {
-                Ok(Self { src: path })
-            } else {
-                Err(format!("No file found at path {:?}", path.to_str()))
-            }
-        } else if authors_file.is_none() {
-            let home_dir = env::var("HOME").unwrap();
-            let path = PathBuf::from(format!("{}/.config/coa/authors", home_dir));
-            if path.is_file() {
-                Ok(Self { src: path })
-            } else {
-                let mut path = env::current_dir().unwrap();
-				path.push("authors");
-                if path.is_file() {
-                    Ok(Self { src: path })
-                } else {
-                    Err("No authors file found!".to_string())
-                }
-            }
-        } else {
-            Err("FileSystem error!".to_string())
-        }
+        return match authors_file {
+            Some(authors_file) => Self::load_specific_file(PathBuf::from(authors_file)),
+            None => Self::load_default_with_fallback(),
+        };
     }
 
-    fn read_lines(&self) -> Result<Lines<BufReader<File>>> {
+    fn load_specific_file(path: PathBuf) -> std::result::Result<FSRepo, String> {
+		return match path.is_file() {
+			true => Ok(Self { src: path }),
+			false => Err(format!("No file found at path {:?}", path.to_str())),
+		};
+    }
+
+    fn load_default_with_fallback() -> std::result::Result<FSRepo, String> {
+        let home_dir = env::var("HOME").unwrap();
+        let home_file = PathBuf::from(format!("{}/.config/coa/authors", home_dir));
+        return match home_file.is_file() {
+			true => Ok(Self { src: home_file }),
+			false => Self::try_with_local_file(),
+		}
+    }
+
+	fn try_with_local_file() -> std::result::Result<FSRepo, String> {
+		let mut local_file = env::current_dir().unwrap();
+		local_file.push("authors");
+		return match local_file.is_file() {
+			true => Ok(Self { src: local_file }),
+			false => Err("No authors file found!".to_string()),
+		};
+	}
+
+	fn read_lines(&self) -> Result<Lines<BufReader<File>>> {
         let file = File::open(&self.src)?;
         Ok(BufReader::new(file).lines())
     }
