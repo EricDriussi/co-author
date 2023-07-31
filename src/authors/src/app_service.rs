@@ -20,13 +20,4 @@ impl<T: AuthorsRepo> AuthorsService<T> {
             .map(|author| author.signature())
             .collect()
     }
-
-    pub fn print_all(&self) {
-        let authors = self.all_available();
-        println!();
-        for author in &authors {
-            println!("{}", author);
-        }
-        println!();
-    }
 }
