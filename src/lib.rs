@@ -6,7 +6,7 @@ use git::{app_service::GitService, git::GitRepo};
 
 pub mod cli;
 
-pub fn run_with_cli<T: GitRepo, Y: AuthorsRepo, R: BufRead, W: Write>(
+pub fn run_interactive<T: GitRepo, Y: AuthorsRepo, R: BufRead, W: Write>(
     git_service: GitService<T>,
     auth_service: AuthorsService<Y>,
     mut cli: Cli<R, W>,

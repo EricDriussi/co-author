@@ -4,15 +4,15 @@ use std::{
     process,
 };
 
-use co_author::{cli::Cli, run_with_cli};
+use co_author::{cli::Cli, run_interactive};
 
 /// Co-author your git commits
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// Path of the authors file
+    /// File containing a csv list of authors (alias,name,email)
     #[arg(short, long)]
-    path: Option<String>,
+    file: Option<String>,
 }
 
 // TODO: modify --path -> --file
@@ -41,8 +41,8 @@ fn main() {
 
 fn run(args: Args) -> Result<(), String> {
     let git_service = git::libgit_setup()?;
-    let authors_service = authors::fs_setup(args.path)?;
+    let authors_service = authors::fs_setup(args.file)?;
 
     let cli = Cli::new(stdin().lock(), stdout().lock());
-    return run_with_cli(git_service, authors_service, cli);
+    return run_interactive(git_service, authors_service, cli);
 }

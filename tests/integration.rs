@@ -4,7 +4,7 @@ use authors::{
     app_service::AuthorsService,
     author::{Author, AuthorsRepo},
 };
-use co_author::{cli::Cli, run_with_cli};
+use co_author::{cli::Cli, run_interactive};
 use git::{
     app_service::GitService,
     git::{CommitBody, GitRepo},
@@ -21,7 +21,7 @@ fn mocked_cli_flow() {
     ));
     let cli = Cli::new(raw_input, nothing);
 
-    let result = run_with_cli(git_service, authors_service, cli);
+    let result = run_interactive(git_service, authors_service, cli);
 
     assert!(result.is_ok());
 }
