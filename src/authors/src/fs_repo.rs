@@ -1,9 +1,4 @@
-use std::{
-    env,
-    fs::File,
-    io::{BufRead, BufReader, Lines, Result},
-    path::PathBuf,
-};
+use std::{env, fs::File, io::{BufRead, BufReader, Lines, Result}, path::PathBuf};
 
 use crate::author::{Author, AuthorsRepo};
 
@@ -26,13 +21,17 @@ impl FSRepo {
             }
         } else if authors_file.is_none() {
             let home_dir = env::var("HOME").unwrap();
-            let file_path = PathBuf::from(format!("{}/.config/coa/authors", home_dir));
-            if file_path.exists() {
-                Ok(Self { src: file_path })
+            let path = PathBuf::from(format!("{}/.config/coa/authors", home_dir));
+            if path.is_file() {
+                Ok(Self { src: path })
             } else {
-                Ok(Self {
-                    src: PathBuf::from(env::current_dir().unwrap()),
-                })
+                let mut path = env::current_dir().unwrap();
+				path.push("authors");
+                if path.is_file() {
+                    Ok(Self { src: path })
+                } else {
+                    Err("No authors file found!".to_string())
+                }
             }
         } else {
             Err("FileSystem error!".to_string())
