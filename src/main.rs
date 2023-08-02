@@ -15,7 +15,6 @@ struct Args {
     file: Option<String>,
 }
 
-// TODO: look at config-rs for config/paths handling
 // TODO: pass list of aliases as arg (--list)
 // TODO: option to add all aliases in file (--all), don't ask for aliases
 // TODO: option to open commit buffer instead of asking for commit message (--editor), pre-populated with co-authors OR...
