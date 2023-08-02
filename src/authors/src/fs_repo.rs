@@ -31,9 +31,9 @@ impl FSRepo {
     }
 
     fn load_default_with_fallback() -> std::result::Result<FSRepo, String> {
-        let home_file = PathBuf::from(conf::authors_file());
-        return match home_file.is_file() {
-            true => Ok(Self { src: home_file }),
+        let default_file = PathBuf::from(conf::authors_file());
+        return match default_file.is_file() {
+            true => Ok(Self { src: default_file }),
             false => Self::try_with_local_file(),
         };
     }

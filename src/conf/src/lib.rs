@@ -7,16 +7,14 @@ pub fn authors_file() -> String {
 }
 
 fn get_config() -> Config {
-    let mut config_file = "default";
+    let mut config_file = "src/conf/src/configs/default";
     if let Ok(test_env) = env::var("COA_ENV") {
         if test_env == "test" {
-            config_file = "test";
+            config_file = "../conf/src/configs/test";
         }
     }
     return Config::builder()
-        .add_source(config::File::with_name(
-            format!("src/conf/src/configs/{}", config_file).as_str(),
-        ))
+        .add_source(config::File::with_name(config_file))
         .build()
         .unwrap();
 }
