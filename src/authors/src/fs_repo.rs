@@ -24,31 +24,30 @@ impl FSRepo {
     }
 
     fn load_specific_file(path: PathBuf) -> std::result::Result<FSRepo, String> {
-		return match path.is_file() {
-			true => Ok(Self { src: path }),
-			false => Err(format!("No file found at path {:?}", path.to_str())),
-		};
+        return match path.is_file() {
+            true => Ok(Self { src: path }),
+            false => Err(format!("No file found at path {:?}", path.to_str())),
+        };
     }
 
     fn load_default_with_fallback() -> std::result::Result<FSRepo, String> {
-        let home_dir = env::var("HOME").unwrap();
-        let home_file = PathBuf::from(format!("{}/.config/coa/authors", home_dir));
+        let home_file = PathBuf::from(conf::authors_file());
         return match home_file.is_file() {
-			true => Ok(Self { src: home_file }),
-			false => Self::try_with_local_file(),
-		}
+            true => Ok(Self { src: home_file }),
+            false => Self::try_with_local_file(),
+        };
     }
 
-	fn try_with_local_file() -> std::result::Result<FSRepo, String> {
-		let mut local_file = env::current_dir().unwrap();
-		local_file.push("authors");
-		return match local_file.is_file() {
-			true => Ok(Self { src: local_file }),
-			false => Err("No authors file found!".to_string()),
-		};
-	}
+    fn try_with_local_file() -> std::result::Result<FSRepo, String> {
+        let mut local_file = env::current_dir().unwrap();
+        local_file.push("authors");
+        return match local_file.is_file() {
+            true => Ok(Self { src: local_file }),
+            false => Err("No authors file found!".to_string()),
+        };
+    }
 
-	fn read_lines(&self) -> Result<Lines<BufReader<File>>> {
+    fn read_lines(&self) -> Result<Lines<BufReader<File>>> {
         let file = File::open(&self.src)?;
         Ok(BufReader::new(file).lines())
     }
