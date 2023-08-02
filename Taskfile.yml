@@ -1,0 +1,20 @@
+version: '3'
+silent: true
+tasks:
+  default:
+    cmds:
+      - go-task -l
+  run:
+    desc: "Run in dev mode"
+    cmds:
+      - cargo run
+  test:
+    desc: "Run all tests"
+    env:
+      COA_ENV: test
+    cmds:
+      - cargo test && cargo test -p conf -p git -p authors
+  build:
+    desc: "Build binary"
+    cmds:
+      - cargo build --release
