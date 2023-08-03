@@ -40,7 +40,10 @@ fn main() {
 
 fn run(args: Args) -> Result<(), String> {
 	let git_service = git::libgit_setup()?;
-	let authors_service = authors::fs_setup(args.file)?;
+	let authors_service = match args.file {
+		Some(file) => authors::fs_setup_from_file(file)?,
+		None => authors::fs_default_setup()?,
+	};
 
 	let cli = Cli::new(stdin().lock(), stdout().lock());
 	return run_interactive(git_service, authors_service, cli);

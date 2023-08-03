@@ -12,29 +12,19 @@ pub struct FSRepo {
 }
 
 impl FSRepo {
-	pub fn new(src: PathBuf) -> Self {
-		Self { src }
-	}
-
-	pub fn from(authors_file: Option<String>) -> std::result::Result<Self, String> {
-		return match authors_file {
-			Some(authors_file) => Self::load_specific_file(PathBuf::from(authors_file)),
-			None => Self::load_default_with_fallback(),
-		};
-	}
-
-	fn load_specific_file(path: PathBuf) -> std::result::Result<FSRepo, String> {
-		return match path.is_file() {
-			true => Ok(Self { src: path }),
-			false => Err(format!("No file found at path {:?}", path.to_str())),
-		};
-	}
-
-	fn load_default_with_fallback() -> std::result::Result<FSRepo, String> {
+	pub fn default() -> std::result::Result<Self, String> {
 		let default_file = PathBuf::from(conf::authors_file());
 		return match default_file.is_file() {
 			true => Ok(Self { src: default_file }),
 			false => Self::try_with_local_file(),
+		};
+	}
+
+	pub fn from(authors_file: String) -> std::result::Result<Self, String> {
+		let path = PathBuf::from(authors_file);
+		return match path.is_file() {
+			true => Ok(Self { src: path }),
+			false => Err(format!("No file found at path {:?}", path.to_str())),
 		};
 	}
 
@@ -99,7 +89,7 @@ mod test {
 
 	#[test]
 	fn should_read_lines() {
-		let repo = FSRepo::from(Some("tests/data/authors".to_string())).unwrap();
+		let repo = FSRepo::from("tests/data/authors".to_string()).unwrap();
 		let contents = repo.read_lines();
 
 		assert!(contents.is_ok());
