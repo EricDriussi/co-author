@@ -9,7 +9,7 @@ pub fn authors_file() -> String {
 	return get_config().get::<String>("authors_file").unwrap();
 }
 
-fn get_config() -> Config {
+pub fn get_config() -> Config {
 	let config_file = if let Ok(test_env) = env::var("COA_ENV") {
 		if test_env == "test" {
 			TEST_CONFIG

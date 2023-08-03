@@ -7,7 +7,7 @@ use std::fs;
 
 #[test]
 fn should_init_from_a_given_existing_file() {
-	let repo = FSRepo::from(Some("tests/data/authors".to_string()));
+	let repo = FSRepo::from(some_valid_authors_file());
 	assert!(repo.is_ok());
 }
 
@@ -19,7 +19,7 @@ fn should_not_init_if_a_given_file_is_non_existent() {
 
 #[test]
 #[serial]
-fn should_default_to_cwd_when_looking_for_a_authors_file() {
+fn should_look_in_cwd_when_no_authors_file_is_found_in_home_dir() {
 	let authors_file_in_cwd = "./authors";
 	fs::File::create(authors_file_in_cwd).unwrap();
 
@@ -38,7 +38,7 @@ fn should_fail_to_init_when_no_valid_file_is_found() {
 
 #[test]
 fn should_fetch_all_available_authors() {
-	let repo = FSRepo::from(Some("tests/data/authors".to_string())).unwrap();
+	let repo = FSRepo::from(some_valid_authors_file()).unwrap();
 
 	let actual_authors = repo.all();
 
@@ -53,7 +53,7 @@ fn should_fetch_all_available_authors() {
 
 #[test]
 fn should_fetch_authors_based_on_alias() {
-	let repo = FSRepo::from(Some("tests/data/authors".to_string())).unwrap();
+	let repo = FSRepo::from(some_valid_authors_file()).unwrap();
 
 	let alias = "a";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));
@@ -64,7 +64,7 @@ fn should_fetch_authors_based_on_alias() {
 
 #[test]
 fn should_fetch_all_authors_for_a_given_alias() {
-	let repo = FSRepo::from(Some("tests/data/authors".to_string())).unwrap();
+	let repo = FSRepo::from(some_valid_authors_file()).unwrap();
 
 	let alias = "b";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));
@@ -74,4 +74,19 @@ fn should_fetch_all_authors_for_a_given_alias() {
 		Author::new(alias, "username2", "something2@gmail.com"),
 	]);
 	assert_eq!(actual_authors, expected_authors);
+}
+
+#[test]
+fn should_return_an_empty_list_if_no_author_mathces_alias() {
+	let repo = FSRepo::from(some_valid_authors_file()).unwrap();
+
+	let alias = "z";
+	let actual_authors = repo.find(Vec::from([String::from(alias)]));
+
+	let expected_authors = Vec::from([]);
+	assert_eq!(actual_authors, expected_authors);
+}
+
+fn some_valid_authors_file() -> Option<String> {
+	Some(conf::get_config().get::<String>("valid_test_authors_file").unwrap())
 }
