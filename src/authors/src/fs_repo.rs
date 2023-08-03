@@ -24,7 +24,7 @@ impl FSRepo {
 		let path = PathBuf::from(authors_file);
 		return match path.is_file() {
 			true => Ok(Self { src: path }),
-			false => Err(format!("No file found at path {:?}", path.to_str())),
+			false => Err(format!("No file found at path {:?}", path.to_str().unwrap())),
 		};
 	}
 
