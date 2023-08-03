@@ -5,7 +5,7 @@ use std::{
 
 use clap::Parser;
 
-use co_author::{cli::Cli, run_interactive, run_interactive_no_ask_aliases};
+use co_author::{cli::Cli, run_interactive, run_interactive_all_authors, run_interactive_no_ask_aliases};
 
 /// Co-author your git commits
 #[derive(Parser, Debug)]
@@ -18,9 +18,12 @@ struct Args {
 	/// List of comma spearated aliases
 	#[arg(short, long)]
 	list: Option<String>,
+
+	/// Use all aliases available
+	#[arg(short, long, default_value = "false")]
+	all: bool,
 }
 
-// TODO: option to add all aliases in file (--all), don't ask for aliases
 // TODO: option to open commit buffer instead of asking for commit message (--editor), pre-populated with co-authors OR...
 // TODO: add dedicated flag for commit message (--message), else ☝️
 // TODO: option to pre-populate with last commit message (--pre-populate), for both -m and -e
@@ -49,6 +52,12 @@ fn run(args: Args) -> Result<(), String> {
 	};
 
 	let cli = Cli::new(stdin().lock(), stdout().lock());
+
+	if args.all {
+		return run_interactive_all_authors(git_service, authors_service, cli);
+	}
+
+	// FIXME.Make -a and -l work together
 
 	if args.list.is_some() {
 		return run_interactive_no_ask_aliases(git_service, authors_service, cli, args.list.unwrap());

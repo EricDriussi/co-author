@@ -40,3 +40,14 @@ fn print(authors: Vec<Author>) {
 	}
 	println!();
 }
+
+pub fn run_interactive_all_authors<T: GitRepo, Y: AuthorsRepo, R: BufRead, W: Write>(
+	git_service: GitService<T>,
+	authors_service: AuthorsService<Y>,
+	mut cli: Cli<R, W>,
+) -> Result<(), String> {
+	let found_authors = authors_service.signatures_of_all();
+	let commit_body = cli.ask_for_commit_message()?;
+
+	return git_service.commit(commit_body.as_str(), found_authors);
+}

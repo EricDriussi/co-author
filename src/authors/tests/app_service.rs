@@ -4,12 +4,23 @@ use authors::{
 };
 
 #[test]
-fn should_find_requested_authors() {
+fn should_find_requested_authors_signatures() {
 	let author_service = AuthorsService::new(MockRepo::new());
 	let actual_authors = author_service.signatures_of(Vec::from([String::from("a")]));
 	let expected_signature = MockRepo::hardcoded_authors()[0].signature().clone();
 	assert_eq!(actual_authors.len(), 1);
 	assert!(actual_authors.contains(&expected_signature));
+}
+
+#[test]
+fn should_find_all_authors_signatures() {
+	let author_service = AuthorsService::new(MockRepo::new());
+	let actual_authors = author_service.signatures_of_all();
+	let expected_signature_1 = MockRepo::hardcoded_authors()[0].signature().clone();
+	let expected_signature_2 = MockRepo::hardcoded_authors()[0].signature().clone();
+	assert_eq!(actual_authors.len(), 2);
+	assert!(actual_authors.contains(&expected_signature_1));
+	assert!(actual_authors.contains(&expected_signature_2));
 }
 
 #[test]
