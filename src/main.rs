@@ -1,8 +1,9 @@
-use clap::Parser;
 use std::{
-    io::{stdin, stdout},
-    process,
+	io::{stdin, stdout},
+	process,
 };
+
+use clap::Parser;
 
 use co_author::{cli::Cli, run_interactive};
 
@@ -10,9 +11,9 @@ use co_author::{cli::Cli, run_interactive};
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// File containing a csv list of authors (alias,name,email)
-    #[arg(short, long)]
-    file: Option<String>,
+	/// File containing a csv list of authors (alias,name,email)
+	#[arg(short, long)]
+	file: Option<String>,
 }
 
 // TODO: pass list of aliases as arg (--list)
@@ -27,20 +28,20 @@ struct Args {
 // TODO: use with fzf or add fuzzy finding
 
 fn main() {
-    let args = Args::parse();
-    match run(args) {
-        Ok(_) => (),
-        Err(e) => {
-            eprintln!("[Error] {}", e);
-            process::exit(1);
-        }
-    }
+	let args = Args::parse();
+	match run(args) {
+		Ok(_) => (),
+		Err(e) => {
+			eprintln!("[Error] {}", e);
+			process::exit(1);
+		}
+	}
 }
 
 fn run(args: Args) -> Result<(), String> {
-    let git_service = git::libgit_setup()?;
-    let authors_service = authors::fs_setup(args.file)?;
+	let git_service = git::libgit_setup()?;
+	let authors_service = authors::fs_setup(args.file)?;
 
-    let cli = Cli::new(stdin().lock(), stdout().lock());
-    return run_interactive(git_service, authors_service, cli);
+	let cli = Cli::new(stdin().lock(), stdout().lock());
+	return run_interactive(git_service, authors_service, cli);
 }
