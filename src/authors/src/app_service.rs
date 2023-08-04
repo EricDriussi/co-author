@@ -21,7 +21,7 @@ impl<T: AuthorsRepo> AuthorsService<T> {
 			.collect()
 	}
 
-	pub fn signatures_of_all(&self) -> Vec<String> {
+	pub fn all_signatures(&self) -> Vec<String> {
 		self.repo.all().iter().map(|author| author.signature()).collect()
 	}
 }

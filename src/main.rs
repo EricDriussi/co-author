@@ -20,15 +20,16 @@ struct Args {
 	list: Option<String>,
 
 	/// Use all aliases available
-	#[arg(short, long, default_value = "false")]
+	#[arg(short, long, conflicts_with("list"), default_value = "false")]
 	all: bool,
 }
 
-// TODO: option to open commit buffer instead of asking for commit message (--editor), pre-populated with co-authors OR...
-// TODO: add dedicated flag for commit message (--message), else ☝️
-// TODO: option to pre-populate with last commit message (--pre-populate), for both -m and -e
 // TODO: make current default cli prompting a specific use case/flag (--interactive)
-// TODO: running co-authors on its own should print the help menu (let matches = App::new("myprog").setting(AppSettings::ArgRequiredElseHelp).get_matches();)
+// TODO: no flag = --help -> #[command(arg_required_else_help = true)]
+// TODO: default behavior should open commit buffer instead of asking for commit message, pre-populated with co-authors UNLESS...
+// TODO: add dedicated flag for commit message (--message)
+// TODO: -l and -a should work with -m
+// TODO: option to pre-populate with last commit message (--pre-populate), for both -m and default buffer opening
 // TODO: sort authors by name when printing
 // TODO: automatically create aliases for authors
 // TODO: use with fzf or add fuzzy finding
@@ -56,8 +57,6 @@ fn run(args: Args) -> Result<(), String> {
 	if args.all {
 		return run_interactive_all_authors(git_service, authors_service, cli);
 	}
-
-	// FIXME.Make -a and -l work together
 
 	if args.list.is_some() {
 		return run_interactive_no_ask_aliases(git_service, authors_service, cli, args.list.unwrap());
