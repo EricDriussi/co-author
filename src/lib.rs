@@ -28,8 +28,7 @@ pub fn exec(commit_body: String, authors_signatures: Vec<String>) -> Result<(), 
 	return git_service.commit(commit_body.as_str(), authors_signatures);
 }
 
-pub fn get_commit_message(args: &Args) -> Result<String, String> {
-	let mut cli = Cli::new(stdin().lock(), stdout().lock());
+pub fn get_commit_message<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>) -> Result<String, String> {
 	if let Some(message) = &args.message {
 		return Ok(message.to_string());
 	}

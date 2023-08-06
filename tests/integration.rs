@@ -4,7 +4,7 @@ use authors::{
 	app_service::AuthorsService,
 	author::{Author, AuthorsRepo},
 };
-use co_author::{cli::Cli, run_interactive};
+use co_author::{args::Args, cli::Cli, get_authors_signatures, get_commit_message, run_interactive};
 use git::{
 	app_service::GitService,
 	git::{CommitBody, GitRepo},
@@ -23,6 +23,48 @@ fn mocked_cli_flow() {
 
 	assert!(result.is_ok());
 }
+
+#[test]
+fn commit_message_is_gathered_from_arg() {
+	let nothing = sink();
+	let raw_input = Cursor::new("");
+	let cli = Cli::new(raw_input, nothing);
+
+	let message_by_param = "a commit message";
+	let args = Args {
+		message: Some(message_by_param.to_string()),
+		editor: false,
+		file: None,
+		list: None,
+		all: false,
+	};
+
+	let result = get_commit_message(&args, cli);
+
+	assert_eq!(result, Ok(message_by_param.to_string()));
+}
+
+#[test]
+fn commit_message_is_gathered_from_cli_prompt() {
+	let args = Args {
+		message: None,
+		editor: false,
+		file: None,
+		list: None,
+		all: false,
+	};
+
+	let nothing = sink();
+	let message_by_prompt = "a commit message";
+	let raw_input = Cursor::new(message_by_prompt);
+	let cli = Cli::new(raw_input, nothing);
+
+	let result = get_commit_message(&args, cli);
+
+	assert_eq!(result, Ok(message_by_prompt.to_string()));
+}
+
+//TODO.Add test for getting message from editor
 
 struct MockGitRepo {}
 

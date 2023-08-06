@@ -17,7 +17,7 @@ pub struct Args {
 	pub all: bool,
 
 	/// Specify commit message
-	#[arg(short, long)]
+	#[arg(short, long, conflicts_with("editor"))]
 	pub message: Option<String>,
 
 	/// Open default editor for commit message

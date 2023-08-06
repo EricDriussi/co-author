@@ -1,9 +1,11 @@
-use std::process;
+use std::{
+	io::{stdin, stdout},
+	process,
+};
 
 use clap::Parser;
-use co_author::{args::Args, exec, get_authors_signatures, get_commit_message};
+use co_author::{args::Args, cli::Cli, exec, get_authors_signatures, get_commit_message};
 
-// TODO: -l and -a should work with -m
 // TODO: option to pre-populate with last commit message (--pre-populate), for both -m and default buffer opening
 // TODO: sort authors by name when printing
 // TODO: automatically create aliases for authors
@@ -21,7 +23,8 @@ fn main() {
 }
 
 fn run(args: Args) -> Result<(), String> {
+	let cli = Cli::new(stdin().lock(), stdout().lock());
 	let authors = get_authors_signatures(&args)?;
-	let commit_body = get_commit_message(&args)?;
+	let commit_body = get_commit_message(&args, cli)?;
 	return exec(commit_body, authors);
 }
