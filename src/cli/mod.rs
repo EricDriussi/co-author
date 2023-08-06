@@ -1,4 +1,9 @@
-use std::io::{BufRead, Write};
+use std::{
+	env, fs,
+	io::{BufRead, BufReader, Write},
+	path::Path,
+	process::{Command, Stdio},
+};
 
 mod reader;
 
@@ -29,6 +34,66 @@ impl<R: BufRead, W: Write> Cli<R, W> {
 		);
 
 		return aliases.split_whitespace().map(|s| s.to_string()).collect();
+	}
+
+	pub fn get_commit_from_editor() -> Option<String> {
+		// FIXME.Propper error handling
+		// FIXME.COMMIT_EDITMSG needs to be pre-populated with the output of "git status" as comments, simulating default git behavior
+		let commit_editmsg_path = Path::new("./.git/COMMIT_EDITMSG");
+		match Self::get_editor() {
+			Some(editor) => Command::new(&editor)
+				.arg(commit_editmsg_path)
+				.stdin(Stdio::inherit())
+				.stdout(Stdio::inherit())
+				.stderr(Stdio::inherit())
+				.output()
+				.unwrap(),
+			None => match Command::new("vim")
+				.arg(commit_editmsg_path)
+				.stdin(Stdio::inherit())
+				.stdout(Stdio::inherit())
+				.stderr(Stdio::inherit())
+				.output()
+			{
+				Ok(output) => Ok(output),
+				Err(_) => Command::new("vi")
+					.arg(commit_editmsg_path)
+					.stdin(Stdio::inherit())
+					.stdout(Stdio::inherit())
+					.stderr(Stdio::inherit())
+					.output(),
+			}
+			.unwrap(),
+		};
+
+		let file = fs::File::open(commit_editmsg_path).unwrap();
+		let reader = BufReader::new(file);
+		let mut message = String::new();
+
+		for line in reader.lines() {
+			let line = line.unwrap();
+			if !line.starts_with('#') {
+				message.push_str(&line);
+				message.push('\n');
+			}
+		}
+		Some(message)
+	}
+
+	fn get_editor() -> Option<String> {
+		// FIXME.This requires git2-rs
+		// let config = Config::open_default().unwrap();
+		// match config.get_string("core.editor") {
+		// 	Ok(editor) => Some(editor),
+		// 	Err(_) => match env::var("EDITOR") {
+		// 		Ok(editor) => Some(editor),
+		// 		Err(_) => None,
+		// 	},
+		// }
+		match env::var("EDITOR") {
+			Ok(editor) => Some(editor),
+			Err(_) => None,
+		}
 	}
 }
 
