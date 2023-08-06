@@ -7,6 +7,7 @@ use git::{app_service::GitService, git::GitRepo};
 
 pub mod cli;
 
+// FIXME.rm this
 pub fn run_interactive<T: GitRepo, Y: AuthorsRepo, R: BufRead, W: Write>(
 	git_service: GitService<T>,
 	authors_service: AuthorsService<Y>,
@@ -20,19 +21,6 @@ pub fn run_interactive<T: GitRepo, Y: AuthorsRepo, R: BufRead, W: Write>(
 	return git_service.commit(commit_body.as_str(), found_authors);
 }
 
-pub fn run_interactive_no_ask_aliases<T: GitRepo, Y: AuthorsRepo, R: BufRead, W: Write>(
-	git_service: GitService<T>,
-	authors_service: AuthorsService<Y>,
-	mut cli: Cli<R, W>,
-	aliases: String,
-) -> Result<(), String> {
-	let given_aliases = aliases.split(',').map(|alias| alias.to_string()).collect();
-	let found_authors = authors_service.signatures_of(given_aliases);
-	let commit_body = cli.ask_for_commit_message()?;
-
-	return git_service.commit(commit_body.as_str(), found_authors);
-}
-
 fn print(authors: Vec<Author>) {
 	println!();
 	for author in &authors {
@@ -41,13 +29,9 @@ fn print(authors: Vec<Author>) {
 	println!();
 }
 
-pub fn run_interactive_all_authors<T: GitRepo, Y: AuthorsRepo, R: BufRead, W: Write>(
-	git_service: GitService<T>,
-	authors_service: AuthorsService<Y>,
-	mut cli: Cli<R, W>,
-) -> Result<(), String> {
-	let found_authors = authors_service.all_signatures();
-	let commit_body = cli.ask_for_commit_message()?;
-
-	return git_service.commit(commit_body.as_str(), found_authors);
+pub fn exec(commit_body: String, authors_signatures: Vec<String>) -> Result<(), String> {
+	let git_service = git::libgit_setup()?;
+	println!("{}", commit_body);
+	println!("{:?}", authors_signatures);
+	return git_service.commit(commit_body.as_str(), authors_signatures);
 }

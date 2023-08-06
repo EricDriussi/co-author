@@ -9,7 +9,7 @@ impl<T: GitRepo> GitService<T> {
 		GitService { repo }
 	}
 
-	pub fn commit(&self, message: &str, aliases: Vec<String>) -> Result<(), String> {
-		return self.repo.commit(CommitBody::new(message, aliases));
+	pub fn commit(&self, message: &str, authors: Vec<String>) -> Result<(), String> {
+		return self.repo.commit(CommitBody::new(message, authors));
 	}
 }

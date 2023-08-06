@@ -10,6 +10,7 @@ use git::{
 	git::{CommitBody, GitRepo},
 };
 
+// FIXME.rm this and re-think integration testing
 #[test]
 fn mocked_cli_flow() {
 	let git_service = GitService::new(MockGitRepo::new());

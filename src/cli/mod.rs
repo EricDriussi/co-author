@@ -36,10 +36,10 @@ impl<R: BufRead, W: Write> Cli<R, W> {
 		return aliases.split_whitespace().map(|s| s.to_string()).collect();
 	}
 
-	pub fn get_commit_from_editor() -> Option<String> {
+	pub fn get_commit_from_editor(&self) -> Option<String> {
 		// FIXME.Propper error handling
 		// FIXME.COMMIT_EDITMSG needs to be pre-populated with the output of "git status" as comments, simulating default git behavior
-		let commit_editmsg_path = Path::new("./.git/COMMIT_EDITMSG");
+		let commit_editmsg_path = Path::new("./.git/COMMIT_EDITMSG"); // FIXME.Needs to go to root dir to find file
 		match Self::get_editor() {
 			Some(editor) => Command::new(&editor)
 				.arg(commit_editmsg_path)
