@@ -39,10 +39,10 @@ pub fn get_commit_message<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>)
 	Ok(commit_body)
 }
 
-pub fn get_authors_signatures(args: &Args) -> Result<Vec<String>, String> {
+pub fn get_authors_signatures<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>) -> Result<Vec<String>, String> {
 	let authors_service = match &args.file {
 		Some(file) => authors::fs_setup_from_file(file.to_string())?,
-		None => authors::fs_default_setup()?,
+		None => authors::fs_default_setup(conf::authors_file())?,
 	};
 
 	if args.all {
@@ -53,7 +53,6 @@ pub fn get_authors_signatures(args: &Args) -> Result<Vec<String>, String> {
 		return Ok(authors_service.signatures_of(given_aliases));
 	}
 
-	let mut cli = Cli::new(stdin().lock(), stdout().lock());
 	print(authors_service.all_available());
 	let aliases = cli.ask_for_aliases();
 	return Ok(authors_service.signatures_of(aliases));

@@ -177,6 +177,7 @@ version = "0.1.0"
 dependencies = [
  "authors",
  "clap",
+ "conf",
  "git",
 ]
 

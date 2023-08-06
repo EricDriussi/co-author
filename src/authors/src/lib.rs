@@ -9,8 +9,8 @@ pub fn fs_setup_from_file(authors_file: String) -> Result<app_service::AuthorsSe
 	};
 }
 
-pub fn fs_default_setup() -> Result<app_service::AuthorsService<fs_repo::FSRepo>, String> {
-	return match fs_repo::FSRepo::default() {
+pub fn fs_default_setup(default_authors_file: String) -> Result<app_service::AuthorsService<fs_repo::FSRepo>, String> {
+	return match fs_repo::FSRepo::default(default_authors_file) {
 		Ok(repo) => Ok(app_service::AuthorsService::new(repo)),
 		Err(e) => Err(format!("Couldn't load authors file: {}", e)),
 	};

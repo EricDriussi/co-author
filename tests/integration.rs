@@ -66,6 +66,48 @@ fn commit_message_is_gathered_from_cli_prompt() {
 
 //TODO.Add test for getting message from editor
 
+#[test]
+fn authors_signatures_are_gathered_from_list() {
+	//TODO.2.Review
+	let nothing = sink();
+	let raw_input = Cursor::new("");
+	let cli = Cli::new(raw_input, nothing);
+
+	let args = Args {
+		message: None,
+		editor: false,
+		file: None,
+		list: Some("a b cd".to_string()),
+		all: false,
+	};
+
+	let signatures = get_authors_signatures(&args, cli);
+
+	assert!(signatures.is_ok());
+	assert_eq!(signatures.unwrap(), Vec::from(["a b cd"]));
+}
+
+#[test]
+fn authors_signatures_are_gathered_from_cli_prompt() {
+	//TODO.2.Review
+	let args = Args {
+		message: None,
+		editor: false,
+		file: None,
+		list: None,
+		all: false,
+	};
+
+	let nothing = sink();
+	let raw_input = Cursor::new(format!("{}{}{}{}", "a commit message", "\n", "a b cd", "\n"));
+	let cli = Cli::new(raw_input, nothing);
+
+	let signatures = get_authors_signatures(&args, cli);
+
+	assert!(signatures.is_ok());
+	assert_eq!(signatures.unwrap(), Vec::from(["a b cd"]));
+}
+
 struct MockGitRepo {}
 
 impl MockGitRepo {

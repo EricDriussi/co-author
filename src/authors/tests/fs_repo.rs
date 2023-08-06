@@ -17,11 +17,11 @@ fn should_not_init_if_a_given_file_does_not_exist() {
 
 #[test]
 #[serial]
-fn should_look_in_cwd_when_no_authors_file_is_found_in_default_home_path() {
+fn should_look_in_cwd_when_no_authors_file_is_found_in_default_path() {
 	let authors_file_in_cwd = "./authors";
 	fs::File::create(authors_file_in_cwd).unwrap();
 
-	let repo = FSRepo::default();
+	let repo = FSRepo::default("/not_real".to_string());
 	assert!(repo.is_ok());
 
 	fs::remove_file(authors_file_in_cwd).unwrap();
@@ -30,7 +30,7 @@ fn should_look_in_cwd_when_no_authors_file_is_found_in_default_home_path() {
 #[test]
 #[serial]
 fn should_fail_to_init_when_no_valid_file_is_found() {
-	assert!(FSRepo::default().is_err());
+	assert!(FSRepo::default("/not_real".to_string()).is_err());
 }
 
 #[test]

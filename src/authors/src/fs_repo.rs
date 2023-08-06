@@ -12,8 +12,8 @@ pub struct FSRepo {
 }
 
 impl FSRepo {
-	pub fn default() -> std::result::Result<Self, String> {
-		let default_file = PathBuf::from(conf::authors_file());
+	pub fn default(default_authors_file: String) -> std::result::Result<Self, String> {
+		let default_file = PathBuf::from(default_authors_file);
 		return match default_file.is_file() {
 			true => Ok(Self { src: default_file }),
 			false => Self::try_with_local_file(),

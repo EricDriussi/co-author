@@ -23,8 +23,11 @@ fn main() {
 }
 
 fn run(args: Args) -> Result<(), String> {
+	// FIXME.This cli thing needs to go
 	let cli = Cli::new(stdin().lock(), stdout().lock());
-	let authors = get_authors_signatures(&args)?;
+	let authors = get_authors_signatures(&args, cli)?;
+
+	let cli = Cli::new(stdin().lock(), stdout().lock());
 	let commit_body = get_commit_message(&args, cli)?;
 	return exec(commit_body, authors);
 }
