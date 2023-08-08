@@ -85,5 +85,5 @@ fn should_return_an_empty_list_if_no_author_mathces_alias() {
 }
 
 fn some_valid_authors_file() -> String {
-	conf::get_config().get::<String>("valid_test_authors_file").unwrap()
+	conf::get_config().get::<String>("authors_file_from_authors_crate").unwrap()
 }

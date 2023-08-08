@@ -1,2 +1,2 @@
 authors_file: "src/authors/tests/data/authors"
-valid_test_authors_file: "tests/data/authors"
+authors_file_from_authors_crate: "tests/data/authors"

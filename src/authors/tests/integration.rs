@@ -2,7 +2,7 @@ use authors::{app_service::AuthorsService, fs_repo::FSRepo};
 
 #[test]
 fn authors_service_returns_stored_authors_signatures() {
-	let valid_authors_file = conf::get_config().get::<String>("valid_test_authors_file").unwrap();
+	let valid_authors_file = conf::get_config().get::<String>("authors_file_from_authors_crate").unwrap();
 	let repo = FSRepo::from(valid_authors_file).unwrap();
 	let app_service = AuthorsService::new(repo);
 
@@ -13,7 +13,7 @@ fn authors_service_returns_stored_authors_signatures() {
 
 #[test]
 fn authors_crate_setup_works_when_an_authors_file_is_found() {
-	let valid_authors_file = conf::get_config().get::<String>("valid_test_authors_file").unwrap();
+	let valid_authors_file = conf::get_config().get::<String>("authors_file_from_authors_crate").unwrap();
 
 	assert!(authors::fs_setup_from_file(valid_authors_file).is_ok());
 }
