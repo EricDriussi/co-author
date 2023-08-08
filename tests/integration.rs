@@ -86,9 +86,9 @@ fn authors_signatures_are_gathered_from_list() {
 	assert_eq!(
 		signatures.unwrap(),
 		Vec::from([
-			"Co-Authored by: Name Surname <someone@users.noreply.github.com>",
-			"Co-Authored by: username <something@gmail.com>",
-			"Co-Authored by: username2 <something2@gmail.com>"
+			"Co-Authored-by: Name Surname <someone@users.noreply.github.com>",
+			"Co-Authored-by: username <something@gmail.com>",
+			"Co-Authored-by: username2 <something2@gmail.com>"
 		])
 	);
 }
@@ -113,9 +113,9 @@ fn authors_signatures_are_gathered_from_cli_prompt() {
 	assert_eq!(
 		signatures.unwrap(),
 		Vec::from([
-			"Co-Authored by: Name Surname <someone@users.noreply.github.com>",
-			"Co-Authored by: username <something@gmail.com>",
-			"Co-Authored by: username2 <something2@gmail.com>"
+			"Co-Authored-by: Name Surname <someone@users.noreply.github.com>",
+			"Co-Authored-by: username <something@gmail.com>",
+			"Co-Authored-by: username2 <something2@gmail.com>"
 		])
 	);
 }
