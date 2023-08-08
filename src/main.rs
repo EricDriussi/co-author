@@ -6,6 +6,7 @@ use std::{
 use clap::Parser;
 use co_author::{args::Args, cli::Cli, exec, get_authors_signatures, get_commit_message};
 
+// TODO: ensure hooks work!
 // TODO: option to pre-populate with last commit message (--pre-populate), for both -m and default buffer opening
 // TODO: sort authors by name when printing
 // TODO: automatically create aliases for authors

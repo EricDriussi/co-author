@@ -1,3 +1,2 @@
-# TODO.1.this should point to tests/data/authors
-authors_file: "/not_real"
+authors_file: "src/authors/tests/data/authors"
 valid_test_authors_file: "tests/data/authors"

@@ -68,7 +68,6 @@ fn commit_message_is_gathered_from_cli_prompt() {
 
 #[test]
 fn authors_signatures_are_gathered_from_list() {
-	//TODO.2.Review
 	let nothing = sink();
 	let raw_input = Cursor::new("");
 	let cli = Cli::new(raw_input, nothing);
@@ -77,19 +76,25 @@ fn authors_signatures_are_gathered_from_list() {
 		message: None,
 		editor: false,
 		file: None,
-		list: Some("a b cd".to_string()),
+		list: Some("a,b,cd".to_string()),
 		all: false,
 	};
 
 	let signatures = get_authors_signatures(&args, cli);
 
 	assert!(signatures.is_ok());
-	assert_eq!(signatures.unwrap(), Vec::from(["a b cd"]));
+	assert_eq!(
+		signatures.unwrap(),
+		Vec::from([
+			"Co-Authored by: Name Surname <someone@users.noreply.github.com>",
+			"Co-Authored by: username <something@gmail.com>",
+			"Co-Authored by: username2 <something2@gmail.com>"
+		])
+	);
 }
 
 #[test]
 fn authors_signatures_are_gathered_from_cli_prompt() {
-	//TODO.2.Review
 	let args = Args {
 		message: None,
 		editor: false,
@@ -99,13 +104,20 @@ fn authors_signatures_are_gathered_from_cli_prompt() {
 	};
 
 	let nothing = sink();
-	let raw_input = Cursor::new(format!("{}{}{}{}", "a commit message", "\n", "a b cd", "\n"));
+	let raw_input = Cursor::new("a b cd");
 	let cli = Cli::new(raw_input, nothing);
 
 	let signatures = get_authors_signatures(&args, cli);
 
 	assert!(signatures.is_ok());
-	assert_eq!(signatures.unwrap(), Vec::from(["a b cd"]));
+	assert_eq!(
+		signatures.unwrap(),
+		Vec::from([
+			"Co-Authored by: Name Surname <someone@users.noreply.github.com>",
+			"Co-Authored by: username <something@gmail.com>",
+			"Co-Authored by: username2 <something2@gmail.com>"
+		])
+	);
 }
 
 struct MockGitRepo {}
