@@ -10,6 +10,7 @@ use co_author::{args::Args, cli::Cli, exec, get_authors_signatures, get_commit_m
 // TODO: option to pre-populate with last commit message (--pre-populate), for both -m and default buffer opening
 // TODO: sort authors by name when printing
 // TODO: automatically create aliases for authors
+// TODO: add amend option -> adds authors to last commit (no message)
 // TODO: use with fzf or add fuzzy finding
 
 fn main() {
@@ -24,7 +25,6 @@ fn main() {
 }
 
 fn run(args: Args) -> Result<(), String> {
-	// FIXME.This cli thing needs to go
 	let cli = Cli::new(stdin().lock(), stdout().lock());
 	let authors = get_authors_signatures(&args, cli)?;
 

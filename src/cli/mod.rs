@@ -72,6 +72,7 @@ impl<R: BufRead, W: Write> Cli<R, W> {
 
 		for line in reader.lines() {
 			let line = line.unwrap();
+			// TODO.Test comment handling
 			if !line.starts_with('#') {
 				message.push_str(&line);
 				message.push('\n');
