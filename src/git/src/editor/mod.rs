@@ -5,10 +5,12 @@ use std::{
 	process::{Command, Stdio},
 };
 
-pub fn get_commit_from_editor() -> Option<String> {
+pub fn get_commit_from_editor(tmp_file: String) -> Option<String> {
 	// FIXME.Propper error handling
 	// FIXME.COMMIT_EDITMSG needs to be pre-populated with the output of "git status" as comments, simulating default git behavior
-	let commit_editmsg_path = Path::new("../../.git/COMMIT_EDITMSG"); // FIXME.Needs to go to root dir to find file
+
+	let relative_tmp_file_path = format!("../../{}", tmp_file); // FIXME.Needs to go to root dir to find file
+	let commit_editmsg_path = Path::new(relative_tmp_file_path.as_str());
 	match get_editor() {
 		Some(editor) => Command::new(&editor)
 			.arg(commit_editmsg_path)

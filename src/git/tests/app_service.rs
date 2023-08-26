@@ -21,11 +21,13 @@ fn should_not_allow_editor_commit_with_no_message() {
 	let service = GitService::new(spy);
 	let aliases = vec![String::from("a")];
 
-	let commit_editmsg_path = "../../.git/COMMIT_EDITMSG";
+	// TODO. Refactor
+	let commit_editmsg = ".git/COMMIT_EDITMSG_TEST";
+	let commit_editmsg_path = format!("../../{}", commit_editmsg);
 	std::fs::write(commit_editmsg_path, "").unwrap();
 	std::env::set_var("EDITOR", "echo");
 
-	let result = service.commit_with_editor(aliases);
+	let result = service.commit_with_editor(aliases, String::from(commit_editmsg));
 
 	assert!(result.is_err());
 }
