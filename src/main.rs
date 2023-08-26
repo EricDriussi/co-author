@@ -11,6 +11,9 @@ use co_author::{args::Args, cli::Cli, exec, get_authors_signatures, get_commit_m
 // TODO: sort authors by name when printing
 // TODO: automatically create aliases for authors
 // TODO: add amend option -> adds authors to last commit (no message)
+// TODO: who should handle empty commit msgs? co-author or libgit2?
+// Simpler code if left to libgit2, why handle it in co-author?
+// What is libgit2's behavior when empty commit msg?
 // TODO: use with fzf or add fuzzy finding
 
 fn main() {
@@ -27,6 +30,11 @@ fn main() {
 fn run(args: Args) -> Result<(), String> {
 	let cli = Cli::new(stdin().lock(), stdout().lock());
 	let authors = get_authors_signatures(&args, cli)?;
+
+	if args.editor {
+		let git_service = git::libgit_setup()?;
+		return git_service.commit_with_editor(authors);
+	}
 
 	let cli = Cli::new(stdin().lock(), stdout().lock());
 	let commit_body = get_commit_message(&args, cli)?;

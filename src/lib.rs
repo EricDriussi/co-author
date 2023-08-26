@@ -16,9 +16,6 @@ pub fn get_commit_message<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>)
 	if let Some(message) = &args.message {
 		return Ok(message.to_string());
 	}
-	if args.editor {
-		return Ok(cli.get_commit_from_editor().unwrap());
-	}
 	let commit_body = cli.ask_for_commit_message()?;
 	Ok(commit_body)
 }

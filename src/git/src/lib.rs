@@ -1,6 +1,7 @@
 use std::env;
 
 pub mod app_service;
+mod editor;
 pub mod git;
 pub mod libgit_repo;
 
