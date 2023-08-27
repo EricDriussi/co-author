@@ -49,6 +49,7 @@ pub fn get_commit_message_from_editor(editmsg: PathBuf) -> Option<String> {
 	}
 }
 
+// TODO. test separately
 fn read_message_from_file(file_path: &std::path::Path) -> Option<String> {
 	// FIXME.Always remove if present and create new one with result of git status
 	// FIXME.COMMIT_EDITMSG needs to be pre-populated with the output of "git status" as comments, simulating default git behavior

@@ -1,8 +1,10 @@
 use super::*;
 use git2::Config;
+use serial_test::serial;
 
 // TODO.test fallback logic?
 #[test]
+#[serial]
 fn test_get_trimmed_commit_from_editor() {
 	let commit_editmsg_path = "../../.git/COMMIT_EDITMSG_TEST";
 	let test_commit_message = "  Test commit message.\nThis is a second line. \n".to_string();
@@ -18,9 +20,11 @@ fn test_get_trimmed_commit_from_editor() {
 
 	// Cleanup
 	std::fs::remove_file(commit_editmsg_path).unwrap();
+	config.remove("core.editor").unwrap();
 }
 
 #[test]
+#[serial]
 fn test_removes_commented_lines_when_getting_commit_from_editor() {
 	let commit_editmsg_path = "../../.git/COMMIT_EDITMSG_TEST_COMMENTS";
 	let test_commit_message = "Test commit message.\n# This is a commented line.\n#And another one.".to_string();
@@ -36,4 +40,5 @@ fn test_removes_commented_lines_when_getting_commit_from_editor() {
 
 	// Cleanup
 	std::fs::remove_file(commit_editmsg_path).unwrap();
+	config.remove("core.editor").unwrap();
 }

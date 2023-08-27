@@ -1,3 +1,4 @@
+use serial_test::serial;
 use std::path::PathBuf;
 
 use git::{
@@ -19,6 +20,7 @@ fn should_commit() {
 }
 
 #[test]
+#[serial]
 fn should_commit_using_editor() {
 	let spy = MockRepo::new();
 	let service = GitService::new(spy);
@@ -36,9 +38,11 @@ fn should_commit_using_editor() {
 	assert!(result.is_ok());
 	// Cleanup
 	std::fs::remove_file(editmsg_from_root).unwrap();
+	config.remove("core.editor").unwrap();
 }
 
 #[test]
+#[serial]
 fn should_not_allow_editor_commit_with_no_message() {
 	let spy = MockRepo::new();
 	let service = GitService::new(spy);
@@ -56,6 +60,7 @@ fn should_not_allow_editor_commit_with_no_message() {
 	assert!(result.is_err());
 	// Cleanup
 	std::fs::remove_file(editmsg_from_root).unwrap();
+	config.remove("core.editor").unwrap();
 }
 
 struct MockRepo {}
