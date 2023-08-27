@@ -69,6 +69,6 @@ impl GitRepo for MockRepo {
 	}
 
 	fn root(&self) -> Result<PathBuf, String> {
-		return Ok(PathBuf::new());
+		return Ok(PathBuf::from("../../"));
 	}
 }

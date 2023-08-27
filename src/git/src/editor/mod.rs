@@ -1,26 +1,24 @@
 use std::{
 	env, fs,
 	io::{BufRead, BufReader},
-	path::Path,
+	path::PathBuf,
 	process::{Command, Stdio},
 };
 
-pub fn get_commit_message_from_editor(tmp_file: &str) -> Option<String> {
+pub fn get_commit_message_from_editor(editmsg: PathBuf) -> Option<String> {
 	// FIXME.Propper error handling
 	// FIXME.COMMIT_EDITMSG needs to be pre-populated with the output of "git status" as comments, simulating default git behavior
 
-	let relative_tmp_file_path = format!("../../{}", tmp_file); // FIXME.Needs to go to root dir to find file
-	let commit_editmsg_path = Path::new(relative_tmp_file_path.as_str());
 	match get_editor() {
 		Some(editor) => Command::new(&editor)
-			.arg(commit_editmsg_path)
+			.arg(editmsg.as_path())
 			.stdin(Stdio::inherit())
 			.stdout(Stdio::inherit())
 			.stderr(Stdio::inherit())
 			.output()
 			.unwrap(),
 		None => match Command::new("vim")
-			.arg(commit_editmsg_path)
+			.arg(editmsg.as_path())
 			.stdin(Stdio::inherit())
 			.stdout(Stdio::inherit())
 			.stderr(Stdio::inherit())
@@ -28,7 +26,7 @@ pub fn get_commit_message_from_editor(tmp_file: &str) -> Option<String> {
 		{
 			Ok(output) => Ok(output),
 			Err(_) => Command::new("vi")
-				.arg(commit_editmsg_path)
+				.arg(editmsg.as_path())
 				.stdin(Stdio::inherit())
 				.stdout(Stdio::inherit())
 				.stderr(Stdio::inherit())
@@ -37,7 +35,7 @@ pub fn get_commit_message_from_editor(tmp_file: &str) -> Option<String> {
 		.unwrap(),
 	};
 
-	let file = fs::File::open(commit_editmsg_path).unwrap();
+	let file = fs::File::open(editmsg.as_path()).unwrap();
 	let reader = BufReader::new(file);
 	let mut message = String::new();
 

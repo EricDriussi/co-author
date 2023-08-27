@@ -10,7 +10,7 @@ fn test_get_commit_from_editor() {
 
 	std::env::set_var("EDITOR", "echo");
 
-	let result = get_commit_message_from_editor(commit_editmsg);
+	let result = get_commit_message_from_editor(PathBuf::from(commit_editmsg_path.clone()));
 
 	assert_eq!(result, Some(test_commit_message));
 

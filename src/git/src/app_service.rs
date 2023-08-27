@@ -17,9 +17,9 @@ impl<T: GitRepo> GitService<T> {
 	}
 
 	pub fn commit_with_editor(&self, authors: Vec<String>, tmp_file: &str) -> Result<(), String> {
-		let mut root = self.repo.root()?;
-		root.push(tmp_file);
-		match editor::get_commit_message_from_editor(tmp_file) {
+		let mut editmsg_path = self.repo.root()?;
+		editmsg_path.push(tmp_file);
+		match editor::get_commit_message_from_editor(editmsg_path) {
 			Some(msg) => return self.repo.commit(CommitBody::new(msg.as_str(), authors)),
 			None => return Err("Commit message cannot be empty.".to_string()),
 		}
