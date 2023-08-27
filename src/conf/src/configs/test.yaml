@@ -1,3 +1,2 @@
 authors_file: "src/authors/tests/data/authors"
 authors_file_from_authors_crate: "tests/data/authors"
-editmsg: ".git/COMMIT_EDITMSG_TEST"
