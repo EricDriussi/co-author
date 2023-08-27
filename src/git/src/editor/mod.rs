@@ -50,9 +50,7 @@ fn vim_fallback(path: &Path) -> Option<String> {
 }
 
 fn read_message_from_file(file_path: &Path) -> Option<String> {
-	// FIXME.Always remove if present and create new one with result of git status
-	// FIXME.COMMIT_EDITMSG needs to be pre-populated with the output of "git status" as comments, simulating default git behavior
-	let file = fs::File::open(file_path).ok()?;
+	let file = fs::File::open(file_path).expect("Something went wrong");
 	let reader = BufReader::new(file);
 	let mut message = String::new();
 
