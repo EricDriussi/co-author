@@ -30,7 +30,7 @@ fn run(args: Args) -> Result<(), String> {
 
 	if args.editor {
 		let git_service = git::libgit_setup()?;
-		return git_service.commit_with_editor(authors, conf::editmsg().as_str());
+		return git_service.commit_with_editor(authors);
 	}
 
 	let cli = Cli::new(stdin().lock(), stdout().lock());

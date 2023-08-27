@@ -26,5 +26,5 @@ impl Display for CommitBody {
 
 pub trait GitRepo {
 	fn commit(&self, body: CommitBody) -> Result<(), String>;
-	fn root(&self) -> Result<PathBuf, String>;
+	fn editmsg_file(&self) -> PathBuf;
 }

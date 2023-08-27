@@ -6,6 +6,7 @@ use git2::{Repository, RepositoryInitOptions};
 use std::{
 	fs::{self, File},
 	path::{Path, PathBuf},
+	process::Command,
 };
 
 #[test]
@@ -48,22 +49,30 @@ fn should_error_out_if_no_changes_are_staged() {
 }
 
 #[test]
-fn should_find_git_root() {
-	let repo = LibGitRepo::new(PathBuf::from("/var/tmp/coa_ok"));
+fn test_prepares_editmsg_file() {
+	let test_commit_message = "IRRELEVANT_STRING".to_string();
+	let commit_editmsg_path = "/var/tmp/coa_file/.git/COMMIT_EDITMSG";
+	std::fs::write(commit_editmsg_path.clone(), test_commit_message.clone()).unwrap();
 
-	let result = repo.root();
+	let git_repo = prepare_complex_mock_git_repo("/var/tmp/coa_file");
+	let repo = LibGitRepo::from(git_repo);
+	repo.editmsg_file();
 
-	assert!(result.is_ok());
-	assert_eq!(result.unwrap(), PathBuf::from("/var/tmp/coa_ok"));
-}
-
-#[test]
-fn should_error_out_if_no_root_is_found() {
-	let repo = LibGitRepo::new(PathBuf::from("/var/tmp"));
-
-	let result = repo.root();
-
-	assert!(result.is_err());
+	let contents = std::fs::read_to_string(&Path::new(commit_editmsg_path));
+	assert_eq!(
+		contents.unwrap(),
+		"
+# On branch master
+# Changes to be committed:
+#	bar
+#
+# Changes not staged for commit:
+#	foo
+#
+# Untracked files:
+#	baz
+"
+	);
 }
 
 fn prepare_mock_git_repo(path: &str) -> Repository {
@@ -95,4 +104,29 @@ fn add_change_to_git_tree(git_repo: &Repository) {
 	let mut index = git_repo.index().unwrap();
 	index.add_path(Path::new("foo")).unwrap();
 	index.write_tree().unwrap();
+}
+
+fn prepare_complex_mock_git_repo(path: &str) -> Repository {
+	let git_repo = init_repo(path);
+	add_change_to_git_tree(&git_repo);
+	add_commit(&git_repo);
+	let root = git_repo.path().parent().unwrap();
+
+	std::fs::write(&root.join("foo"), "text").unwrap();
+	std::fs::write(&root.join("bar"), "text").unwrap();
+	std::fs::write(&root.join("baz"), "text").unwrap();
+
+	// TODO. Find a better way to do this, should be able to use git2.rs
+	let cwd = std::env::current_dir().unwrap();
+	std::env::set_current_dir("/var/tmp/coa_file/").unwrap();
+	Command::new("git")
+		.arg("restore")
+		.arg("--staged")
+		.arg("foo")
+		.output()
+		.expect("ERR_TEST");
+	Command::new("git").arg("add").arg("bar").output().expect("ERR_TEST");
+	std::env::set_current_dir(cwd).unwrap();
+
+	return git_repo;
 }
