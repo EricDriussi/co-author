@@ -4,6 +4,7 @@ use git::{
 	app_service::GitService,
 	git::{CommitBody, GitRepo},
 };
+use git2::Config;
 
 #[test]
 fn should_commit() {
@@ -26,6 +27,8 @@ fn should_commit_using_editor() {
 	let editmsg = ".git/COMMIT_EDITMSG_TEST_OK";
 	let editmsg_from_root = format!("../../{}", editmsg);
 	std::fs::write(editmsg_from_root.clone(), "himom").unwrap();
+	let mut config = Config::open_default().unwrap();
+	config.set_str("core.editor", "not_real").unwrap();
 	std::env::set_var("EDITOR", "echo");
 
 	let result = service.commit_with_editor(aliases, editmsg);
@@ -44,6 +47,8 @@ fn should_not_allow_editor_commit_with_no_message() {
 	let editmsg = ".git/COMMIT_EDITMSG_TEST_ERR";
 	let editmsg_from_root = format!("../../{}", editmsg);
 	std::fs::write(editmsg_from_root.clone(), "").unwrap();
+	let mut config = Config::open_default().unwrap();
+	config.set_str("core.editor", "not_real").unwrap();
 	std::env::set_var("EDITOR", "echo");
 
 	let result = service.commit_with_editor(aliases, editmsg);
