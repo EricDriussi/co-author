@@ -41,13 +41,18 @@ pub fn get_commit_message_from_editor(editmsg: PathBuf) -> Option<String> {
 
 	for line in reader.lines() {
 		let line = line.unwrap();
-		// TODO.Test comment handling
 		if !line.starts_with('#') {
-			message.push_str(&line);
+			message.push_str(&line.trim());
 			message.push('\n');
 		}
 	}
-	return if message.is_empty() { None } else { Some(message) };
+
+	let trimmed_message = message.trim();
+	return if trimmed_message.is_empty() {
+		None
+	} else {
+		Some(trimmed_message.to_string())
+	};
 }
 
 fn get_editor() -> Option<String> {
