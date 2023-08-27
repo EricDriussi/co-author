@@ -18,20 +18,41 @@ fn should_commit() {
 }
 
 #[test]
+fn should_commit_using_editor() {
+	let spy = MockRepo::new();
+	let service = GitService::new(spy);
+	let aliases = vec![String::from("a")];
+
+	// TODO. Refactor
+	let commit_editmsg = ".git/COMMIT_EDITMSG_TEST_OK";
+	let commit_editmsg_path = format!("../../{}", commit_editmsg);
+	std::fs::write(commit_editmsg_path.clone(), "himom").unwrap();
+	std::env::set_var("EDITOR", "echo");
+
+	let result = service.commit_with_editor(aliases, commit_editmsg);
+
+	assert!(result.is_ok());
+	// Cleanup
+	std::fs::remove_file(commit_editmsg_path).unwrap();
+}
+
+#[test]
 fn should_not_allow_editor_commit_with_no_message() {
 	let spy = MockRepo::new();
 	let service = GitService::new(spy);
 	let aliases = vec![String::from("a")];
 
 	// TODO. Refactor
-	let commit_editmsg = ".git/COMMIT_EDITMSG_TEST";
+	let commit_editmsg = ".git/COMMIT_EDITMSG_TEST_ERR";
 	let commit_editmsg_path = format!("../../{}", commit_editmsg);
-	std::fs::write(commit_editmsg_path, "").unwrap();
+	std::fs::write(commit_editmsg_path.clone(), "").unwrap();
 	std::env::set_var("EDITOR", "echo");
 
-	let result = service.commit_with_editor(aliases, String::from(commit_editmsg));
+	let result = service.commit_with_editor(aliases, commit_editmsg);
 
 	assert!(result.is_err());
+	// Cleanup
+	std::fs::remove_file(commit_editmsg_path).unwrap();
 }
 
 struct MockRepo {}

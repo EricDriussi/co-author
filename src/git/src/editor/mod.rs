@@ -5,7 +5,7 @@ use std::{
 	process::{Command, Stdio},
 };
 
-pub fn get_commit_message_from_editor(tmp_file: String) -> Option<String> {
+pub fn get_commit_message_from_editor(tmp_file: &str) -> Option<String> {
 	// FIXME.Propper error handling
 	// FIXME.COMMIT_EDITMSG needs to be pre-populated with the output of "git status" as comments, simulating default git behavior
 
