@@ -7,6 +7,19 @@ use std::{
 
 use git2::Config;
 
+pub fn get_commit_message_from_editor(editmsg: PathBuf) -> Option<String> {
+	match Config::open_default() {
+		Ok(config) => match config.get_string("core.editor") {
+			Ok(editor) => match open_editor(&editor, editmsg.as_path()) {
+				Ok(_) => return read_message_from_file(editmsg.as_path()),
+				Err(_) => return env_fallback(editmsg.as_path()),
+			},
+			Err(_) => return env_fallback(editmsg.as_path()),
+		},
+		Err(_) => return env_fallback(editmsg.as_path()),
+	}
+}
+
 fn open_editor(editor: &str, path: &Path) -> io::Result<Output> {
 	return Command::new(editor)
 		.arg(path)
@@ -36,21 +49,7 @@ fn vim_fallback(path: &Path) -> Option<String> {
 	}
 }
 
-pub fn get_commit_message_from_editor(editmsg: PathBuf) -> Option<String> {
-	match Config::open_default() {
-		Ok(config) => match config.get_string("core.editor") {
-			Ok(editor) => match open_editor(&editor, editmsg.as_path()) {
-				Ok(_) => return read_message_from_file(editmsg.as_path()),
-				Err(_) => return env_fallback(editmsg.as_path()),
-			},
-			Err(_) => return env_fallback(editmsg.as_path()),
-		},
-		Err(_) => return env_fallback(editmsg.as_path()),
-	}
-}
-
-// TODO. test separately
-fn read_message_from_file(file_path: &std::path::Path) -> Option<String> {
+fn read_message_from_file(file_path: &Path) -> Option<String> {
 	// FIXME.Always remove if present and create new one with result of git status
 	// FIXME.COMMIT_EDITMSG needs to be pre-populated with the output of "git status" as comments, simulating default git behavior
 	let file = fs::File::open(file_path).ok()?;
