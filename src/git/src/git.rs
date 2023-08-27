@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, path::PathBuf};
 
 pub struct CommitBody {
 	message: String,
@@ -26,4 +26,5 @@ impl Display for CommitBody {
 
 pub trait GitRepo {
 	fn commit(&self, body: CommitBody) -> Result<(), String>;
+	fn root(&self) -> Result<PathBuf, String>;
 }

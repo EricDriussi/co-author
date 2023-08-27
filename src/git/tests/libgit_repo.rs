@@ -47,6 +47,25 @@ fn should_error_out_if_no_changes_are_staged() {
 	assert!(result.is_err());
 }
 
+#[test]
+fn should_find_git_root() {
+	let repo = LibGitRepo::new(PathBuf::from("/var/tmp/coa_ok"));
+
+	let result = repo.root();
+
+	assert!(result.is_ok());
+	assert_eq!(result.unwrap(), PathBuf::from("/var/tmp/coa_ok"));
+}
+
+#[test]
+fn should_error_out_if_no_root_is_found() {
+	let repo = LibGitRepo::new(PathBuf::from("/var/tmp"));
+
+	let result = repo.root();
+
+	assert!(result.is_err());
+}
+
 fn prepare_mock_git_repo(path: &str) -> Repository {
 	let git_repo = init_repo(path);
 	add_commit(&git_repo);

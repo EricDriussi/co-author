@@ -30,6 +30,13 @@ impl GitRepo for LibGitRepo {
 			Err(_) => return Err(String::from("Something went wrong!")),
 		};
 	}
+
+	fn root(&self) -> Result<PathBuf, String> {
+		match Self::find_git_root(self.path.clone()) {
+			Some(root) => return Ok(root),
+			None => return Err(String::from("Something went wrong!")),
+		}
+	}
 }
 
 impl LibGitRepo {

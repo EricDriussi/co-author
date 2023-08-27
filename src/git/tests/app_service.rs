@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use git::{
 	app_service::GitService,
 	git::{CommitBody, GitRepo},
@@ -43,5 +45,9 @@ impl MockRepo {
 impl GitRepo for MockRepo {
 	fn commit(&self, _body: CommitBody) -> Result<(), String> {
 		return Ok(());
+	}
+
+	fn root(&self) -> Result<PathBuf, String> {
+		return Ok(PathBuf::new());
 	}
 }
