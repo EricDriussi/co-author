@@ -5,11 +5,13 @@ use std::{
 	process::{Command, Stdio},
 };
 
+use git2::Config;
+
 pub fn get_commit_message_from_editor(editmsg: PathBuf) -> Option<String> {
 	// FIXME.Propper error handling
 	// FIXME.COMMIT_EDITMSG needs to be pre-populated with the output of "git status" as comments, simulating default git behavior
 
-	match get_editor() {
+	match default_editor() {
 		Some(editor) => Command::new(&editor)
 			.arg(editmsg.as_path())
 			.stdin(Stdio::inherit())
@@ -55,19 +57,14 @@ pub fn get_commit_message_from_editor(editmsg: PathBuf) -> Option<String> {
 	};
 }
 
-fn get_editor() -> Option<String> {
-	// FIXME.This requires git2-rs
-	// let config = Config::open_default().unwrap();
-	// match config.get_string("core.editor") {
-	// 	Ok(editor) => Some(editor),
-	// 	Err(_) => match env::var("EDITOR") {
-	// 		Ok(editor) => Some(editor),
-	// 		Err(_) => None,
-	// 	},
-	// }
-	match env::var("EDITOR") {
+fn default_editor() -> Option<String> {
+	let config = Config::open_default().unwrap();
+	match config.get_string("core.editor") {
 		Ok(editor) => Some(editor),
-		Err(_) => None,
+		Err(_) => match env::var("EDITOR") {
+			Ok(editor) => Some(editor),
+			Err(_) => None,
+		},
 	}
 }
 
