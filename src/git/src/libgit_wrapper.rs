@@ -2,14 +2,14 @@ use std::path::PathBuf;
 
 use git2::{Repository, Signature, StatusOptions};
 
-use crate::git::{CommitBody, GitRepo};
+use crate::git_domain::{CommitBody, GitWrapper};
 
-pub struct LibGitRepo {
+pub struct LibGitWrapper {
 	repo: Option<Repository>,
 	path: PathBuf,
 }
 
-impl GitRepo for LibGitRepo {
+impl GitWrapper for LibGitWrapper {
 	fn commit(&self, commit_body: CommitBody) -> Result<(), String> {
 		match self.no_staged_changes() {
 			Ok(no_changes) => {
@@ -40,7 +40,7 @@ impl GitRepo for LibGitRepo {
 	}
 }
 
-impl LibGitRepo {
+impl LibGitWrapper {
 	pub fn new(path: PathBuf) -> Self {
 		Self { path, repo: None }
 	}
@@ -66,7 +66,7 @@ impl LibGitRepo {
 		None
 	}
 
-	pub fn open_if_valid(&self) -> Option<LibGitRepo> {
+	pub fn open_if_valid(&self) -> Option<LibGitWrapper> {
 		if let Ok(repo) = Repository::open(&self.path) {
 			Some(Self::from(repo))
 		} else if let Some(root) = Self::find_git_root(self.path.clone()) {

@@ -24,7 +24,7 @@ impl Display for CommitBody {
 	}
 }
 
-pub trait GitRepo {
+pub trait GitWrapper {
 	fn commit(&self, body: CommitBody) -> Result<(), String>;
 	fn editmsg_file(&self) -> PathBuf;
 }

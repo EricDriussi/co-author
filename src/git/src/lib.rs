@@ -1,14 +1,14 @@
 use std::env;
 
-pub mod app_service;
-mod editor;
-pub mod git;
-pub mod libgit_repo;
+mod editor_handler;
+pub mod git_domain;
+pub mod libgit_wrapper;
+pub mod service;
 
-pub fn libgit_setup() -> Result<app_service::GitService<libgit_repo::LibGitRepo>, String> {
-	let repo = libgit_repo::LibGitRepo::new(env::current_dir().unwrap());
+pub fn libgit_setup() -> Result<service::GitService<libgit_wrapper::LibGitWrapper>, String> {
+	let repo = libgit_wrapper::LibGitWrapper::new(env::current_dir().unwrap());
 	let serv = match repo.open_if_valid() {
-		Some(repo) => Ok(app_service::GitService::new(repo)),
+		Some(repo) => Ok(service::GitService::new(repo)),
 		None => {
 			return Err("Not a valid git repository".to_string());
 		}

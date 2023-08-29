@@ -1,4 +1,4 @@
-use git::git::CommitBody;
+use git::git_domain::CommitBody;
 
 #[test]
 fn should_produce_a_correctly_formatted_commit_body() {

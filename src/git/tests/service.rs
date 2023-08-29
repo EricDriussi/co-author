@@ -3,8 +3,8 @@ use std::path::PathBuf;
 use serial_test::serial;
 
 use git::{
-	app_service::GitService,
-	git::{CommitBody, GitRepo},
+	git_domain::{CommitBody, GitWrapper},
+	service::GitService,
 };
 use git2::Config;
 
@@ -72,7 +72,7 @@ impl MockRepo {
 	}
 }
 
-impl GitRepo for MockRepo {
+impl GitWrapper for MockRepo {
 	fn commit(&self, _body: CommitBody) -> Result<(), String> {
 		return Ok(());
 	}
