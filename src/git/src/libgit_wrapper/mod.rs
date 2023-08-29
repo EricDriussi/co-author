@@ -1,8 +1,10 @@
 use std::path::PathBuf;
 
-use git2::{Repository, Signature, StatusOptions};
+use git2::{Repository, Signature};
 
 use crate::git_domain::{CommitBody, GitWrapper};
+
+mod editmsg_handler;
 
 pub struct LibGitWrapper {
 	repo: Option<Repository>,
@@ -35,7 +37,11 @@ impl GitWrapper for LibGitWrapper {
 		let editmsg = ".git/COMMIT_EDITMSG";
 		let mut editmsg_path = Self::find_git_root(self.path.clone()).expect("Something whent wrong");
 		editmsg_path.push(editmsg);
-		std::fs::write(editmsg_path.clone(), self.get_status_for_commit_file()).unwrap();
+		std::fs::write(
+			editmsg_path.clone(),
+			editmsg_handler::get_status_for_commit_file(self.repo.as_ref().unwrap()),
+		)
+		.unwrap();
 		return editmsg_path;
 	}
 }
@@ -104,65 +110,5 @@ impl LibGitWrapper {
 				&[&parent_commit],
 			)
 			.map(|_| ())
-	}
-
-	fn get_status_for_commit_file(&self) -> String {
-		// TODO.refactor
-		let mut options = StatusOptions::new();
-		options.include_untracked(true);
-
-		let repo = self.repo.as_ref().unwrap();
-		let hd = repo.head().unwrap();
-		let head = hd.shorthand();
-		let statuses = repo.statuses(Some(&mut options)).unwrap();
-
-		let mut output = String::from(
-			"
-# On branch ",
-		);
-
-		output.push_str(head.unwrap());
-		output.push_str("\n");
-
-		if statuses.iter().any(|e| {
-			e.status().is_index_new()
-				|| e.status().is_index_modified()
-				|| e.status().is_index_deleted()
-				|| e.status().is_index_renamed()
-				|| e.status().is_index_typechange()
-		}) {
-			output.push_str("# Changes to be committed:\n");
-			for entry in statuses.iter().filter(|e| {
-				e.status().is_index_new()
-					|| e.status().is_index_modified()
-					|| e.status().is_index_deleted()
-					|| e.status().is_index_renamed()
-					|| e.status().is_index_typechange()
-			}) {
-				output.push_str("#\t");
-				output.push_str(entry.path().unwrap());
-			}
-			output.push_str("\n#\n");
-		}
-
-		if statuses.iter().any(|e| e.status().is_wt_modified()) {
-			output.push_str("# Changes not staged for commit:\n");
-			for entry in statuses.iter().filter(|e| e.status().is_wt_modified()) {
-				output.push_str("#\t");
-				output.push_str(entry.path().unwrap());
-			}
-			output.push_str("\n#\n");
-		}
-
-		if statuses.iter().any(|e| e.status().is_wt_new()) {
-			output.push_str("# Untracked files:\n");
-			for entry in statuses.iter().filter(|e| e.status().is_wt_new()) {
-				output.push_str("#\t");
-				output.push_str(entry.path().unwrap());
-			}
-			output.push_str("\n");
-		}
-
-		return output;
 	}
 }
