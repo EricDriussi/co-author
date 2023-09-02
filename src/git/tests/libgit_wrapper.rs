@@ -56,7 +56,7 @@ fn test_prepares_editmsg_file() {
 
 	let git_repo = prepare_complex_mock_git_repo("/var/tmp/coa_file");
 	let repo = LibGitWrapper::from(git_repo);
-	repo.editmsg_file();
+	repo.setup_editmsg_file();
 
 	let contents = std::fs::read_to_string(&Path::new(commit_editmsg_path));
 	assert_eq!(

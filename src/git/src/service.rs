@@ -4,22 +4,24 @@ use crate::{
 };
 
 pub struct GitService<T: GitWrapper> {
-	repo: T,
+	git_wrapper: T,
 }
 
 impl<T: GitWrapper> GitService<T> {
 	pub fn new(repo: T) -> GitService<T> {
-		GitService { repo }
+		GitService { git_wrapper: repo }
 	}
 
 	pub fn commit(&self, message: &str, authors: Vec<String>) -> Result<(), String> {
-		return self.repo.commit(CommitBody::new(message, authors));
+		// TODO.better place for hooks?
+		return self.git_wrapper.commit(CommitBody::new(message, authors));
 	}
 
 	pub fn commit_with_editor(&self, authors: Vec<String>) -> Result<(), String> {
-		let editmsg = self.repo.editmsg_file();
-		match editor_handler::get_commit_message_from_editor(editmsg) {
-			Some(msg) => return self.repo.commit(CommitBody::new(msg.as_str(), authors)),
+		let editmsg_file = self.git_wrapper.setup_editmsg_file();
+		// TODO.better place for hooks?
+		match editor_handler::get_commit_message_from_editor(editmsg_file) {
+			Some(msg) => return self.git_wrapper.commit(CommitBody::new(msg.as_str(), authors)),
 			None => return Err("Commit message cannot be empty.".to_string()),
 		}
 	}

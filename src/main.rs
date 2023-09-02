@@ -6,11 +6,11 @@ use std::{
 use clap::Parser;
 use co_author::{args::Args, cli::Cli, exec, get_authors_signatures, get_commit_message};
 
-// TODO: ensure hooks work!
+// TODO: do nothing if no staged changes, print error like git?
 // TODO: option to pre-populate with last commit message (--pre-populate), for both -m and default buffer opening
 // TODO: sort authors by name when printing
 // TODO: automatically create aliases for authors
-// TODO: add amend option -> adds authors to last commit (no message)
+// TODO: add amend option -> update authors of last commit if no message, update message if no authors, normal amend if no message nor author
 // TODO: use with fzf or add fuzzy finding
 
 fn main() {

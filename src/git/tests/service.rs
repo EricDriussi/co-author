@@ -77,7 +77,7 @@ impl GitWrapper for MockRepo {
 		return Ok(());
 	}
 
-	fn editmsg_file(&self) -> PathBuf {
+	fn setup_editmsg_file(&self) -> PathBuf {
 		return PathBuf::from("../../.git/COMMIT_EDITMSG_TEST");
 	}
 }

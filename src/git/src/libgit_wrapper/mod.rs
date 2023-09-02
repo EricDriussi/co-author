@@ -27,13 +27,17 @@ impl GitWrapper for LibGitWrapper {
 			Err(_) => return Err(String::from("User name and/or email not set")),
 		};
 
+		// TODO: run pre-commit hook
+		// TODO: run prepare-commit-msg hook (this only makes sense when using the editor, run elsewhere?)
+		// TODO: run commit-msg hook (passing the name of the editmsg file is the default git behavior, maybe print to editmsg even if -m or prompt?)
+
 		match self.try_to_commit(signature, commit_body) {
 			Ok(_) => return Ok(()),
 			Err(_) => return Err(String::from("Something went wrong!")),
 		};
 	}
 
-	fn editmsg_file(&self) -> PathBuf {
+	fn setup_editmsg_file(&self) -> PathBuf {
 		let editmsg = ".git/COMMIT_EDITMSG";
 		let mut editmsg_path = Self::find_git_root(self.path.clone()).expect("Something whent wrong");
 		editmsg_path.push(editmsg);
