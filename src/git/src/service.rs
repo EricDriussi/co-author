@@ -1,5 +1,5 @@
 use crate::{
-	editor_handler,
+	editor,
 	git_domain::{CommitBody, GitWrapper},
 };
 
@@ -13,16 +13,19 @@ impl<T: GitWrapper> GitService<T> {
 	}
 
 	pub fn commit(&self, message: &str, authors: Vec<String>) -> Result<(), String> {
-		// TODO.better place for hooks?
-		return self.git_wrapper.commit(CommitBody::new(message, authors));
+		// TODO. pre-commit hook
+		self.git_wrapper.write_to_editmsg(CommitBody::new(message, authors))?;
+		// TODO. commit-msg hook (pass editmsg path as param)
+		return self.git_wrapper.commit();
 	}
 
 	pub fn commit_with_editor(&self, authors: Vec<String>) -> Result<(), String> {
-		let editmsg_file = self.git_wrapper.setup_editmsg_file();
-		// TODO.better place for hooks?
-		match editor_handler::get_commit_message_from_editor(editmsg_file) {
-			Some(msg) => return self.git_wrapper.commit(CommitBody::new(msg.as_str(), authors)),
-			None => return Err("Commit message cannot be empty.".to_string()),
-		}
+		// TODO. pre-commit hook
+		self.git_wrapper.write_to_editmsg(CommitBody::new("", authors))?;
+		self.git_wrapper.add_status_to_editmsg()?;
+		let editmsg_path = self.git_wrapper.editmsg_path_from_root();
+		editor::open(editmsg_path);
+		// TODO. commit-msg hook (pass editmsg path as param)
+		return self.git_wrapper.commit();
 	}
 }

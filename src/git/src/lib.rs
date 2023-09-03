@@ -1,6 +1,6 @@
 use std::env;
 
-mod editor_handler;
+mod editor;
 pub mod git_domain;
 pub mod libgit_wrapper;
 pub mod service;

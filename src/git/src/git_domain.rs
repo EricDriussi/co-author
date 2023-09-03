@@ -25,6 +25,8 @@ impl Display for CommitBody {
 }
 
 pub trait GitWrapper {
-	fn commit(&self, body: CommitBody) -> Result<(), String>;
-	fn setup_editmsg_file(&self) -> PathBuf;
+	fn commit(&self) -> Result<(), String>;
+	fn add_status_to_editmsg(&self) -> Result<(), String>;
+	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), String>;
+	fn editmsg_path_from_root(&self) -> PathBuf;
 }

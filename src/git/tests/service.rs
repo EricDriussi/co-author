@@ -1,11 +1,6 @@
 use std::path::PathBuf;
 
-use serial_test::serial;
-
-use git::{
-	git_domain::{CommitBody, GitWrapper},
-	service::GitService,
-};
+use git::{git_domain::GitWrapper, service::GitService};
 use git2::Config;
 
 #[test]
@@ -21,7 +16,6 @@ fn should_commit() {
 }
 
 #[test]
-#[serial]
 fn should_commit_using_editor() {
 	let spy = MockRepo::new();
 	let service = GitService::new(spy);
@@ -42,28 +36,6 @@ fn should_commit_using_editor() {
 	config.remove("core.editor").unwrap();
 }
 
-#[test]
-#[serial]
-fn should_not_allow_editor_commit_with_no_message() {
-	let spy = MockRepo::new();
-	let service = GitService::new(spy);
-	let aliases = vec![String::from("a")];
-
-	let editmsg = ".git/COMMIT_EDITMSG_TEST";
-	let editmsg_from_root = format!("../../{}", editmsg);
-	std::fs::write(editmsg_from_root.clone(), "").unwrap();
-	let mut config = Config::open_default().unwrap();
-	config.set_str("core.editor", "not_real").unwrap();
-	std::env::set_var("EDITOR", "echo");
-
-	let result = service.commit_with_editor(aliases);
-
-	assert!(result.is_err());
-	// Cleanup
-	std::fs::remove_file(editmsg_from_root).unwrap();
-	config.remove("core.editor").unwrap();
-}
-
 struct MockRepo {}
 
 impl MockRepo {
@@ -73,11 +45,19 @@ impl MockRepo {
 }
 
 impl GitWrapper for MockRepo {
-	fn commit(&self, _body: CommitBody) -> Result<(), String> {
+	fn commit(&self) -> Result<(), String> {
 		return Ok(());
 	}
 
-	fn setup_editmsg_file(&self) -> PathBuf {
+	fn write_to_editmsg(&self, _: git::git_domain::CommitBody) -> Result<(), String> {
+		return Ok(());
+	}
+
+	fn add_status_to_editmsg(&self) -> Result<(), String> {
+		return Ok(());
+	}
+
+	fn editmsg_path_from_root(&self) -> PathBuf {
 		return PathBuf::from("../../.git/COMMIT_EDITMSG_TEST");
 	}
 }

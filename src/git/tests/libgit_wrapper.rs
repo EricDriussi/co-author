@@ -23,45 +23,69 @@ fn should_determine_if_is_valid_git_repo() {
 
 #[test]
 fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
-	let git_repo = prepare_mock_git_repo("/var/tmp/coa_ok");
+	let repo_path = "/var/tmp/coa";
+	let git_repo = prepare_mock_git_repo(repo_path);
 	add_change_to_git_tree(&git_repo);
 
 	let repo = LibGitWrapper::from(git_repo);
 	let authors = vec!["random author".to_string()];
 	let commit_body = CommitBody::new("irrelevant message", authors);
 
-	let result = repo.commit(commit_body);
+	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", repo_path);
+	std::fs::write(editmsg_path, commit_body.formatted_body()).unwrap();
+
+	let result = repo.commit();
 
 	assert!(result.is_ok());
 }
 
 #[test]
 fn should_error_out_if_no_changes_are_staged() {
-	let git_repo = prepare_mock_git_repo("/var/tmp/coa_err");
+	let repo_path = "/var/tmp/coa_err";
+	let git_repo = prepare_mock_git_repo(repo_path);
 
 	let repo = LibGitWrapper::from(git_repo);
 	let authors = vec!["random author".to_string()];
 	let commit_body = CommitBody::new("irrelevant message", authors);
 
-	let result = repo.commit(commit_body);
+	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", repo_path);
+	std::fs::write(editmsg_path, commit_body.formatted_body()).unwrap();
 
-	assert!(result.is_err());
+	let result = repo.commit();
+
+	assert!(result.unwrap_err().contains("No changes staged for commit"));
+}
+
+#[test]
+fn should_error_out_if_commit_body_is_empty() {
+	let repo_path = "/var/tmp/coa_empty";
+	let git_repo = prepare_mock_git_repo(repo_path);
+	add_change_to_git_tree(&git_repo);
+
+	let repo = LibGitWrapper::from(git_repo);
+	let no_authors = vec!["".to_string()];
+	let commit_body = CommitBody::new("", no_authors);
+
+	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", repo_path);
+	std::fs::write(editmsg_path, commit_body.formatted_body()).unwrap();
+
+	let result = repo.commit();
+
+	assert!(result.unwrap_err().contains("Commit message cannot be empty"));
 }
 
 #[test]
 fn test_prepares_editmsg_file() {
-	let test_commit_message = "IRRELEVANT_STRING".to_string();
-	let commit_editmsg_path = "/var/tmp/coa_file/.git/COMMIT_EDITMSG";
-	std::fs::write(commit_editmsg_path.clone(), test_commit_message.clone()).unwrap();
-
 	let git_repo = prepare_complex_mock_git_repo("/var/tmp/coa_file");
 	let repo = LibGitWrapper::from(git_repo);
-	repo.setup_editmsg_file();
+	repo.add_status_to_editmsg().unwrap();
 
+	let commit_editmsg_path = "/var/tmp/coa_file/.git/COMMIT_EDITMSG";
 	let contents = std::fs::read_to_string(&Path::new(commit_editmsg_path));
 	assert_eq!(
 		contents.unwrap(),
 		"
+
 # On branch master
 # Changes to be committed:
 #	bar
@@ -118,7 +142,7 @@ fn prepare_complex_mock_git_repo(path: &str) -> Repository {
 
 	// TODO. Find a better way to do this, should be able to use git2.rs
 	let cwd = std::env::current_dir().unwrap();
-	std::env::set_current_dir("/var/tmp/coa_file/").unwrap();
+	std::env::set_current_dir(path).unwrap();
 	Command::new("git")
 		.arg("restore")
 		.arg("--staged")

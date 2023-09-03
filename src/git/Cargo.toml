@@ -5,6 +5,3 @@ edition = "2021"
 
 [dependencies]
 git2 = "0.17.2"
-
-[dev-dependencies]
-serial_test = "0.5"

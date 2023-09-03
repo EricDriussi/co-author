@@ -1,10 +1,10 @@
-use std::path::PathBuf;
+use std::{fs::OpenOptions, io::Write, path::PathBuf};
 
 use git2::{Repository, Signature};
 
 use crate::git_domain::{CommitBody, GitWrapper};
 
-mod editmsg_handler;
+pub mod editmsg_handler;
 
 pub struct LibGitWrapper {
 	repo: Option<Repository>,
@@ -12,7 +12,7 @@ pub struct LibGitWrapper {
 }
 
 impl GitWrapper for LibGitWrapper {
-	fn commit(&self, commit_body: CommitBody) -> Result<(), String> {
+	fn commit(&self) -> Result<(), String> {
 		match self.no_staged_changes() {
 			Ok(no_changes) => {
 				if no_changes {
@@ -27,26 +27,42 @@ impl GitWrapper for LibGitWrapper {
 			Err(_) => return Err(String::from("User name and/or email not set")),
 		};
 
-		// TODO: run pre-commit hook
-		// TODO: run prepare-commit-msg hook (this only makes sense when using the editor, run elsewhere?)
-		// TODO: run commit-msg hook (passing the name of the editmsg file is the default git behavior, maybe print to editmsg even if -m or prompt?)
+		let editmsg_path = self.editmsg_path_from_root();
+		let commit_message = match editmsg_handler::read_editmsg(&editmsg_path) {
+			Some(msg) => msg,
+			None => return Err(String::from("Commit message cannot be empty")),
+		};
 
-		match self.try_to_commit(signature, commit_body) {
+		match self.try_to_commit(signature, commit_message) {
 			Ok(_) => return Ok(()),
 			Err(_) => return Err(String::from("Something went wrong!")),
 		};
 	}
 
-	fn setup_editmsg_file(&self) -> PathBuf {
+	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), String> {
+		let editmsg_path = self.editmsg_path_from_root();
+		return editmsg_handler::write_commit_to_file(commit_body, editmsg_path);
+	}
+
+	fn editmsg_path_from_root(&self) -> PathBuf {
 		let editmsg = ".git/COMMIT_EDITMSG";
-		let mut editmsg_path = Self::find_git_root(self.path.clone()).expect("Something whent wrong");
-		editmsg_path.push(editmsg);
-		std::fs::write(
-			editmsg_path.clone(),
-			editmsg_handler::get_status_for_commit_file(self.repo.as_ref().unwrap()),
-		)
-		.unwrap();
-		return editmsg_path;
+		if let Some(mut editmsg_path) = Self::find_git_root(self.path.clone()) {
+			editmsg_path.push(editmsg);
+			return editmsg_path;
+		} else {
+			panic!("Something went wrong");
+		}
+	}
+
+	fn add_status_to_editmsg(&self) -> Result<(), String> {
+		let editmsg_path = self.editmsg_path_from_root();
+		let status = editmsg_handler::get_status_for_commit_file(&self.repo.as_ref().unwrap());
+
+		let mut file_to_append = OpenOptions::new().create(true).append(true).open(editmsg_path).unwrap();
+		match file_to_append.write_all(status.as_bytes()) {
+			Ok(_) => Ok(()),
+			Err(_) => Err("Couldn't write status".to_string()),
+		}
 	}
 }
 
@@ -98,7 +114,7 @@ impl LibGitWrapper {
 		return Ok(diff.deltas().count() == 0);
 	}
 
-	fn try_to_commit(&self, signature: Signature, commit_body: CommitBody) -> Result<(), git2::Error> {
+	fn try_to_commit(&self, signature: Signature, commit_message: String) -> Result<(), git2::Error> {
 		let oid = self.repo.as_ref().unwrap().index()?.write_tree()?;
 		let tree = self.repo.as_ref().unwrap().find_tree(oid)?;
 		let parent_commit = self.repo.as_ref().unwrap().head()?.peel_to_commit()?;
@@ -109,7 +125,7 @@ impl LibGitWrapper {
 				Some("HEAD"),
 				&signature,
 				&signature,
-				&commit_body.formatted_body(),
+				commit_message.as_str(),
 				&tree,
 				&[&parent_commit],
 			)

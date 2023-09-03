@@ -1,4 +1,38 @@
+use std::{
+	io::{BufRead, BufReader},
+	path::{Path, PathBuf},
+};
+
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
+
+use crate::git_domain::CommitBody;
+
+pub fn write_commit_to_file(commit_body: CommitBody, editmsg_path: PathBuf) -> Result<(), String> {
+	return match std::fs::write(editmsg_path, commit_body.formatted_body()) {
+		Ok(_) => Ok(()),
+		Err(_) => Err("Something went wrong".to_string()),
+	};
+}
+
+pub fn read_editmsg(editmsg_path: &Path) -> Option<String> {
+	let file = std::fs::File::open(editmsg_path).expect("Something went wrong");
+	let reader = BufReader::new(file);
+	let mut message = String::new();
+
+	for line in reader.lines() {
+		if let Ok(line) = line {
+			if !line.starts_with('#') {
+				message.push_str(&line.trim());
+				message.push('\n');
+			}
+		}
+	}
+
+	match message.trim().is_empty() {
+		true => None,
+		false => Some(message.trim().to_string()),
+	}
+}
 
 pub fn get_status_for_commit_file(repo: &Repository) -> String {
 	let mut options = StatusOptions::new();
@@ -8,7 +42,7 @@ pub fn get_status_for_commit_file(repo: &Repository) -> String {
 	let short_head = head.shorthand().unwrap();
 	let file_statuses = repo.statuses(Some(&mut options)).unwrap();
 
-	let output = format!("\n# On branch {}\n", short_head);
+	let output = format!("\n\n# On branch {}\n", short_head);
 
 	format!(
 		"{}# Changes to be committed:\n{}#\n# Changes not staged for commit:\n{}#\n# Untracked files:\n{}",
@@ -51,4 +85,45 @@ fn untracked_files(file_statuses: &Statuses) -> String {
 
 fn format_file_path(entry: StatusEntry) -> String {
 	return format!("#\t{}\n", entry.path().unwrap());
+}
+
+#[cfg(test)]
+mod test {
+
+	use std::path::Path;
+
+	use super::*;
+
+	#[test]
+	fn test_removes_commented_lines_when_reading_commit_message() {
+		let commit_editmsg_path = "../../.git/COMMIT_EDITMSG_TEST_COMMENTS";
+		std::fs::write(
+			commit_editmsg_path.clone(),
+			"Test commit message.\n# This is a commented line.\n#And another one."
+				.to_string()
+				.clone(),
+		)
+		.unwrap();
+
+		let result = read_editmsg(&Path::new(commit_editmsg_path));
+
+		assert_eq!(result, Some("Test commit message.".to_string()));
+
+		// Cleanup
+		std::fs::remove_file(commit_editmsg_path).unwrap();
+	}
+
+	#[test]
+	fn test_trims_lines_when_getting_reading_commit_message() {
+		let test_commit_message = "  Test commit message.\nThis is a second line. \n".to_string();
+		let commit_editmsg_path = "../../.git/COMMIT_EDITMSG_TEST_TRIM";
+		std::fs::write(commit_editmsg_path.clone(), test_commit_message.clone()).unwrap();
+
+		let result = read_editmsg(&Path::new(commit_editmsg_path));
+
+		assert_eq!(result, Some(test_commit_message.trim().to_string()));
+
+		// Cleanup
+		std::fs::remove_file(commit_editmsg_path).unwrap();
+	}
 }
