@@ -4,9 +4,8 @@ use std::{
 };
 
 use clap::Parser;
-use co_author::{args::Args, cli::Cli, exec, get_authors_signatures, get_commit_message};
+use co_author::{args::Args, cli::Cli, get_authors_signatures, get_commit_message};
 
-// TODO: do nothing if no staged changes, print error like git?
 // TODO: option to pre-populate with last commit message (--pre-populate), for both -m and default buffer opening
 // TODO: sort authors by name when printing
 // TODO: automatically create aliases for authors
@@ -25,15 +24,16 @@ fn main() {
 }
 
 fn run(args: Args) -> Result<(), String> {
+	let git_service = git::libgit_setup()?;
+
 	let cli = Cli::new(stdin().lock(), stdout().lock());
 	let authors = get_authors_signatures(&args, cli)?;
 
 	if args.editor {
-		let git_service = git::libgit_setup()?;
 		return git_service.commit_with_editor(authors);
 	}
 
 	let cli = Cli::new(stdin().lock(), stdout().lock());
 	let commit_body = get_commit_message(&args, cli)?;
-	return exec(commit_body, authors);
+	return git_service.commit(commit_body.as_str(), authors);
 }

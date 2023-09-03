@@ -13,15 +13,6 @@ pub struct LibGitWrapper {
 
 impl GitWrapper for LibGitWrapper {
 	fn commit(&self) -> Result<(), String> {
-		match self.no_staged_changes() {
-			Ok(no_changes) => {
-				if no_changes {
-					return Err(String::from("No changes staged for commit"));
-				}
-			}
-			Err(_) => return Err(String::from("Something went wrong!")),
-		};
-
 		let signature = match self.repo.as_ref().unwrap().signature() {
 			Ok(sig) => sig,
 			Err(_) => return Err(String::from("User name and/or email not set")),
@@ -80,11 +71,19 @@ impl LibGitWrapper {
 		Self { path, repo: None }
 	}
 
-	pub fn from(repo: Repository) -> Self {
-		Self {
-			path: repo.path().to_path_buf(),
-			repo: Some(repo),
+	pub fn from(path: PathBuf) -> Result<Self, String> {
+		let root = match Self::find_git_root(path.clone()) {
+			Some(root) => root,
+			None => return Err("Not in a valid git repo".to_string()),
+		};
+
+		if let Ok(repo) = Repository::open(root) {
+			return match Self::no_staged_changes(&repo) {
+				true => Err("No staged changes".to_string()),
+				false => Ok(Self { path, repo: Some(repo) }),
+			};
 		}
+		return Err("Could not open the repo".to_string());
 	}
 
 	fn find_git_root(mut path: PathBuf) -> Option<PathBuf> {
@@ -101,26 +100,12 @@ impl LibGitWrapper {
 		None
 	}
 
-	pub fn open_if_valid(&self) -> Option<LibGitWrapper> {
-		if let Ok(repo) = Repository::open(&self.path) {
-			Some(Self::from(repo))
-		} else if let Some(root) = Self::find_git_root(self.path.clone()) {
-			Repository::open(&root).ok().map(Self::from)
-		} else {
-			None
-		}
-	}
-
-	fn no_staged_changes(&self) -> Result<bool, git2::Error> {
-		let head = self.repo.as_ref().unwrap().head()?;
-		let tree = head.peel_to_tree()?;
-		let index = self.repo.as_ref().unwrap().index()?;
-		let diff = self
-			.repo
-			.as_ref()
-			.unwrap()
-			.diff_tree_to_index(Some(&tree), Some(&index), None)?;
-		return Ok(diff.deltas().count() == 0);
+	fn no_staged_changes(repo: &Repository) -> bool {
+		let head = repo.head().unwrap();
+		let tree = head.peel_to_tree().unwrap();
+		let index = repo.index().unwrap();
+		let diff = repo.diff_tree_to_index(Some(&tree), Some(&index), None).unwrap();
+		return diff.deltas().count() == 0;
 	}
 
 	fn try_to_commit(&self, signature: Signature, commit_message: String) -> Result<(), git2::Error> {

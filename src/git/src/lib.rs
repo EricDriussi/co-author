@@ -6,10 +6,9 @@ pub mod libgit_wrapper;
 pub mod service;
 
 pub fn libgit_setup() -> Result<service::GitService<libgit_wrapper::LibGitWrapper>, String> {
-	let repo = libgit_wrapper::LibGitWrapper::new(env::current_dir().unwrap());
-	let serv = match repo.open_if_valid() {
-		Some(repo) => Ok(service::GitService::new(repo)),
-		None => {
+	let serv = match libgit_wrapper::LibGitWrapper::from(env::current_dir().unwrap()) {
+		Ok(repo) => Ok(service::GitService::new(repo)),
+		Err(_) => {
 			return Err("Not a valid git repository".to_string());
 		}
 	};

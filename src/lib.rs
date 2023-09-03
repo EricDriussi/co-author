@@ -7,11 +7,6 @@ use cli::Cli;
 pub mod args;
 pub mod cli;
 
-pub fn exec(commit_body: String, authors_signatures: Vec<String>) -> Result<(), String> {
-	let git_service = git::libgit_setup()?;
-	return git_service.commit(commit_body.as_str(), authors_signatures);
-}
-
 pub fn get_commit_message<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>) -> Result<String, String> {
 	if let Some(message) = &args.message {
 		return Ok(message.to_string());
