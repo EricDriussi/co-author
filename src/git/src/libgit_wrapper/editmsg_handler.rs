@@ -17,21 +17,33 @@ pub fn write_commit_to_file(commit_body: CommitBody, editmsg_path: PathBuf) -> R
 pub fn read_editmsg(editmsg_path: &Path) -> Option<String> {
 	let file = std::fs::File::open(editmsg_path).expect("Something went wrong");
 	let reader = BufReader::new(file);
-	let mut message = String::new();
+	let mut commit_body = String::new();
 
 	for line in reader.lines() {
 		if let Ok(line) = line {
 			if !line.starts_with('#') {
-				message.push_str(&line.trim());
-				message.push('\n');
+				commit_body.push_str(&line.trim());
+				commit_body.push('\n');
 			}
 		}
 	}
+	let trimmed_body = commit_body.trim().to_string();
 
-	match message.trim().is_empty() {
-		true => None,
-		false => Some(message.trim().to_string()),
+	match has_message(&trimmed_body) {
+		true => Some(trimmed_body),
+		false => None,
 	}
+}
+
+fn has_message(commit_body: &String) -> bool {
+	let lines_without_co_author = commit_body
+		.lines()
+		.filter(|line| !line.starts_with("Co-Authored-by"))
+		.collect::<Vec<&str>>()
+		.join("\n");
+
+	let contains_lines_without_co_author = !lines_without_co_author.trim().is_empty();
+	return contains_lines_without_co_author;
 }
 
 pub fn get_status_for_commit_file(repo: &Repository) -> String {
@@ -114,7 +126,7 @@ mod test {
 	}
 
 	#[test]
-	fn test_trims_lines_when_getting_reading_commit_message() {
+	fn test_trims_lines_when_reading_commit_message() {
 		let test_commit_message = "  Test commit message.\nThis is a second line. \n".to_string();
 		let commit_editmsg_path = "../../.git/COMMIT_EDITMSG_TEST_TRIM";
 		std::fs::write(commit_editmsg_path.clone(), test_commit_message.clone()).unwrap();
