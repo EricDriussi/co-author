@@ -27,7 +27,7 @@ impl GitWrapper for LibGitWrapper {
 			Err(_) => return Err(String::from("User name and/or email not set")),
 		};
 
-		let editmsg_path = self.editmsg_path_from_root();
+		let editmsg_path = self.editmsg_path();
 		let commit_message = match editmsg_handler::read_editmsg(&editmsg_path) {
 			Some(msg) => msg,
 			None => return Err(String::from("Commit message cannot be empty")),
@@ -40,11 +40,11 @@ impl GitWrapper for LibGitWrapper {
 	}
 
 	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), String> {
-		let editmsg_path = self.editmsg_path_from_root();
+		let editmsg_path = self.editmsg_path();
 		return editmsg_handler::write_commit_to_file(commit_body, editmsg_path);
 	}
 
-	fn editmsg_path_from_root(&self) -> PathBuf {
+	fn editmsg_path(&self) -> PathBuf {
 		let editmsg = ".git/COMMIT_EDITMSG";
 		if let Some(mut editmsg_path) = Self::find_git_root(self.path.clone()) {
 			editmsg_path.push(editmsg);
@@ -54,8 +54,17 @@ impl GitWrapper for LibGitWrapper {
 		}
 	}
 
+	fn hooks_path(&self) -> PathBuf {
+		if let Some(mut hooks_path) = Self::find_git_root(self.path.clone()) {
+			hooks_path.push(".git/hooks/");
+			return hooks_path;
+		} else {
+			panic!("Something went wrong");
+		}
+	}
+
 	fn add_status_to_editmsg(&self) -> Result<(), String> {
-		let editmsg_path = self.editmsg_path_from_root();
+		let editmsg_path = self.editmsg_path();
 		let status = editmsg_handler::get_status_for_commit_file(&self.repo.as_ref().unwrap());
 
 		let mut file_to_append = OpenOptions::new().create(true).append(true).open(editmsg_path).unwrap();

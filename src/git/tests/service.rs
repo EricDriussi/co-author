@@ -57,7 +57,11 @@ impl GitWrapper for MockRepo {
 		return Ok(());
 	}
 
-	fn editmsg_path_from_root(&self) -> PathBuf {
+	fn editmsg_path(&self) -> PathBuf {
+		return PathBuf::from("../../.git/COMMIT_EDITMSG_TEST");
+	}
+
+	fn hooks_path(&self) -> PathBuf {
 		return PathBuf::from("../../.git/COMMIT_EDITMSG_TEST");
 	}
 }

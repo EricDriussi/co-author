@@ -28,5 +28,6 @@ pub trait GitWrapper {
 	fn commit(&self) -> Result<(), String>;
 	fn add_status_to_editmsg(&self) -> Result<(), String>;
 	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), String>;
-	fn editmsg_path_from_root(&self) -> PathBuf;
+	fn editmsg_path(&self) -> PathBuf;
+	fn hooks_path(&self) -> PathBuf;
 }
