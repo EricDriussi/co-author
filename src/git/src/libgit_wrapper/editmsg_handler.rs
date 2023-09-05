@@ -56,6 +56,7 @@ pub fn get_status_for_commit_file(repo: &Repository) -> String {
 
 	let output = format!("\n\n# On branch {}\n", short_head);
 
+	// FIXME. Don't print section header if no changes of that type
 	format!(
 		"{}# Changes to be committed:\n{}#\n# Changes not staged for commit:\n{}#\n# Untracked files:\n{}",
 		output,

@@ -6,20 +6,17 @@ use git2::{Repository, RepositoryInitOptions};
 use std::{
 	fs::{self, File},
 	path::{Path, PathBuf},
-	process::Command,
 };
-
-// FIXME: These tests are flaky and suck, make them better
 
 #[test]
 fn should_determine_if_is_valid_git_repo() {
 	let repo_path = "/var/tmp/coa_valid";
-	prepare_mock_git_repo(repo_path);
+	let git_repo = init_repo(repo_path);
 
 	let repo_with_no_staged_changes = LibGitWrapper::from(PathBuf::from(repo_path));
 	assert!(repo_with_no_staged_changes.is_err());
 
-	add_change_to_git_tree(repo_path);
+	create_and_add_file_to_git_tree(&git_repo, "foo");
 	let valid_repo = LibGitWrapper::from(PathBuf::from(repo_path));
 	assert!(valid_repo.is_ok());
 
@@ -30,8 +27,8 @@ fn should_determine_if_is_valid_git_repo() {
 #[test]
 fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
 	let repo_path = "/var/tmp/coa";
-	prepare_mock_git_repo(repo_path);
-	add_change_to_git_tree(repo_path);
+	let git_repo = init_repo(repo_path);
+	create_and_add_file_to_git_tree(&git_repo, "foo");
 
 	let repo = LibGitWrapper::from(PathBuf::from(repo_path));
 	assert!(repo.is_ok());
@@ -49,8 +46,8 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 #[test]
 fn should_error_out_if_commit_body_is_empty() {
 	let repo_path = "/var/tmp/coa_empty";
-	prepare_mock_git_repo(repo_path);
-	add_change_to_git_tree(repo_path);
+	let git_repo = init_repo(repo_path);
+	create_and_add_file_to_git_tree(&git_repo, "foo");
 
 	let repo = LibGitWrapper::from(PathBuf::from(repo_path));
 	assert!(repo.is_ok());
@@ -68,7 +65,24 @@ fn should_error_out_if_commit_body_is_empty() {
 #[test]
 fn test_prepares_editmsg_file() {
 	let repo_path = "/var/tmp/coa_file";
-	prepare_complex_mock_git_repo(repo_path);
+	let git_repo = init_repo(repo_path);
+	create_and_add_file_to_git_tree(&git_repo, "foo");
+
+	let mut index = git_repo.index().unwrap();
+	let id = index.write_tree().unwrap();
+	let tree = git_repo.find_tree(id).unwrap();
+	add_commit(&git_repo, tree.clone());
+
+	// add bar
+	create_and_add_file_to_git_tree(&git_repo, "bar");
+	// modify but don't add foo
+	let root = git_repo.path().parent().unwrap();
+	std::fs::write(&root.join("foo"), "text").unwrap();
+	// add baz but keep untracked
+	std::fs::write(&root.join("baz"), "text").unwrap();
+
+	add_commit(&git_repo, tree);
+
 	let repo = LibGitWrapper::from(PathBuf::from(repo_path));
 	assert!(repo.is_ok());
 	repo.unwrap().add_status_to_editmsg().unwrap();
@@ -92,53 +106,33 @@ fn test_prepares_editmsg_file() {
 	);
 }
 
-fn prepare_mock_git_repo(path: &str) -> Repository {
-	let git_repo = init_repo(path);
-	add_commit(&git_repo);
-	return git_repo;
-}
-
 fn init_repo(path: &str) -> Repository {
 	let dir = PathBuf::from(path);
 	fs::remove_dir_all(&dir).ok();
-	return Repository::init_opts(&dir, &RepositoryInitOptions::new()).unwrap();
-}
+	let repo = Repository::init_opts(&dir, &RepositoryInitOptions::new()).unwrap();
 
-fn add_commit(repo: &Repository) {
 	let mut index = repo.index().unwrap();
 	let id = index.write_tree().unwrap();
 	let tree = repo.find_tree(id).unwrap();
 	let sig = repo.signature().unwrap();
 	repo.commit(Some("HEAD"), &sig, &sig, "initial commit", &tree, &[])
 		.unwrap();
+	drop(tree);
+	return repo;
 }
 
-fn add_change_to_git_tree(repo_path: &str) {
-	File::create(PathBuf::from(repo_path).join("foo")).unwrap();
-	std::env::set_current_dir(PathBuf::from(repo_path)).unwrap();
-	Command::new("git").arg("add").arg("foo").output().expect("ERR_TEST");
+fn add_commit(repo: &Repository, tree: git2::Tree<'_>) {
+	let sig = repo.signature().unwrap();
+	let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
+	repo.commit(Some("HEAD"), &sig, &sig, "initial commit", &tree, &[&head_commit])
+		.unwrap();
 }
 
-fn prepare_complex_mock_git_repo(path: &str) -> Repository {
-	let git_repo = init_repo(path);
-	add_change_to_git_tree(path);
-	add_commit(&git_repo);
-	let root = git_repo.path().parent().unwrap();
+fn create_and_add_file_to_git_tree(repo: &Repository, file_name: &str) {
+	let root = repo.path().parent().unwrap();
+	File::create(&root.join(file_name)).unwrap();
 
-	std::fs::write(&root.join("foo"), "text").unwrap();
-	std::fs::write(&root.join("bar"), "text").unwrap();
-	std::fs::write(&root.join("baz"), "text").unwrap();
-
-	let cwd = std::env::current_dir().unwrap();
-	std::env::set_current_dir(path).unwrap();
-	Command::new("git")
-		.arg("restore")
-		.arg("--staged")
-		.arg("foo")
-		.output()
-		.expect("ERR_TEST");
-	Command::new("git").arg("add").arg("bar").output().expect("ERR_TEST");
-	std::env::set_current_dir(cwd).unwrap();
-
-	return git_repo;
+	let mut index = repo.index().unwrap();
+	index.add_path(Path::new(file_name)).unwrap();
+	index.write().unwrap();
 }
