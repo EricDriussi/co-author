@@ -17,8 +17,7 @@ impl<T: GitWrapper> GitService<T> {
 	pub fn commit(&self, message: &str, authors: Vec<String>) -> Result<(), String> {
 		run_pre_commit_hook(self.git_wrapper.hooks_path())?;
 		self.git_wrapper.write_to_editmsg(CommitBody::new(message, authors))?;
-		let editmsg_path = self.git_wrapper.editmsg_path();
-		run_commit_msg_hook(self.git_wrapper.hooks_path(), editmsg_path)?;
+		run_commit_msg_hook(self.git_wrapper.hooks_path(), self.git_wrapper.editmsg_path())?;
 		return self.git_wrapper.commit();
 	}
 
@@ -26,9 +25,8 @@ impl<T: GitWrapper> GitService<T> {
 		run_pre_commit_hook(self.git_wrapper.hooks_path())?;
 		self.git_wrapper.write_to_editmsg(CommitBody::new("", authors))?;
 		self.git_wrapper.add_status_to_editmsg()?;
-		let editmsg_path = self.git_wrapper.editmsg_path();
-		editor::open(editmsg_path.clone());
-		run_commit_msg_hook(self.git_wrapper.hooks_path(), editmsg_path)?;
+		editor::open(self.git_wrapper.editmsg_path());
+		run_commit_msg_hook(self.git_wrapper.hooks_path(), self.git_wrapper.editmsg_path())?;
 		return self.git_wrapper.commit();
 	}
 }

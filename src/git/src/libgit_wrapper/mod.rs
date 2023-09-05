@@ -18,8 +18,7 @@ impl GitWrapper for LibGitWrapper {
 			Err(_) => return Err(String::from("User name and/or email not set")),
 		};
 
-		let editmsg_path = self.editmsg_path();
-		let commit_message = match editmsg_handler::read_editmsg(&editmsg_path) {
+		let commit_message = match editmsg_handler::read_editmsg(&self.editmsg_path()) {
 			Some(msg) => msg,
 			None => return Err(String::from("Commit message cannot be empty")),
 		};
@@ -31,27 +30,15 @@ impl GitWrapper for LibGitWrapper {
 	}
 
 	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), String> {
-		let editmsg_path = self.editmsg_path();
-		return editmsg_handler::write_commit_to_file(commit_body, editmsg_path);
+		return editmsg_handler::write_commit_to_file(commit_body, self.editmsg_path());
 	}
 
 	fn editmsg_path(&self) -> PathBuf {
-		let editmsg = ".git/COMMIT_EDITMSG";
-		if let Some(mut editmsg_path) = Self::find_git_root(self.path.clone()) {
-			editmsg_path.push(editmsg);
-			return editmsg_path;
-		} else {
-			panic!("Something went wrong");
-		}
+		return self.path.join(".git/COMMIT_EDITMSG");
 	}
 
 	fn hooks_path(&self) -> PathBuf {
-		if let Some(mut hooks_path) = Self::find_git_root(self.path.clone()) {
-			hooks_path.push(".git/hooks/");
-			return hooks_path;
-		} else {
-			panic!("Something went wrong");
-		}
+		return self.path.join(".git/hooks/");
 	}
 
 	fn add_status_to_editmsg(&self) -> Result<(), String> {
@@ -72,32 +59,13 @@ impl LibGitWrapper {
 	}
 
 	pub fn from(path: PathBuf) -> Result<Self, String> {
-		let root = match Self::find_git_root(path.clone()) {
-			Some(root) => root,
-			None => return Err("Not in a valid git repo".to_string()),
-		};
-
-		if let Ok(repo) = Repository::open(root) {
+		if let Ok(repo) = Repository::open(path.clone()) {
 			return match Self::no_staged_changes(&repo) {
 				true => Err("No staged changes".to_string()),
 				false => Ok(Self { path, repo: Some(repo) }),
 			};
 		}
 		return Err("Could not open the repo".to_string());
-	}
-
-	fn find_git_root(mut path: PathBuf) -> Option<PathBuf> {
-		loop {
-			let git_dir = path.join(".git");
-			if git_dir.is_dir() {
-				return Some(path);
-			}
-
-			if !path.pop() {
-				break;
-			}
-		}
-		None
 	}
 
 	fn no_staged_changes(repo: &Repository) -> bool {
