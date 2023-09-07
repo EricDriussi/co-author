@@ -93,6 +93,11 @@ fn test_prepares_editmsg_file() {
 		contents.unwrap(),
 		"
 
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# A message with only 'Co-Authored' lines will be considered empty.
+#
 # On branch master
 # Changes to be committed:
 #	bar
