@@ -1,4 +1,5 @@
 use std::{
+	error::Error,
 	io::{BufRead, BufReader},
 	path::{Path, PathBuf},
 };
@@ -7,11 +8,9 @@ use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 
 use crate::git_domain::CommitBody;
 
-pub fn write_commit_to_file(commit_body: CommitBody, editmsg_path: PathBuf) -> Result<(), String> {
-	return match std::fs::write(editmsg_path, commit_body.formatted_body()) {
-		Ok(_) => Ok(()),
-		Err(_) => Err("Something went wrong".to_string()),
-	};
+pub fn write_commit_to_file(commit_body: CommitBody, editmsg_path: PathBuf) -> Result<(), Box<dyn Error>> {
+	std::fs::write(editmsg_path, commit_body.formatted_body())?;
+	Ok(())
 }
 
 pub fn read_editmsg(editmsg_path: &Path) -> Option<String> {

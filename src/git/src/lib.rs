@@ -2,6 +2,7 @@ use std::env;
 
 mod editor;
 pub mod git_domain;
+mod git_err;
 pub mod libgit_wrapper;
 pub mod service;
 

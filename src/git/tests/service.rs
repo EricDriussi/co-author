@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{error::Error, path::PathBuf};
 
 use git::{git_domain::GitWrapper, service::GitService};
 use git2::Config;
@@ -45,15 +45,15 @@ impl MockRepo {
 }
 
 impl GitWrapper for MockRepo {
-	fn commit(&self) -> Result<(), String> {
+	fn commit(&self) -> Result<(), Box<dyn Error>> {
 		return Ok(());
 	}
 
-	fn write_to_editmsg(&self, _: git::git_domain::CommitBody) -> Result<(), String> {
+	fn write_to_editmsg(&self, _: git::git_domain::CommitBody) -> Result<(), Box<dyn Error>> {
 		return Ok(());
 	}
 
-	fn add_status_to_editmsg(&self) -> Result<(), String> {
+	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
 		return Ok(());
 	}
 

@@ -1,5 +1,6 @@
 use std::{
 	env,
+	error::Error,
 	io::{stdin, stdout},
 	path::PathBuf,
 	process,
@@ -8,10 +9,9 @@ use std::{
 use clap::Parser;
 use co_author::{args::Args, cli::Cli, get_authors_signatures, get_commit_message};
 
-// FIXME: use Result<(), Box<dyn Error>>, instead of String
-// TODO: option to pre-populate with last commit message (--pre-populate), for both -m and default buffer opening
-// TODO: sort authors by name when printing
-// TODO: automatically create aliases for authors
+// TODO: option to pre-populate with last commit message (--pre-populate), for both prompt(?) and default buffer opening
+// TODO: option to sort authors by name when adding to commit message
+// TODO: automatically create on the fly aliases for authors
 // TODO: add amend option -> update authors of last commit if no message, update message if no authors, normal amend if no message nor author
 // TODO: use with fzf or add fuzzy finding
 
@@ -26,7 +26,7 @@ fn main() {
 	}
 }
 
-fn run(args: Args) -> Result<(), String> {
+fn run(args: Args) -> Result<(), Box<dyn Error>> {
 	set_cwd_to_git_root()?;
 	let git_service = git::libgit_setup()?;
 
@@ -42,7 +42,7 @@ fn run(args: Args) -> Result<(), String> {
 	return git_service.commit(commit_body.as_str(), authors);
 }
 
-fn set_cwd_to_git_root() -> Result<(), String> {
+fn set_cwd_to_git_root() -> Result<(), Box<dyn Error>> {
 	let project_root_dir = get_project_root_dir()?;
 	env::set_current_dir(&project_root_dir).map_err(|_| "Something went wrong")?;
 	Ok(())

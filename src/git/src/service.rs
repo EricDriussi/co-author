@@ -1,8 +1,9 @@
-use std::{path::PathBuf, process::Command};
+use std::{error::Error, path::PathBuf, process::Command};
 
 use crate::{
 	editor,
 	git_domain::{CommitBody, GitWrapper},
+	git_err::HookError,
 };
 
 pub struct GitService<T: GitWrapper> {
@@ -14,14 +15,14 @@ impl<T: GitWrapper> GitService<T> {
 		GitService { git_wrapper: repo }
 	}
 
-	pub fn commit(&self, message: &str, authors: Vec<String>) -> Result<(), String> {
+	pub fn commit(&self, message: &str, authors: Vec<String>) -> Result<(), Box<dyn Error>> {
 		run_pre_commit_hook(self.git_wrapper.hooks_path())?;
 		self.git_wrapper.write_to_editmsg(CommitBody::new(message, authors))?;
 		run_commit_msg_hook(self.git_wrapper.hooks_path(), self.git_wrapper.editmsg_path())?;
 		return self.git_wrapper.commit();
 	}
 
-	pub fn commit_with_editor(&self, authors: Vec<String>) -> Result<(), String> {
+	pub fn commit_with_editor(&self, authors: Vec<String>) -> Result<(), Box<dyn Error>> {
 		run_pre_commit_hook(self.git_wrapper.hooks_path())?;
 		self.git_wrapper.write_to_editmsg(CommitBody::new("", authors))?;
 		self.git_wrapper.add_status_to_editmsg()?;
@@ -31,7 +32,7 @@ impl<T: GitWrapper> GitService<T> {
 	}
 }
 
-fn run_pre_commit_hook(mut hooks_path: PathBuf) -> Result<(), String> {
+fn run_pre_commit_hook(mut hooks_path: PathBuf) -> Result<(), Box<dyn Error>> {
 	hooks_path.push("pre-commit");
 	match hooks_path.exists() {
 		true => {
@@ -40,14 +41,14 @@ fn run_pre_commit_hook(mut hooks_path: PathBuf) -> Result<(), String> {
 
 			return match succeeded {
 				true => Ok(()),
-				false => Err("Pre-commit hook failed, aborting".to_string()),
+				false => Err(HookError::new("Pre-commit")),
 			};
 		}
 		false => return Ok(()),
 	}
 }
 
-fn run_commit_msg_hook(mut hooks_path: PathBuf, editmsg_path: PathBuf) -> Result<(), String> {
+fn run_commit_msg_hook(mut hooks_path: PathBuf, editmsg_path: PathBuf) -> Result<(), Box<dyn Error>> {
 	hooks_path.push("commit-msg");
 	match hooks_path.exists() {
 		true => {
@@ -56,7 +57,7 @@ fn run_commit_msg_hook(mut hooks_path: PathBuf, editmsg_path: PathBuf) -> Result
 
 			return match succeeded {
 				true => Ok(()),
-				false => Err("Commit-msg hook failed, aborting".to_string()),
+				false => Err(HookError::new("Commit-msg")),
 			};
 		}
 		false => return Ok(()),

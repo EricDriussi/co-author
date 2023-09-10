@@ -1,18 +1,22 @@
 use std::{
 	env,
+	error::Error,
 	fs::File,
 	io::{BufRead, BufReader, Lines, Result},
 	path::PathBuf,
 };
 
-use crate::author::{Author, AuthorsRepo};
+use crate::{
+	author::{Author, AuthorsRepo},
+	author_err::AuthorError,
+};
 
 pub struct FSRepo {
 	src: PathBuf,
 }
 
 impl FSRepo {
-	pub fn default(default_authors_file: String) -> std::result::Result<Self, String> {
+	pub fn default(default_authors_file: String) -> std::result::Result<Self, Box<dyn Error>> {
 		let default_file = PathBuf::from(default_authors_file);
 		return match default_file.is_file() {
 			true => Ok(Self { src: default_file }),
@@ -20,26 +24,31 @@ impl FSRepo {
 		};
 	}
 
-	pub fn from(authors_file: String) -> std::result::Result<Self, String> {
+	pub fn from(authors_file: String) -> std::result::Result<Self, Box<dyn Error>> {
 		let path = PathBuf::from(authors_file);
 		return match path.is_file() {
 			true => Ok(Self { src: path }),
-			false => Err(format!("No file found at path {:?}", path.to_str().unwrap())),
+			false => Err(AuthorError::new(format!(
+				"No file at path {:?}",
+				path.to_str().unwrap()
+			))),
 		};
 	}
 
-	fn try_with_local_file() -> std::result::Result<FSRepo, String> {
+	fn try_with_local_file() -> std::result::Result<FSRepo, Box<dyn Error>> {
 		let mut local_file = env::current_dir().unwrap();
 		local_file.push("authors");
 		return match local_file.is_file() {
 			true => Ok(Self { src: local_file }),
-			false => Err("No authors file found!".to_string()),
+			false => Err(AuthorError::new(format!("No file found!"))),
 		};
 	}
 
-	fn read_lines(&self) -> Result<Lines<BufReader<File>>> {
-		let file = File::open(&self.src)?;
-		Ok(BufReader::new(file).lines())
+	fn read_lines(&self) -> Option<Lines<BufReader<File>>> {
+		return match File::open(&self.src) {
+			Ok(file) => Some(BufReader::new(file).lines()),
+			Err(_) => None,
+		};
 	}
 
 	fn filter_by_alias(line: &str, aliases: &[String]) -> bool {
@@ -63,22 +72,22 @@ impl FSRepo {
 impl AuthorsRepo for FSRepo {
 	fn find(&self, aliases: Vec<String>) -> Vec<Author> {
 		match self.read_lines() {
-			Ok(lines) => lines
+			Some(lines) => lines
 				.filter_map(Result::ok)
 				.filter(|line| Self::filter_by_alias(line, &aliases))
 				.filter_map(|matching_line| Self::parse_author(matching_line.as_str()))
 				.collect(),
-			Err(_) => Vec::new(),
+			None => Vec::new(),
 		}
 	}
 
 	fn all(&self) -> Vec<Author> {
 		match self.read_lines() {
-			Ok(lines) => lines
+			Some(lines) => lines
 				.filter_map(Result::ok)
 				.filter_map(|line| Self::parse_author(line.as_str()))
 				.collect(),
-			Err(_) => Vec::new(),
+			None => Vec::new(),
 		}
 	}
 }
@@ -92,7 +101,7 @@ mod test {
 		let repo = FSRepo::from("tests/data/authors".to_string()).unwrap();
 		let contents = repo.read_lines();
 
-		assert!(contents.is_ok());
+		assert!(contents.is_some());
 	}
 
 	#[test]

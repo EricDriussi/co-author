@@ -1,4 +1,4 @@
-use std::{fs::OpenOptions, io::Write, path::PathBuf};
+use std::{error::Error, fs::OpenOptions, io::Write, path::PathBuf};
 
 use git2::{Repository, Signature};
 
@@ -12,24 +12,23 @@ pub struct LibGitWrapper {
 }
 
 impl GitWrapper for LibGitWrapper {
-	fn commit(&self) -> Result<(), String> {
-		let signature = match self.repo.as_ref().unwrap().signature() {
-			Ok(sig) => sig,
-			Err(_) => return Err(String::from("User name and/or email not set")),
-		};
+	fn commit(&self) -> Result<(), Box<dyn Error>> {
+		let signature = self
+			.repo
+			.as_ref()
+			.unwrap()
+			.signature()
+			.map_err(|_| "User name and/or email not set".to_string())?;
 
-		let commit_message = match editmsg_handler::read_editmsg(&self.editmsg_path()) {
-			Some(msg) => msg,
-			None => return Err(String::from("Commit message cannot be empty")),
-		};
+		let commit_message =
+			editmsg_handler::read_editmsg(&self.editmsg_path()).ok_or("Commit message cannot be empty".to_string())?;
 
-		match self.try_to_commit(signature, commit_message) {
-			Ok(_) => return Ok(()),
-			Err(_) => return Err(String::from("Something went wrong!")),
-		};
+		self.try_to_commit(signature, commit_message)
+			.map_err(|_| "Something went wrong!".to_string())?;
+		Ok(())
 	}
 
-	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), String> {
+	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), Box<dyn Error>> {
 		return editmsg_handler::write_commit_to_file(commit_body, self.editmsg_path());
 	}
 
@@ -41,15 +40,13 @@ impl GitWrapper for LibGitWrapper {
 		return self.path.join(".git/hooks/");
 	}
 
-	fn add_status_to_editmsg(&self) -> Result<(), String> {
+	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
 		let editmsg_path = self.editmsg_path();
 		let status = editmsg_handler::get_status_for_commit_file(&self.repo.as_ref().unwrap());
 
-		let mut file_to_append = OpenOptions::new().create(true).append(true).open(editmsg_path).unwrap();
-		match file_to_append.write_all(status.as_bytes()) {
-			Ok(_) => Ok(()),
-			Err(_) => Err("Couldn't write status".to_string()),
-		}
+		let mut file_to_append = OpenOptions::new().create(true).append(true).open(editmsg_path)?;
+		file_to_append.write_all(status.as_bytes())?;
+		Ok(())
 	}
 }
 

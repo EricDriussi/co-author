@@ -59,7 +59,10 @@ fn should_error_out_if_commit_body_is_empty() {
 
 	let result = repo.unwrap().commit();
 
-	assert!(result.unwrap_err().contains("Commit message cannot be empty"));
+	assert!(result
+		.unwrap_err()
+		.to_string()
+		.contains("Commit message cannot be empty"));
 }
 
 #[test]

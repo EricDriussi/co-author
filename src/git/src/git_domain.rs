@@ -1,4 +1,4 @@
-use std::{fmt::Display, path::PathBuf};
+use std::{error::Error, fmt::Display, path::PathBuf};
 
 pub struct CommitBody {
 	message: String,
@@ -25,9 +25,9 @@ impl Display for CommitBody {
 }
 
 pub trait GitWrapper {
-	fn commit(&self) -> Result<(), String>;
-	fn add_status_to_editmsg(&self) -> Result<(), String>;
-	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), String>;
+	fn commit(&self) -> Result<(), Box<dyn Error>>;
+	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>>;
+	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), Box<dyn Error>>;
 	fn editmsg_path(&self) -> PathBuf;
 	fn hooks_path(&self) -> PathBuf;
 }

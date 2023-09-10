@@ -1,4 +1,7 @@
-use std::io::{BufRead, Write};
+use std::{
+	error::Error,
+	io::{BufRead, Write},
+};
 
 use args::Args;
 use authors::author::Author;
@@ -7,7 +10,7 @@ use cli::Cli;
 pub mod args;
 pub mod cli;
 
-pub fn get_commit_message<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>) -> Result<String, String> {
+pub fn get_commit_message<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>) -> Result<String, Box<dyn Error>> {
 	if let Some(message) = &args.message {
 		return Ok(message.to_string());
 	}
@@ -15,7 +18,10 @@ pub fn get_commit_message<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>)
 	Ok(commit_body)
 }
 
-pub fn get_authors_signatures<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>) -> Result<Vec<String>, String> {
+pub fn get_authors_signatures<R: BufRead, W: Write>(
+	args: &Args,
+	mut cli: Cli<R, W>,
+) -> Result<Vec<String>, Box<dyn Error>> {
 	let authors_service = match &args.file {
 		Some(file) => authors::fs_setup_from_file(file.to_string())?,
 		None => authors::fs_default_setup(conf::authors_file())?,

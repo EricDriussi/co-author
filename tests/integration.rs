@@ -19,7 +19,8 @@ fn commit_message_is_gathered_from_arg() {
 
 	let result = get_commit_message(&args, cli);
 
-	assert_eq!(result, Ok(message_by_param.to_string()));
+	assert!(result.is_ok());
+	assert_eq!(result.unwrap(), message_by_param.to_string());
 }
 
 #[test]
@@ -39,7 +40,8 @@ fn commit_message_is_gathered_from_cli_prompt() {
 
 	let result = get_commit_message(&args, cli);
 
-	assert_eq!(result, Ok(message_by_prompt.to_string()));
+	assert!(result.is_ok());
+	assert_eq!(result.unwrap(), message_by_prompt.to_string());
 }
 
 #[test]
