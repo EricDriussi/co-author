@@ -2,8 +2,9 @@ use std::{
 	env,
 	error::Error,
 	fs::File,
-	io::{BufRead, BufReader, Lines, Result},
+	io::{BufRead, BufReader, Lines},
 	path::PathBuf,
+	result::Result,
 };
 
 use crate::{
@@ -16,7 +17,7 @@ pub struct FSRepo {
 }
 
 impl FSRepo {
-	pub fn default(default_authors_file: String) -> std::result::Result<Self, Box<dyn Error>> {
+	pub fn default(default_authors_file: String) -> Result<Self, Box<dyn Error>> {
 		let default_file = PathBuf::from(default_authors_file);
 		return match default_file.is_file() {
 			true => Ok(Self { src: default_file }),
@@ -24,7 +25,7 @@ impl FSRepo {
 		};
 	}
 
-	pub fn from(authors_file: String) -> std::result::Result<Self, Box<dyn Error>> {
+	pub fn from(authors_file: String) -> Result<Self, Box<dyn Error>> {
 		let path = PathBuf::from(authors_file);
 		return match path.is_file() {
 			true => Ok(Self { src: path }),
@@ -35,7 +36,7 @@ impl FSRepo {
 		};
 	}
 
-	fn try_with_local_file() -> std::result::Result<FSRepo, Box<dyn Error>> {
+	fn try_with_local_file() -> Result<FSRepo, Box<dyn Error>> {
 		let mut local_file = env::current_dir().unwrap();
 		local_file.push("authors");
 		return match local_file.is_file() {
@@ -73,7 +74,7 @@ impl AuthorsRepo for FSRepo {
 	fn find(&self, aliases: Vec<String>) -> Vec<Author> {
 		match self.read_lines() {
 			Some(lines) => lines
-				.filter_map(Result::ok)
+				.filter_map(std::io::Result::ok)
 				.filter(|line| Self::filter_by_alias(line, &aliases))
 				.filter_map(|matching_line| Self::parse_author(matching_line.as_str()))
 				.collect(),
@@ -84,7 +85,7 @@ impl AuthorsRepo for FSRepo {
 	fn all(&self) -> Vec<Author> {
 		match self.read_lines() {
 			Some(lines) => lines
-				.filter_map(Result::ok)
+				.filter_map(std::io::Result::ok)
 				.filter_map(|line| Self::parse_author(line.as_str()))
 				.collect(),
 			None => Vec::new(),
