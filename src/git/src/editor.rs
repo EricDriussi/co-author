@@ -7,7 +7,8 @@ use std::{
 
 use git2::Config;
 
-pub fn open(editmsg: PathBuf) {
+pub fn open() {
+	let editmsg = PathBuf::from(conf::editmsg());
 	match Config::open_default() {
 		Ok(config) => match config.get_string("core.editor") {
 			Ok(editor) => match open_editor(&editor, editmsg.as_path()) {

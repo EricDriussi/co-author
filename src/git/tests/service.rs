@@ -1,5 +1,5 @@
 use serial_test::serial;
-use std::{error::Error, path::PathBuf};
+use std::error::Error;
 
 use git::{git_domain::GitWrapper, service::GitService};
 use git2::Config;
@@ -78,9 +78,5 @@ impl GitWrapper for MockRepo {
 
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
 		return Ok(());
-	}
-
-	fn editmsg_path(&self) -> PathBuf {
-		return PathBuf::from("../../.git/COMMIT_EDITMSG_TEST");
 	}
 }

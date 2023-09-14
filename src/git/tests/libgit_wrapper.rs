@@ -3,21 +3,24 @@ use git::{
 	libgit_wrapper::LibGitWrapper,
 };
 use git2::{Repository, RepositoryInitOptions};
+use serial_test::serial;
 use std::{
 	fs::{self, File},
 	path::{Path, PathBuf},
 };
 
-#[test]
-fn should_determine_if_is_valid_git_repo() {
-	let repo_path = "/var/tmp/coa_valid";
-	let git_repo = init_repo(repo_path);
+const REPO_PATH: &'static str = "/var/tmp/coa";
 
-	let repo_with_no_staged_changes = LibGitWrapper::from(PathBuf::from(repo_path));
+#[test]
+#[serial]
+fn should_determine_if_is_valid_git_repo() {
+	let git_repo = init_repo(REPO_PATH);
+
+	let repo_with_no_staged_changes = LibGitWrapper::from(PathBuf::from(REPO_PATH));
 	assert!(repo_with_no_staged_changes.is_err());
 
 	create_and_add_file_to_git_tree(&git_repo, "foo");
-	let valid_repo = LibGitWrapper::from(PathBuf::from(repo_path));
+	let valid_repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
 	assert!(valid_repo.is_ok());
 
 	let invalid_repo = LibGitWrapper::from(PathBuf::from("/path"));
@@ -25,17 +28,17 @@ fn should_determine_if_is_valid_git_repo() {
 }
 
 #[test]
+#[serial]
 fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
-	let repo_path = "/var/tmp/coa";
-	let git_repo = init_repo(repo_path);
+	let git_repo = init_repo(REPO_PATH);
 	create_and_add_file_to_git_tree(&git_repo, "foo");
 
-	let repo = LibGitWrapper::from(PathBuf::from(repo_path));
+	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
 	assert!(repo.is_ok());
 	let authors = vec!["random author".to_string()];
 	let commit_body = CommitBody::new("irrelevant message", authors);
 
-	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", repo_path);
+	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", REPO_PATH);
 	std::fs::write(editmsg_path, commit_body.formatted_body()).unwrap();
 
 	let result = repo.unwrap().commit();
@@ -44,17 +47,17 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 }
 
 #[test]
+#[serial]
 fn should_error_out_if_commit_body_is_empty() {
-	let repo_path = "/var/tmp/coa_empty";
-	let git_repo = init_repo(repo_path);
+	let git_repo = init_repo(REPO_PATH);
 	create_and_add_file_to_git_tree(&git_repo, "foo");
 
-	let repo = LibGitWrapper::from(PathBuf::from(repo_path));
+	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
 	assert!(repo.is_ok());
 	let no_authors = vec!["".to_string()];
 	let commit_body = CommitBody::new("", no_authors);
 
-	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", repo_path);
+	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", REPO_PATH);
 	std::fs::write(editmsg_path, commit_body.formatted_body()).unwrap();
 
 	let result = repo.unwrap().commit();
@@ -66,9 +69,9 @@ fn should_error_out_if_commit_body_is_empty() {
 }
 
 #[test]
+#[serial]
 fn test_prepares_editmsg_file() {
-	let repo_path = "/var/tmp/coa_file";
-	let git_repo = init_repo(repo_path);
+	let git_repo = init_repo(REPO_PATH);
 	create_and_add_file_to_git_tree(&git_repo, "foo");
 
 	let mut index = git_repo.index().unwrap();
@@ -86,7 +89,7 @@ fn test_prepares_editmsg_file() {
 
 	add_commit(&git_repo, tree);
 
-	let repo = LibGitWrapper::from(PathBuf::from(repo_path));
+	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
 	assert!(repo.is_ok());
 	repo.unwrap().add_status_to_editmsg().unwrap();
 

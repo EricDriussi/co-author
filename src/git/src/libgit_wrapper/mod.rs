@@ -8,7 +8,6 @@ pub mod editmsg_handler;
 
 pub struct LibGitWrapper {
 	repo: Option<Repository>,
-	path: PathBuf,
 }
 
 impl GitWrapper for LibGitWrapper {
@@ -20,8 +19,7 @@ impl GitWrapper for LibGitWrapper {
 			.signature()
 			.map_err(|_| "User name and/or email not set".to_string())?;
 
-		let commit_message =
-			editmsg_handler::read_editmsg(&self.editmsg_path()).ok_or("Commit message cannot be empty".to_string())?;
+		let commit_message = editmsg_handler::read_editmsg().ok_or("Commit message cannot be empty".to_string())?;
 
 		self.try_to_commit(signature, commit_message)
 			.map_err(|_| "Something went wrong!".to_string())?;
@@ -29,33 +27,24 @@ impl GitWrapper for LibGitWrapper {
 	}
 
 	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), Box<dyn Error>> {
-		return editmsg_handler::write_commit_to_file(commit_body, self.editmsg_path());
-	}
-
-	fn editmsg_path(&self) -> PathBuf {
-		return self.path.join(".git/COMMIT_EDITMSG");
+		return editmsg_handler::write_commit_to_file(commit_body);
 	}
 
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
-		let editmsg_path = self.editmsg_path();
 		let status = editmsg_handler::get_status_for_commit_file(&self.repo.as_ref().unwrap());
 
-		let mut file_to_append = OpenOptions::new().create(true).append(true).open(editmsg_path)?;
+		let mut file_to_append = OpenOptions::new().create(true).append(true).open(conf::editmsg())?;
 		file_to_append.write_all(status.as_bytes())?;
 		Ok(())
 	}
 }
 
 impl LibGitWrapper {
-	pub fn new(path: PathBuf) -> Self {
-		Self { path, repo: None }
-	}
-
 	pub fn from(path: PathBuf) -> Result<Self, String> {
 		if let Ok(repo) = Repository::open(path.clone()) {
 			return match Self::no_staged_changes(&repo) {
 				true => Err("No staged changes".to_string()),
-				false => Ok(Self { path, repo: Some(repo) }),
+				false => Ok(Self { repo: Some(repo) }),
 			};
 		}
 		return Err("Could not open the repo".to_string());

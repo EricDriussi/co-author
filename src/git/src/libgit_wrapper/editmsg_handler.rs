@@ -1,19 +1,22 @@
 use std::{
 	error::Error,
 	io::{BufRead, BufReader},
-	path::{Path, PathBuf},
 };
 
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 
 use crate::git_domain::CommitBody;
 
-pub fn write_commit_to_file(commit_body: CommitBody, editmsg_path: PathBuf) -> Result<(), Box<dyn Error>> {
-	std::fs::write(editmsg_path, commit_body.formatted_body())?;
+pub fn write_commit_to_file(commit_body: CommitBody) -> Result<(), Box<dyn Error>> {
+	std::fs::write(conf::editmsg(), commit_body.formatted_body())?;
 	Ok(())
 }
 
-pub fn read_editmsg(editmsg_path: &Path) -> Option<String> {
+pub fn read_editmsg() -> Option<String> {
+	read(conf::editmsg())
+}
+
+fn read(editmsg_path: String) -> Option<String> {
 	let file = std::fs::File::open(editmsg_path).expect("Something went wrong");
 	let reader = BufReader::new(file);
 	let mut commit_body = String::new();
@@ -132,8 +135,6 @@ fn format_file_path(entry: StatusEntry) -> String {
 #[cfg(test)]
 mod test {
 
-	use std::path::Path;
-
 	use super::*;
 
 	#[test]
@@ -147,7 +148,7 @@ mod test {
 		)
 		.unwrap();
 
-		let result = read_editmsg(&Path::new(commit_editmsg_path));
+		let result = read(commit_editmsg_path.to_string());
 
 		assert_eq!(result, Some("Test commit message.".to_string()));
 
@@ -161,7 +162,7 @@ mod test {
 		let commit_editmsg_path = "../../.git/COMMIT_EDITMSG_TEST_TRIM";
 		std::fs::write(commit_editmsg_path.clone(), test_commit_message.clone()).unwrap();
 
-		let result = read_editmsg(&Path::new(commit_editmsg_path));
+		let result = read(commit_editmsg_path.to_string());
 
 		assert_eq!(result, Some(test_commit_message.trim().to_string()));
 

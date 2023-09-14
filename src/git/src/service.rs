@@ -22,7 +22,7 @@ impl<T: GitWrapper> GitService<T> {
 	pub fn commit(&self, message: &str, authors: Vec<String>) -> Result<(), Box<dyn Error>> {
 		self.hook_runner.pre_commit()?;
 		self.git_wrapper.write_to_editmsg(CommitBody::new(message, authors))?;
-		self.hook_runner.commit_msg(self.git_wrapper.editmsg_path())?;
+		self.hook_runner.commit_msg()?;
 		return self.git_wrapper.commit();
 	}
 
@@ -30,8 +30,8 @@ impl<T: GitWrapper> GitService<T> {
 		self.hook_runner.pre_commit()?;
 		self.git_wrapper.write_to_editmsg(CommitBody::new("", authors))?;
 		self.git_wrapper.add_status_to_editmsg()?;
-		editor::open(self.git_wrapper.editmsg_path());
-		self.hook_runner.commit_msg(self.git_wrapper.editmsg_path())?;
+		editor::open();
+		self.hook_runner.commit_msg()?;
 		return self.git_wrapper.commit();
 	}
 }

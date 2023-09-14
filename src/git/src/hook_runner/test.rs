@@ -46,9 +46,8 @@ fn should_run_commit_msg_hook() {
 
 	create_test_hook(commit_msg_hook_path.as_str(), ok_hook_code);
 
-	let path_to_editmsg = "NOT_RELEVANT";
 	let runner = HookRunner::new();
-	let result = runner.commit_msg(PathBuf::from(path_to_editmsg));
+	let result = runner.commit_msg();
 
 	assert!(result.is_ok());
 	// Cleanup
@@ -63,9 +62,8 @@ fn should_err_commit_msg_hook() {
 
 	create_test_hook(commit_msg_hook_path.as_str(), err_hook_code);
 
-	let path_to_editmsg = "NOT_RELEVANT";
 	let runner = HookRunner::new();
-	let result = runner.commit_msg(PathBuf::from(path_to_editmsg));
+	let result = runner.commit_msg();
 
 	assert!(result.is_err());
 	assert_eq!(result.unwrap_err().to_string(), "Commit-msg hook failed, aborting");

@@ -29,11 +29,11 @@ impl HookRunner {
 		};
 	}
 
-	pub fn commit_msg(&self, editmsg_path: PathBuf) -> Result<(), Box<dyn Error>> {
+	pub fn commit_msg(&self) -> Result<(), Box<dyn Error>> {
 		let p = PathBuf::from(format!("{}/commit-msg", self.path));
 		return match p.exists() {
 			true => {
-				let status = Command::new(p).arg(editmsg_path.to_str().unwrap()).status();
+				let status = Command::new(p).arg(conf::editmsg()).status();
 				let succeeded = status.is_ok() && status.unwrap().success();
 
 				match succeeded {
