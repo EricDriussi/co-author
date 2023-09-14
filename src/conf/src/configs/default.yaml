@@ -1,2 +1,3 @@
 authors_file: "/home/eric/.config/coa/authors"
 hooks_path: ".git/hooks"
+editmsg: ".git/COMMIT_EDITMSG"

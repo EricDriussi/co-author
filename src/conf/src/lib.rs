@@ -13,6 +13,10 @@ pub fn hooks_path() -> String {
 	return get_config().get::<String>("hooks_path").unwrap();
 }
 
+pub fn editmsg() -> String {
+	return get_config().get::<String>("editmsg").unwrap();
+}
+
 pub fn get_config() -> Config {
 	let config_file = if let Ok(test_env) = env::var("COA_ENV") {
 		if test_env == "test" {
