@@ -1,3 +1,4 @@
+use serial_test::serial;
 use std::{error::Error, path::PathBuf};
 
 use git::{git_domain::GitWrapper, service::GitService};
@@ -16,7 +17,8 @@ fn should_commit() {
 }
 
 #[test]
-fn should_commit_using_editor() {
+#[serial]
+fn should_commit_using_git_editor() {
 	let spy = MockRepo::new();
 	let service = GitService::new(spy);
 	let aliases = vec![String::from("a")];
@@ -25,7 +27,28 @@ fn should_commit_using_editor() {
 	let editmsg_from_root = format!("../../{}", editmsg);
 	std::fs::write(editmsg_from_root.clone(), "himom").unwrap();
 	let mut config = Config::open_default().unwrap();
-	config.set_str("core.editor", "not_real").unwrap();
+	config.set_str("core.editor", "echo").unwrap();
+
+	let result = service.commit_with_editor(aliases);
+
+	assert!(result.is_ok());
+	// Cleanup
+	std::fs::remove_file(editmsg_from_root).unwrap();
+	config.remove("core.editor").unwrap();
+}
+
+#[test]
+#[serial]
+fn should_commit_using_env_editor() {
+	let spy = MockRepo::new();
+	let service = GitService::new(spy);
+	let aliases = vec![String::from("a")];
+
+	let editmsg = ".git/COMMIT_EDITMSG_TEST";
+	let editmsg_from_root = format!("../../{}", editmsg);
+	std::fs::write(editmsg_from_root.clone(), "himom").unwrap();
+	let mut config = Config::open_default().unwrap();
+	config.set_str("core.editor", "NOT_REAL").unwrap();
 	std::env::set_var("EDITOR", "echo");
 
 	let result = service.commit_with_editor(aliases);

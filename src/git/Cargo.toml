@@ -4,4 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-git2 = "0.17.2"
+git2 = "0.18.0"
+
+[dev-dependencies]
+serial_test = "*"
