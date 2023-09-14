@@ -1,2 +1,3 @@
 authors_file: "src/authors/tests/data/authors"
 authors_file_from_authors_crate: "tests/data/authors"
+hooks_path: "../../.git/hooks"

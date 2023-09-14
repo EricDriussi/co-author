@@ -29,5 +29,4 @@ pub trait GitWrapper {
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>>;
 	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), Box<dyn Error>>;
 	fn editmsg_path(&self) -> PathBuf;
-	fn hooks_path(&self) -> PathBuf;
 }

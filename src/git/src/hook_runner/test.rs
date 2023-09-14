@@ -8,13 +8,13 @@ use super::*;
 #[test]
 #[serial]
 fn should_run_pre_commit_hook() {
-	let hooks_dir = "../../.git/hooks";
-	let pre_commit_hook_path = format!("{}/pre-commit", hooks_dir);
+	let pre_commit_hook_path = format!("{}/pre-commit", conf::hooks_path());
 	let ok_hook_code = "#!/bin/sh\nexit 0";
 
 	create_test_hook(pre_commit_hook_path.as_str(), ok_hook_code);
 
-	let result = pre_commit(PathBuf::from("../../.git/hooks"));
+	let runner = HookRunner::new();
+	let result = runner.pre_commit();
 
 	assert!(result.is_ok());
 	// Cleanup
@@ -24,13 +24,13 @@ fn should_run_pre_commit_hook() {
 #[test]
 #[serial]
 fn should_err_pre_commit_hook() {
-	let hooks_dir = "../../.git/hooks";
-	let pre_commit_hook_path = format!("{}/pre-commit", hooks_dir);
+	let pre_commit_hook_path = format!("{}/pre-commit", conf::hooks_path());
 	let err_hook_code = "#!/bin/sh\nexit 1";
 
 	create_test_hook(pre_commit_hook_path.as_str(), err_hook_code);
 
-	let result = pre_commit(PathBuf::from("../../.git/hooks"));
+	let runner = HookRunner::new();
+	let result = runner.pre_commit();
 
 	assert!(result.is_err());
 	assert_eq!(result.unwrap_err().to_string(), "Pre-commit hook failed, aborting");
@@ -41,14 +41,14 @@ fn should_err_pre_commit_hook() {
 #[test]
 #[serial]
 fn should_run_commit_msg_hook() {
-	let hooks_dir = "../../.git/hooks";
-	let commit_msg_hook_path = format!("{}/commit-msg", hooks_dir);
+	let commit_msg_hook_path = format!("{}/commit-msg", conf::hooks_path());
 	let ok_hook_code = "#!/bin/sh\necho $1\nexit 0";
-	let path_to_editmsg = "NOT_RELEVANT";
 
 	create_test_hook(commit_msg_hook_path.as_str(), ok_hook_code);
 
-	let result = commit_msg(PathBuf::from("../../.git/hooks"), PathBuf::from(path_to_editmsg));
+	let path_to_editmsg = "NOT_RELEVANT";
+	let runner = HookRunner::new();
+	let result = runner.commit_msg(PathBuf::from(path_to_editmsg));
 
 	assert!(result.is_ok());
 	// Cleanup
@@ -58,14 +58,14 @@ fn should_run_commit_msg_hook() {
 #[test]
 #[serial]
 fn should_err_commit_msg_hook() {
-	let hooks_dir = "../../.git/hooks";
-	let commit_msg_hook_path = format!("{}/commit-msg", hooks_dir);
+	let commit_msg_hook_path = format!("{}/commit-msg", conf::hooks_path());
 	let err_hook_code = "#!/bin/sh\necho $1\nexit 1";
-	let path_to_editmsg = "NOT_RELEVANT";
 
 	create_test_hook(commit_msg_hook_path.as_str(), err_hook_code);
 
-	let result = commit_msg(PathBuf::from("../../.git/hooks"), PathBuf::from(path_to_editmsg));
+	let path_to_editmsg = "NOT_RELEVANT";
+	let runner = HookRunner::new();
+	let result = runner.commit_msg(PathBuf::from(path_to_editmsg));
 
 	assert!(result.is_err());
 	assert_eq!(result.unwrap_err().to_string(), "Commit-msg hook failed, aborting");

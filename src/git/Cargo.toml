@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 git2 = "0.18.0"
+conf = { path = "../conf" }
 
 [dev-dependencies]
 serial_test = "*"

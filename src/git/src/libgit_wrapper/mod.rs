@@ -36,10 +36,6 @@ impl GitWrapper for LibGitWrapper {
 		return self.path.join(".git/COMMIT_EDITMSG");
 	}
 
-	fn hooks_path(&self) -> PathBuf {
-		return self.path.join(".git/hooks/");
-	}
-
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
 		let editmsg_path = self.editmsg_path();
 		let status = editmsg_handler::get_status_for_commit_file(&self.repo.as_ref().unwrap());

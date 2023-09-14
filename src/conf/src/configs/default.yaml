@@ -1,1 +1,2 @@
 authors_file: "/home/eric/.config/coa/authors"
+hooks_path: ".git/hooks"

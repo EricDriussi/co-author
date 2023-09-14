@@ -315,6 +315,7 @@ dependencies = [
 name = "git"
 version = "0.1.0"
 dependencies = [
+ "conf",
  "git2",
  "serial_test",
 ]
