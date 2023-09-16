@@ -1,6 +1,6 @@
 use authors::{
-	app_service::AuthorsService,
 	author::{Author, AuthorsRepo},
+	service::AuthorsService,
 };
 
 #[test]

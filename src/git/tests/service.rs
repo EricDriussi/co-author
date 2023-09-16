@@ -1,7 +1,7 @@
 use serial_test::serial;
 use std::error::Error;
 
-use git::{git_domain::GitWrapper, service::GitService};
+use git::{git::GitWrapper, service::GitService};
 use git2::Config;
 
 #[test]
@@ -72,7 +72,7 @@ impl GitWrapper for MockRepo {
 		return Ok(());
 	}
 
-	fn write_to_editmsg(&self, _: git::git_domain::CommitBody) -> Result<(), Box<dyn Error>> {
+	fn write_to_editmsg(&self, _: git::git::CommitBody) -> Result<(), Box<dyn Error>> {
 		return Ok(());
 	}
 

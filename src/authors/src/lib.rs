@@ -1,13 +1,13 @@
 use std::error::Error;
 
-use app_service::AuthorsService;
 use author_err::AuthorError;
 use fs_repo::FSRepo;
+use service::AuthorsService;
 
-pub mod app_service;
 pub mod author;
 mod author_err;
 pub mod fs_repo;
+pub mod service;
 
 pub fn fs_setup_from_file(authors_file: String) -> Result<AuthorsService<FSRepo>, Box<dyn Error>> {
 	return match FSRepo::from(authors_file) {

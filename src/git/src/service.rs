@@ -2,7 +2,7 @@ use std::error::Error;
 
 use crate::{
 	editor,
-	git_domain::{CommitBody, GitWrapper},
+	git::{CommitBody, GitWrapper},
 	hook_runner::HookRunner,
 };
 

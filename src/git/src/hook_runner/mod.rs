@@ -1,6 +1,7 @@
 use std::{error::Error, path::PathBuf, process::Command};
 
-use crate::git_err::HookError;
+mod hook_err;
+use self::hook_err::HookError;
 
 pub struct HookRunner {
 	path: String,

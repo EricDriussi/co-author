@@ -1,5 +1,5 @@
 use git::{
-	git_domain::{CommitBody, GitWrapper},
+	git::{CommitBody, GitWrapper},
 	libgit_wrapper::LibGitWrapper,
 };
 use git2::{Repository, RepositoryInitOptions};

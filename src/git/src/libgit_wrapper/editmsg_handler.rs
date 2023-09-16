@@ -5,7 +5,7 @@ use std::{
 
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 
-use crate::git_domain::CommitBody;
+use crate::git::CommitBody;
 
 pub fn write_commit_to_file(commit_body: CommitBody) -> Result<(), Box<dyn Error>> {
 	std::fs::write(conf::editmsg(), commit_body.formatted_body())?;

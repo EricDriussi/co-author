@@ -2,7 +2,7 @@ use std::{error::Error, fs::OpenOptions, io::Write, path::PathBuf};
 
 use git2::{Repository, Signature};
 
-use crate::git_domain::{CommitBody, GitWrapper};
+use crate::git::{CommitBody, GitWrapper};
 
 pub mod editmsg_handler;
 

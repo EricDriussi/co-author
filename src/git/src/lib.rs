@@ -4,8 +4,7 @@ use libgit_wrapper::LibGitWrapper;
 use service::GitService;
 
 mod editor;
-pub mod git_domain;
-mod git_err;
+pub mod git;
 mod hook_runner;
 pub mod libgit_wrapper;
 pub mod service;
