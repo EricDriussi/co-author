@@ -1,5 +1,7 @@
 use std::io::{BufRead, Write};
 
+use rustyline::error::ReadlineError;
+
 mod reader;
 
 pub struct Cli<R: BufRead, W: Write> {
@@ -10,6 +12,27 @@ pub struct Cli<R: BufRead, W: Write> {
 impl<R: BufRead, W: Write> Cli<R, W> {
 	pub fn new(input: R, output: W) -> Self {
 		Cli { input, output }
+	}
+
+	pub fn ask_for_commit_message2(prev_commit_msg: String) -> Result<String, &'static str> {
+		let mut rl = rustyline::DefaultEditor::new().unwrap();
+		let input = rl.readline_with_initial("Enter your commit message:\n", (prev_commit_msg.as_str(), ""));
+		return Cli::<R, W>::check_for_empty_line(input);
+	}
+
+	fn check_for_empty_line(input: Result<String, ReadlineError>) -> Result<String, &'static str> {
+		match input {
+			Ok(commit_message) => {
+				if commit_message.trim().is_empty() {
+					Err("Commit message cannot be empty.")
+				} else {
+					Ok(commit_message)
+				}
+			}
+			Err(ReadlineError::Interrupted) => Err("CTRL C"),
+			Err(ReadlineError::Eof) => Err("CTRL D"),
+			Err(_) => Err("GENERIC ERROR"),
+		}
 	}
 
 	pub fn ask_for_commit_message(&mut self) -> Result<String, &'static str> {

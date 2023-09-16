@@ -9,6 +9,7 @@ use cli::Cli;
 
 pub mod args;
 pub mod cli;
+mod new_cli;
 
 pub fn get_commit_message<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>) -> Result<String, Box<dyn Error>> {
 	if let Some(message) = &args.message {
@@ -40,6 +41,7 @@ pub fn get_authors_signatures<R: BufRead, W: Write>(
 	return Ok(authors_service.signatures_of(aliases));
 }
 
+// TODO: Could this be handled as a prompt by rustyline?
 fn print(authors: Vec<Author>) {
 	println!();
 	for author in &authors {
