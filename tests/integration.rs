@@ -6,6 +6,7 @@ use co_author::{args::Args, cli::Cli, handle_authors, handle_commit_msg};
 #[test]
 fn commit_message_is_gathered_from_arg() {
 	let mut cli = MockCli::with_commit_msg("IRRELEVANT");
+	let prev = "IRRELEVANT".to_string();
 
 	let message_by_param = "a commit message";
 	let args = Args {
@@ -17,7 +18,7 @@ fn commit_message_is_gathered_from_arg() {
 		all: false,
 	};
 
-	let option = handle_commit_msg(&args, &mut cli);
+	let option = handle_commit_msg(&args, &mut cli, prev);
 	assert!(option.is_some());
 
 	let result = option.unwrap();
@@ -27,6 +28,7 @@ fn commit_message_is_gathered_from_arg() {
 
 #[test]
 fn commit_message_is_gathered_from_cli_prompt() {
+	let prev = "IRRELEVANT".to_string();
 	let args = Args {
 		message: None,
 		editor: false,
@@ -39,7 +41,7 @@ fn commit_message_is_gathered_from_cli_prompt() {
 	let message_by_prompt = "a commit message";
 	let mut cli = MockCli::with_commit_msg(message_by_prompt);
 
-	let option = handle_commit_msg(&args, &mut cli);
+	let option = handle_commit_msg(&args, &mut cli, prev);
 	assert!(option.is_some());
 
 	let result = option.unwrap();
@@ -48,8 +50,33 @@ fn commit_message_is_gathered_from_cli_prompt() {
 }
 
 #[test]
+fn commit_message_is_gathered_from_pre_populated_cli_prompt() {
+	let prev = "last commit message".to_string();
+	let args = Args {
+		message: None,
+		editor: false,
+		pre_populate: true,
+		file: None,
+		list: None,
+		all: false,
+	};
+
+	let message_by_prompt = "a new commit message";
+	let mut cli = MockCli::with_commit_msg(message_by_prompt);
+
+	let option = handle_commit_msg(&args, &mut cli, prev.clone());
+	assert!(option.is_some());
+
+	let result = option.unwrap();
+	assert!(result.is_ok());
+	let full_message = format!("{}{}", prev, message_by_prompt);
+	assert_eq!(result.unwrap().to_string(), full_message);
+}
+
+#[test]
 fn commit_message_is_not_gathered_under_editor_flag() {
 	let mut cli = MockCli::with_commit_msg("IRRELEVANT");
+	let prev = "IRRELEVANT".to_string();
 	let args = Args {
 		message: None,
 		editor: true,
@@ -59,7 +86,7 @@ fn commit_message_is_not_gathered_under_editor_flag() {
 		all: false,
 	};
 
-	let option = handle_commit_msg(&args, &mut cli);
+	let option = handle_commit_msg(&args, &mut cli, prev);
 	assert!(option.is_none());
 }
 
@@ -123,8 +150,8 @@ impl Cli for MockCli {
 		Ok(self.commit_msg.clone())
 	}
 
-	fn ask_for_commit_message_with_prev(&mut self, _: String) -> Result<String, Box<dyn Error>> {
-		Ok(self.commit_msg.clone())
+	fn ask_for_commit_message_with_prev(&mut self, prev: String) -> Result<String, Box<dyn Error>> {
+		Ok(format!("{}{}", prev, self.commit_msg.clone()))
 	}
 
 	fn ask_for_aliases(&mut self, _: Vec<Author>) -> Result<Vec<String>, Box<dyn Error>> {

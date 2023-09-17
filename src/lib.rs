@@ -24,12 +24,15 @@ pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Bo
 	return Ok(authors_service.signatures_of(aliases));
 }
 
-pub fn handle_commit_msg(args: &Args, cli: &mut impl Cli) -> Option<Result<String, Box<dyn Error>>> {
+pub fn handle_commit_msg(args: &Args, cli: &mut impl Cli, prev: String) -> Option<Result<String, Box<dyn Error>>> {
 	match args.editor {
 		true => None,
 		false => match &args.message {
 			Some(msg) => Some(Ok(msg.to_string())),
-			None => Some(cli.ask_for_commit_message()),
+			None => match &args.pre_populate {
+				false => Some(cli.ask_for_commit_message()),
+				true => Some(cli.ask_for_commit_message_with_prev(prev)),
+			},
 		},
 	}
 }
