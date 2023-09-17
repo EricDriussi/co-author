@@ -19,6 +19,10 @@ impl<T: GitWrapper> GitService<T> {
 		}
 	}
 
+	pub fn last_commit_message(&self) -> String {
+		self.git_wrapper.prev_commit_msg().unwrap_or_default()
+	}
+
 	pub fn commit(&self, message: &str, authors: Vec<String>) -> Result<(), Box<dyn Error>> {
 		self.hook_runner.pre_commit()?;
 		self.git_wrapper.write_to_editmsg(CommitBody::new(message, authors))?;
