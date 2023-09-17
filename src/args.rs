@@ -4,7 +4,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
-	/// File containing a csv list of authors (alias,name,email)
+	/// File containing a csv formatted list of authors (alias,name,email)
 	#[arg(short, long)]
 	pub file: Option<String>,
 
@@ -24,7 +24,7 @@ pub struct Args {
 	#[arg(short, long, default_value = "false")]
 	pub editor: bool,
 
-	/// Pre-populate prompt/editor with last commit message
+	/// Pre-populate prompt/editor with (first line of) last commit message
 	#[arg(short, long, default_value = "false")]
 	pub pre_populate: bool,
 }
