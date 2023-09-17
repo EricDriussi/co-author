@@ -17,10 +17,14 @@ pub struct Args {
 	pub all: bool,
 
 	/// Specify commit message
-	#[arg(short, long, conflicts_with("editor"))]
+	#[arg(short, long, conflicts_with("editor"), conflicts_with("pre_populate"))]
 	pub message: Option<String>,
 
 	/// Open default editor for commit message
 	#[arg(short, long, default_value = "false")]
 	pub editor: bool,
+
+	/// Pre-populate prompt/editor with last commit message
+	#[arg(short, long, default_value = "false")]
+	pub pre_populate: bool,
 }

@@ -11,6 +11,7 @@ fn commit_message_is_gathered_from_arg() {
 	let args = Args {
 		message: Some(message_by_param.to_string()),
 		editor: false,
+		pre_populate: false,
 		file: None,
 		list: None,
 		all: false,
@@ -29,6 +30,7 @@ fn commit_message_is_gathered_from_cli_prompt() {
 	let args = Args {
 		message: None,
 		editor: false,
+		pre_populate: false,
 		file: None,
 		list: None,
 		all: false,
@@ -51,6 +53,7 @@ fn commit_message_is_not_gathered_under_editor_flag() {
 	let args = Args {
 		message: None,
 		editor: true,
+		pre_populate: false,
 		file: None,
 		list: None,
 		all: false,
@@ -66,6 +69,7 @@ fn authors_signatures_are_gathered_from_list() {
 	let args = Args {
 		message: None,
 		editor: false,
+		pre_populate: false,
 		file: None,
 		list: Some("a,b,cd".to_string()),
 		all: false,
@@ -89,6 +93,7 @@ fn authors_signatures_are_gathered_from_cli_prompt() {
 	let args = Args {
 		message: None,
 		editor: false,
+		pre_populate: false,
 		file: None,
 		list: None,
 		all: false,
