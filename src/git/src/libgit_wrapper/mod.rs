@@ -37,6 +37,16 @@ impl GitWrapper for LibGitWrapper {
 		file_to_append.write_all(status.as_bytes())?;
 		Ok(())
 	}
+
+	fn prev_commit_msg(&self) -> Result<String, Box<dyn Error>> {
+		let head_ref = self.repo.as_ref().unwrap().head()?;
+		let last_commit = head_ref.peel_to_commit()?;
+
+		let commit_message = last_commit.message().unwrap_or_default();
+		let first_line = commit_message.lines().next().unwrap_or_default();
+
+		Ok(first_line.to_string())
+	}
 }
 
 impl LibGitWrapper {

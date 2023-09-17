@@ -77,7 +77,7 @@ fn test_prepares_editmsg_file() {
 	let mut index = git_repo.index().unwrap();
 	let id = index.write_tree().unwrap();
 	let tree = git_repo.find_tree(id).unwrap();
-	add_commit(&git_repo, tree.clone());
+	add_commit(&git_repo, tree.clone(), "IRRELEVANT");
 
 	// add bar
 	create_and_add_file_to_git_tree(&git_repo, "bar");
@@ -87,7 +87,7 @@ fn test_prepares_editmsg_file() {
 	// add baz but keep untracked
 	std::fs::write(&root.join("baz"), "text").unwrap();
 
-	add_commit(&git_repo, tree);
+	add_commit(&git_repo, tree, "IRRELEVANT");
 
 	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
 	assert!(repo.is_ok());
@@ -117,6 +117,27 @@ fn test_prepares_editmsg_file() {
 	);
 }
 
+#[test]
+#[serial]
+fn should_only_return_the_first_line_from_the_last_commit() {
+	let git_repo = init_repo(REPO_PATH);
+	create_and_add_file_to_git_tree(&git_repo, "foo");
+
+	let mut index = git_repo.index().unwrap();
+	let id = index.write_tree().unwrap();
+	let tree = git_repo.find_tree(id).unwrap();
+	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
+	assert!(repo.is_ok());
+
+	let first_line = "FIRST LINE".to_string();
+	let msg = format!("{}\nSECOND_LINE", first_line);
+	add_commit(&git_repo, tree, msg.as_str());
+
+	let result = repo.unwrap().prev_commit_msg();
+
+	assert_eq!(result.unwrap(), first_line);
+}
+
 fn init_repo(path: &str) -> Repository {
 	let dir = PathBuf::from(path);
 	fs::remove_dir_all(&dir).ok();
@@ -132,10 +153,10 @@ fn init_repo(path: &str) -> Repository {
 	return repo;
 }
 
-fn add_commit(repo: &Repository, tree: git2::Tree<'_>) {
+fn add_commit(repo: &Repository, tree: git2::Tree<'_>, msg: &str) {
 	let sig = repo.signature().unwrap();
 	let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
-	repo.commit(Some("HEAD"), &sig, &sig, "initial commit", &tree, &[&head_commit])
+	repo.commit(Some("HEAD"), &sig, &sig, msg, &tree, &[&head_commit])
 		.unwrap();
 }
 

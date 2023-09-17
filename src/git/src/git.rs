@@ -28,4 +28,5 @@ pub trait GitWrapper {
 	fn commit(&self) -> Result<(), Box<dyn Error>>;
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>>;
 	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), Box<dyn Error>>;
+	fn prev_commit_msg(&self) -> Result<String, Box<dyn Error>>;
 }
