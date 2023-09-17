@@ -1,4 +1,4 @@
-use co_author::{args::Args, get_authors_signatures, get_commit_message, new_cli::CliNEW};
+use co_author::{args::Args, cli::Cli, get_authors_signatures, get_commit_message};
 
 #[test]
 fn commit_message_is_gathered_from_arg() {
@@ -92,7 +92,7 @@ pub struct MockCli {
 	aliases: Vec<String>,
 }
 
-impl CliNEW for MockCli {
+impl Cli for MockCli {
 	fn ask_for_commit_message(&mut self) -> Result<String, &'static str> {
 		Ok(self.commit_msg.clone())
 	}

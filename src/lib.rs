@@ -4,9 +4,9 @@ use args::Args;
 use authors::author::Author;
 
 pub mod args;
-pub mod new_cli;
+pub mod cli;
 
-pub fn get_commit_message(args: &Args, mut cli: impl new_cli::CliNEW) -> Result<String, Box<dyn Error>> {
+pub fn get_commit_message(args: &Args, mut cli: impl cli::Cli) -> Result<String, Box<dyn Error>> {
 	if let Some(message) = &args.message {
 		return Ok(message.to_string());
 	}
@@ -14,7 +14,7 @@ pub fn get_commit_message(args: &Args, mut cli: impl new_cli::CliNEW) -> Result<
 	Ok(commit_body)
 }
 
-pub fn get_authors_signatures(args: &Args, mut cli: impl new_cli::CliNEW) -> Result<Vec<String>, Box<dyn Error>> {
+pub fn get_authors_signatures(args: &Args, mut cli: impl cli::Cli) -> Result<Vec<String>, Box<dyn Error>> {
 	let authors_service = match &args.file {
 		Some(file) => authors::fs_setup_from_file(file.to_string())?,
 		None => authors::fs_default_setup(conf::authors_file())?,

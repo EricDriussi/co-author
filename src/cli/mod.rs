@@ -4,12 +4,12 @@ pub struct FancyCli {
 	reader: DefaultEditor,
 }
 
-pub trait CliNEW {
+pub trait Cli {
 	fn ask_for_commit_message(&mut self) -> Result<String, &'static str>;
 	fn ask_for_aliases(&mut self) -> Result<Vec<String>, &'static str>;
 }
 
-impl CliNEW for FancyCli {
+impl Cli for FancyCli {
 	fn ask_for_commit_message(&mut self) -> Result<String, &'static str> {
 		match self.reader.readline("Enter your commit message:\n") {
 			Ok(commit_message) => return FancyCli::process_commit_msg(commit_message),

@@ -1,7 +1,7 @@
 use std::{env, error::Error, path::PathBuf, process};
 
 use clap::Parser;
-use co_author::{args::Args, get_authors_signatures, get_commit_message, new_cli::FancyCli};
+use co_author::{args::Args, cli::FancyCli, get_authors_signatures, get_commit_message};
 
 // TODO: option to pre-populate with last commit message (--pre-populate), for both prompt(?) and default buffer opening
 // TODO: option to sort authors by name when adding to commit message
