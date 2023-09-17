@@ -4,7 +4,6 @@ use args::Args;
 use authors::author::Author;
 
 pub mod args;
-pub mod cli;
 pub mod new_cli;
 
 pub fn get_commit_message(args: &Args, mut cli: impl new_cli::CliNEW) -> Result<String, Box<dyn Error>> {
