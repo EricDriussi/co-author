@@ -1,17 +1,13 @@
-use std::{
-	error::Error,
-	io::{BufRead, Write},
-};
+use std::error::Error;
 
 use args::Args;
 use authors::author::Author;
-use cli::Cli;
 
 pub mod args;
 pub mod cli;
-mod new_cli;
+pub mod new_cli;
 
-pub fn get_commit_message<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>) -> Result<String, Box<dyn Error>> {
+pub fn get_commit_message(args: &Args, mut cli: impl new_cli::CliNEW) -> Result<String, Box<dyn Error>> {
 	if let Some(message) = &args.message {
 		return Ok(message.to_string());
 	}
@@ -19,10 +15,7 @@ pub fn get_commit_message<R: BufRead, W: Write>(args: &Args, mut cli: Cli<R, W>)
 	Ok(commit_body)
 }
 
-pub fn get_authors_signatures<R: BufRead, W: Write>(
-	args: &Args,
-	mut cli: Cli<R, W>,
-) -> Result<Vec<String>, Box<dyn Error>> {
+pub fn get_authors_signatures(args: &Args, mut cli: impl new_cli::CliNEW) -> Result<Vec<String>, Box<dyn Error>> {
 	let authors_service = match &args.file {
 		Some(file) => authors::fs_setup_from_file(file.to_string())?,
 		None => authors::fs_default_setup(conf::authors_file())?,
@@ -37,7 +30,7 @@ pub fn get_authors_signatures<R: BufRead, W: Write>(
 	}
 
 	print(authors_service.all_available());
-	let aliases = cli.ask_for_aliases();
+	let aliases = cli.ask_for_aliases()?;
 	return Ok(authors_service.signatures_of(aliases));
 }
 
