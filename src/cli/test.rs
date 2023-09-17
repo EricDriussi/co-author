@@ -4,14 +4,19 @@ use super::*;
 fn should_error_when_given_an_empty_commit_message() {
 	let msg = "".to_string();
 	let result = FancyCli::process_commit_msg(msg);
-	assert_eq!(result, Err("Commit message cannot be empty."));
+	assert!(result.is_err());
+	assert_eq!(
+		result.unwrap_err().to_string(),
+		"CLI failed: Commit message cannot be empty."
+	);
 }
 
 #[test]
 fn should_return_the_submitted_commit_message_if_not_empty() {
 	let msg = "test commit message".to_string();
 	let result = FancyCli::process_commit_msg(msg.clone());
-	assert_eq!(result, Ok(msg));
+	assert!(result.is_ok());
+	assert_eq!(result.unwrap(), msg);
 }
 
 #[test]
@@ -19,7 +24,8 @@ fn should_trim_the_commit_message() {
 	let trimmed_msg = "test commit message".to_string();
 	let msg = format!("{}  ", trimmed_msg.clone());
 	let result = FancyCli::process_commit_msg(msg);
-	assert_eq!(result, Ok(trimmed_msg));
+	assert!(result.is_ok());
+	assert_eq!(result.unwrap(), trimmed_msg);
 }
 
 #[test]

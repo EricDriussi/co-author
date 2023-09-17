@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use co_author::{args::Args, cli::Cli, get_authors_signatures, get_commit_message};
 
 #[test]
@@ -93,11 +95,11 @@ pub struct MockCli {
 }
 
 impl Cli for MockCli {
-	fn ask_for_commit_message(&mut self) -> Result<String, &'static str> {
+	fn ask_for_commit_message(&mut self) -> Result<String, Box<dyn Error>> {
 		Ok(self.commit_msg.clone())
 	}
 
-	fn ask_for_aliases(&mut self) -> Result<Vec<String>, &'static str> {
+	fn ask_for_aliases(&mut self) -> Result<Vec<String>, Box<dyn Error>> {
 		Ok(self.aliases.clone())
 	}
 }
