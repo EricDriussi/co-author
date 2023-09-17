@@ -1,11 +1,11 @@
 use std::error::Error;
 
 use authors::author::Author;
-use co_author::{args::Args, cli::Cli, get_authors_signatures, get_commit_message};
+use co_author::{args::Args, cli::Cli, handle_authors, handle_commit_msg};
 
 #[test]
 fn commit_message_is_gathered_from_arg() {
-	let cli = MockCli::with_commit_msg("IRRELEVANT");
+	let mut cli = MockCli::with_commit_msg("IRRELEVANT");
 
 	let message_by_param = "a commit message";
 	let args = Args {
@@ -16,10 +16,12 @@ fn commit_message_is_gathered_from_arg() {
 		all: false,
 	};
 
-	let result = get_commit_message(&args, cli);
+	let option = handle_commit_msg(&args, &mut cli);
+	assert!(option.is_some());
 
+	let result = option.unwrap();
 	assert!(result.is_ok());
-	assert_eq!(result.unwrap(), message_by_param.to_string());
+	assert_eq!(result.unwrap().to_string(), message_by_param.to_string());
 }
 
 #[test]
@@ -33,18 +35,34 @@ fn commit_message_is_gathered_from_cli_prompt() {
 	};
 
 	let message_by_prompt = "a commit message";
-	let cli = MockCli::with_commit_msg(message_by_prompt);
+	let mut cli = MockCli::with_commit_msg(message_by_prompt);
 
-	let result = get_commit_message(&args, cli);
+	let option = handle_commit_msg(&args, &mut cli);
+	assert!(option.is_some());
 
+	let result = option.unwrap();
 	assert!(result.is_ok());
-	assert_eq!(result.unwrap(), message_by_prompt.to_string());
+	assert_eq!(result.unwrap().to_string(), message_by_prompt.to_string());
+}
+
+#[test]
+fn commit_message_is_not_gathered_under_editor_flag() {
+	let mut cli = MockCli::with_commit_msg("IRRELEVANT");
+	let args = Args {
+		message: None,
+		editor: true,
+		file: None,
+		list: None,
+		all: false,
+	};
+
+	let option = handle_commit_msg(&args, &mut cli);
+	assert!(option.is_none());
 }
 
 #[test]
 fn authors_signatures_are_gathered_from_list() {
-	let cli = MockCli::with_aliases("IRRELEVANT");
-
+	let mut cli = MockCli::with_aliases("IRRELEVANT");
 	let args = Args {
 		message: None,
 		editor: false,
@@ -53,7 +71,7 @@ fn authors_signatures_are_gathered_from_list() {
 		all: false,
 	};
 
-	let signatures = get_authors_signatures(&args, cli);
+	let signatures = handle_authors(&args, &mut cli);
 
 	assert!(signatures.is_ok());
 	assert_eq!(
@@ -76,8 +94,8 @@ fn authors_signatures_are_gathered_from_cli_prompt() {
 		all: false,
 	};
 
-	let cli = MockCli::with_aliases("a b cd");
-	let signatures = get_authors_signatures(&args, cli);
+	let mut cli = MockCli::with_aliases("a b cd");
+	let signatures = handle_authors(&args, &mut cli);
 
 	assert!(signatures.is_ok());
 	assert_eq!(

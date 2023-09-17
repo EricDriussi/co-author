@@ -1,19 +1,12 @@
 use std::error::Error;
 
 use args::Args;
+use cli::Cli;
 
 pub mod args;
 pub mod cli;
 
-pub fn get_commit_message(args: &Args, mut cli: impl cli::Cli) -> Result<String, Box<dyn Error>> {
-	if let Some(message) = &args.message {
-		return Ok(message.to_string());
-	}
-	let commit_body = cli.ask_for_commit_message()?;
-	Ok(commit_body)
-}
-
-pub fn get_authors_signatures(args: &Args, mut cli: impl cli::Cli) -> Result<Vec<String>, Box<dyn Error>> {
+pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Box<dyn Error>> {
 	let authors_service = match &args.file {
 		Some(file) => authors::fs_setup_from_file(file.to_string())?,
 		None => authors::fs_default_setup(conf::authors_file())?,
@@ -29,4 +22,14 @@ pub fn get_authors_signatures(args: &Args, mut cli: impl cli::Cli) -> Result<Vec
 
 	let aliases = cli.ask_for_aliases(authors_service.all_available())?;
 	return Ok(authors_service.signatures_of(aliases));
+}
+
+pub fn handle_commit_msg(args: &Args, cli: &mut impl Cli) -> Option<Result<String, Box<dyn Error>>> {
+	match args.editor {
+		true => None,
+		false => match &args.message {
+			Some(msg) => Some(Ok(msg.to_string())),
+			None => Some(cli.ask_for_commit_message()),
+		},
+	}
 }

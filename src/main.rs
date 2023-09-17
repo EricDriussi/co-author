@@ -1,7 +1,7 @@
 use std::{env, error::Error, path::PathBuf, process};
 
 use clap::Parser;
-use co_author::{args::Args, cli::FancyCli, get_authors_signatures, get_commit_message};
+use co_author::{args::Args, cli::FancyCli, handle_authors, handle_commit_msg};
 
 // TODO: option to pre-populate with last commit message (--pre-populate), for both prompt(?) and default buffer opening
 // TODO: option to sort authors by name when adding to commit message
@@ -22,19 +22,15 @@ fn main() {
 
 fn run(args: Args) -> Result<(), Box<dyn Error>> {
 	set_cwd_to_git_root()?;
-	let git_service = git::libgit_setup()?;
+	let mut cli = FancyCli::new();
 
-	let cli = FancyCli::new();
-	//TODO: Single get_commit_data() and pass cli and git_service?
-	let authors = get_authors_signatures(&args, cli)?;
+	let authors = handle_authors(&args, &mut cli)?;
+	let msg = handle_commit_msg(&args, &mut cli);
 
-	if args.editor {
-		return git_service.commit_with_editor(authors);
-	}
-
-	let cli = FancyCli::new();
-	let commit_body = get_commit_message(&args, cli)?;
-	return git_service.commit(commit_body.as_str(), authors);
+	return match msg {
+		Some(msg) => git::libgit_setup()?.commit(msg?.as_str(), authors),
+		None => git::libgit_setup()?.commit_with_editor(authors),
+	};
 }
 
 fn set_cwd_to_git_root() -> Result<(), Box<dyn Error>> {
