@@ -1,5 +1,6 @@
 use std::error::Error;
 
+use authors::author::Author;
 use co_author::{args::Args, cli::Cli, get_authors_signatures, get_commit_message};
 
 #[test]
@@ -99,7 +100,7 @@ impl Cli for MockCli {
 		Ok(self.commit_msg.clone())
 	}
 
-	fn ask_for_aliases(&mut self) -> Result<Vec<String>, Box<dyn Error>> {
+	fn ask_for_aliases(&mut self, _: Vec<Author>) -> Result<Vec<String>, Box<dyn Error>> {
 		Ok(self.aliases.clone())
 	}
 }

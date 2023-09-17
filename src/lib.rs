@@ -1,7 +1,6 @@
 use std::error::Error;
 
 use args::Args;
-use authors::author::Author;
 
 pub mod args;
 pub mod cli;
@@ -28,16 +27,6 @@ pub fn get_authors_signatures(args: &Args, mut cli: impl cli::Cli) -> Result<Vec
 		return Ok(authors_service.signatures_of(given_aliases));
 	}
 
-	print(authors_service.all_available());
-	let aliases = cli.ask_for_aliases()?;
+	let aliases = cli.ask_for_aliases(authors_service.all_available())?;
 	return Ok(authors_service.signatures_of(aliases));
-}
-
-// TODO: Could this be handled as a prompt by rustyline?
-fn print(authors: Vec<Author>) {
-	println!();
-	for author in &authors {
-		println!("{}", author);
-	}
-	println!();
 }

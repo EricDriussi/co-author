@@ -1,5 +1,6 @@
 use std::{error::Error, process};
 
+use authors::author::Author;
 use rustyline::{error::ReadlineError::Interrupted, DefaultEditor};
 
 use self::cli_err::CliError;
@@ -11,7 +12,7 @@ pub struct FancyCli {
 
 pub trait Cli {
 	fn ask_for_commit_message(&mut self) -> Result<String, Box<dyn Error>>;
-	fn ask_for_aliases(&mut self) -> Result<Vec<String>, Box<dyn Error>>;
+	fn ask_for_aliases(&mut self, authors: Vec<Author>) -> Result<Vec<String>, Box<dyn Error>>;
 }
 
 impl Cli for FancyCli {
@@ -26,8 +27,20 @@ impl Cli for FancyCli {
 		};
 	}
 
-	fn ask_for_aliases(&mut self) -> Result<Vec<String>, Box<dyn Error>> {
-		match self.reader.readline("Enter co-authors aliases separated by spaces:") {
+	fn ask_for_aliases(&mut self, authors: Vec<Author>) -> Result<Vec<String>, Box<dyn Error>> {
+		let printable_authors = authors
+			.iter()
+			.map(|a| a.to_string())
+			.collect::<Vec<String>>()
+			.join("\n");
+
+		match self.reader.readline(
+			format!(
+				"\n{}\n\nEnter co-authors aliases separated by spaces:\n",
+				printable_authors
+			)
+			.as_str(),
+		) {
 			Ok(aliases) => return Ok(FancyCli::process_aliases(aliases)),
 			Err(Interrupted) => {
 				eprintln!("^C");
