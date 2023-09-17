@@ -13,6 +13,7 @@ pub struct FancyCli {
 pub trait Cli {
 	fn ask_for_commit_message(&mut self) -> Result<String, Box<dyn Error>>;
 	fn ask_for_aliases(&mut self, authors: Vec<Author>) -> Result<Vec<String>, Box<dyn Error>>;
+	fn ask_for_commit_message_with_prev(&mut self, prev_commit_msg: String) -> Result<String, Box<dyn Error>>;
 }
 
 impl Cli for FancyCli {
@@ -25,6 +26,16 @@ impl Cli for FancyCli {
 			}
 			Err(_) => return Err(CliError::new("Unexpected error")),
 		};
+	}
+
+	fn ask_for_commit_message_with_prev(&mut self, prev_commit_msg: String) -> Result<String, Box<dyn Error>> {
+		match self
+			.reader
+			.readline_with_initial("Enter your commit message:\n", (prev_commit_msg.as_str(), ""))
+		{
+			Ok(commit_message) => return FancyCli::process_commit_msg(commit_message),
+			Err(_) => return Err(CliError::new("Unexpected error")),
+		}
 	}
 
 	fn ask_for_aliases(&mut self, authors: Vec<Author>) -> Result<Vec<String>, Box<dyn Error>> {
@@ -55,16 +66,6 @@ impl FancyCli {
 	pub fn new() -> Self {
 		Self {
 			reader: DefaultEditor::new().unwrap(),
-		}
-	}
-
-	pub fn ask_for_commit_message_with_prev(&mut self, prev_commit_msg: String) -> Result<String, Box<dyn Error>> {
-		match self
-			.reader
-			.readline_with_initial("Enter your commit message:\n", (prev_commit_msg.as_str(), ""))
-		{
-			Ok(commit_message) => return FancyCli::process_commit_msg(commit_message),
-			Err(_) => return Err(CliError::new("Unexpected error")),
 		}
 	}
 

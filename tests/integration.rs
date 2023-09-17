@@ -118,6 +118,10 @@ impl Cli for MockCli {
 		Ok(self.commit_msg.clone())
 	}
 
+	fn ask_for_commit_message_with_prev(&mut self, _: String) -> Result<String, Box<dyn Error>> {
+		Ok(self.commit_msg.clone())
+	}
+
 	fn ask_for_aliases(&mut self, _: Vec<Author>) -> Result<Vec<String>, Box<dyn Error>> {
 		Ok(self.aliases.clone())
 	}
