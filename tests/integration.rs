@@ -18,12 +18,10 @@ fn commit_message_is_gathered_from_arg() {
 		all: false,
 	};
 
-	let option = handle_commit_msg(&args, &mut cli, prev);
-	assert!(option.is_some());
+	let msg = handle_commit_msg(&args, &mut cli, prev);
 
-	let result = option.unwrap();
-	assert!(result.is_ok());
-	assert_eq!(result.unwrap().to_string(), message_by_param.to_string());
+	assert!(msg.is_ok());
+	assert_eq!(msg.unwrap().to_string(), message_by_param.to_string());
 }
 
 #[test]
@@ -41,12 +39,10 @@ fn commit_message_is_gathered_from_cli_prompt() {
 	let message_by_prompt = "a commit message";
 	let mut cli = MockCli::with_commit_msg(message_by_prompt);
 
-	let option = handle_commit_msg(&args, &mut cli, prev);
-	assert!(option.is_some());
+	let msg = handle_commit_msg(&args, &mut cli, prev);
 
-	let result = option.unwrap();
-	assert!(result.is_ok());
-	assert_eq!(result.unwrap().to_string(), message_by_prompt.to_string());
+	assert!(msg.is_ok());
+	assert_eq!(msg.unwrap().to_string(), message_by_prompt.to_string());
 }
 
 #[test]
@@ -64,30 +60,11 @@ fn commit_message_is_gathered_from_pre_populated_cli_prompt() {
 	let message_by_prompt = "a new commit message";
 	let mut cli = MockCli::with_commit_msg(message_by_prompt);
 
-	let option = handle_commit_msg(&args, &mut cli, prev.clone());
-	assert!(option.is_some());
+	let msg = handle_commit_msg(&args, &mut cli, prev.clone());
 
-	let result = option.unwrap();
-	assert!(result.is_ok());
+	assert!(msg.is_ok());
 	let full_message = format!("{}{}", prev, message_by_prompt);
-	assert_eq!(result.unwrap().to_string(), full_message);
-}
-
-#[test]
-fn commit_message_is_not_gathered_under_editor_flag() {
-	let mut cli = MockCli::with_commit_msg("IRRELEVANT");
-	let prev = "IRRELEVANT".to_string();
-	let args = Args {
-		message: None,
-		editor: true,
-		pre_populate: false,
-		file: None,
-		list: None,
-		all: false,
-	};
-
-	let option = handle_commit_msg(&args, &mut cli, prev);
-	assert!(option.is_none());
+	assert_eq!(msg.unwrap().to_string(), full_message);
 }
 
 #[test]
