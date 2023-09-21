@@ -68,6 +68,23 @@ impl FSRepo {
 			None
 		}
 	}
+
+	fn add_matching_signature(alias: String, valid_lines: &Vec<String>, matching_authors: &mut Vec<Author>) {
+		for line in valid_lines.clone() {
+			if Self::filter_by_alias(&line, &[alias.clone()]) {
+				if let Some(author) = Self::parse_author(&line) {
+					matching_authors.push(author);
+				}
+			}
+		}
+	}
+
+	fn extract_from_lines(lines: Lines<BufReader<File>>, aliases: Vec<String>, matching_authors: &mut Vec<Author>) {
+		let valid_lines = lines.filter_map(std::io::Result::ok).collect::<Vec<_>>();
+		for alias in aliases {
+			Self::add_matching_signature(alias, &valid_lines, matching_authors);
+		}
+	}
 }
 
 impl AuthorsRepo for FSRepo {
@@ -75,16 +92,7 @@ impl AuthorsRepo for FSRepo {
 		let mut matching_authors: Vec<Author> = Vec::new();
 
 		if let Some(lines) = self.read_lines() {
-			let valid_lines = lines.filter_map(std::io::Result::ok).collect::<Vec<_>>();
-			for alias in aliases {
-				for line in valid_lines.clone() {
-					if Self::filter_by_alias(&line, &[alias.clone()]) {
-						if let Some(author) = Self::parse_author(&line) {
-							matching_authors.push(author);
-						}
-					}
-				}
-			}
+			Self::extract_from_lines(lines, aliases, &mut matching_authors)
 		};
 
 		return matching_authors;

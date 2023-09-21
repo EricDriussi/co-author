@@ -3,7 +3,6 @@ use std::{env, error::Error, path::PathBuf, process};
 use clap::Parser;
 use co_author::{args::Args, cli::FancyCli, handle_authors, handle_commit_msg};
 
-// TODO: option to sort authors by name when adding to commit message
 // TODO: automatically create on the fly aliases for authors
 // TODO: add amend option -> update authors of last commit if no message, update message if no authors, normal amend if no message nor author
 // TODO: use with fzf or add fuzzy finding
