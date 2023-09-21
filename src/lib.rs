@@ -13,15 +13,24 @@ pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Bo
 	};
 
 	if args.all {
-		return Ok(authors_service.all_signatures());
+		return match args.sort {
+			true => Ok(sort(authors_service.all_signatures())),
+			false => Ok(authors_service.all_signatures()),
+		};
 	}
 	if let Some(list) = &args.list {
 		let given_aliases = list.split(',').map(|alias| alias.to_string()).collect();
-		return Ok(authors_service.signatures_of(given_aliases));
+		return match args.sort {
+			true => Ok(sort(authors_service.signatures_of(given_aliases))),
+			false => Ok(authors_service.signatures_of(given_aliases)),
+		};
 	}
 
 	let aliases = cli.ask_for_aliases(authors_service.all_available())?;
-	return Ok(authors_service.signatures_of(aliases));
+	return match args.sort {
+		true => Ok(sort(authors_service.signatures_of(aliases))),
+		false => Ok(authors_service.signatures_of(aliases)),
+	};
 }
 
 pub fn handle_commit_msg(args: &Args, cli: &mut impl Cli, prev: String) -> Result<String, Box<dyn Error>> {
@@ -30,6 +39,11 @@ pub fn handle_commit_msg(args: &Args, cli: &mut impl Cli, prev: String) -> Resul
 	}
 	return match args.pre_populate {
 		false => cli.ask_for_commit_message(),
-		true => cli.ask_for_commit_message_with_prev(prev),
+		true => cli.ask_for_commit_message_with_pre_populated(prev),
 	};
+}
+
+pub fn sort<String: Ord>(mut vector: Vec<String>) -> Vec<String> {
+	vector.sort();
+	vector
 }

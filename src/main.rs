@@ -25,6 +25,7 @@ fn run(args: Args) -> Result<(), Box<dyn Error>> {
 	let mut cli = FancyCli::new();
 	let authors = handle_authors(&args, &mut cli)?;
 
+	// FIXME. Find a way to pass this to handle_commit_msg (clone/copy)
 	let git_service = git::libgit_setup()?;
 	let prev = git_service.last_commit_message();
 

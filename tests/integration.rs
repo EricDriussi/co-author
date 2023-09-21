@@ -16,6 +16,7 @@ fn commit_message_is_gathered_from_arg() {
 		file: None,
 		list: None,
 		all: false,
+		sort: false,
 	};
 
 	let msg = handle_commit_msg(&args, &mut cli, prev);
@@ -34,6 +35,7 @@ fn commit_message_is_gathered_from_cli_prompt() {
 		file: None,
 		list: None,
 		all: false,
+		sort: false,
 	};
 
 	let message_by_prompt = "a commit message";
@@ -55,6 +57,7 @@ fn commit_message_is_gathered_from_pre_populated_cli_prompt() {
 		file: None,
 		list: None,
 		all: false,
+		sort: false,
 	};
 
 	let message_by_prompt = "a new commit message";
@@ -77,6 +80,7 @@ fn authors_signatures_are_gathered_from_list() {
 		file: None,
 		list: Some("a,b,cd".to_string()),
 		all: false,
+		sort: false,
 	};
 
 	let signatures = handle_authors(&args, &mut cli);
@@ -101,6 +105,7 @@ fn authors_signatures_are_gathered_from_cli_prompt() {
 		file: None,
 		list: None,
 		all: false,
+		sort: false,
 	};
 
 	let mut cli = MockCli::with_aliases("a b cd");
@@ -127,7 +132,7 @@ impl Cli for MockCli {
 		Ok(self.commit_msg.clone())
 	}
 
-	fn ask_for_commit_message_with_prev(&mut self, prev: String) -> Result<String, Box<dyn Error>> {
+	fn ask_for_commit_message_with_pre_populated(&mut self, prev: String) -> Result<String, Box<dyn Error>> {
 		Ok(format!("{}{}", prev, self.commit_msg.clone()))
 	}
 

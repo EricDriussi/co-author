@@ -13,7 +13,7 @@ pub struct FancyCli {
 pub trait Cli {
 	fn ask_for_commit_message(&mut self) -> Result<String, Box<dyn Error>>;
 	fn ask_for_aliases(&mut self, authors: Vec<Author>) -> Result<Vec<String>, Box<dyn Error>>;
-	fn ask_for_commit_message_with_prev(&mut self, prev_commit_msg: String) -> Result<String, Box<dyn Error>>;
+	fn ask_for_commit_message_with_pre_populated(&mut self, prev_commit_msg: String) -> Result<String, Box<dyn Error>>;
 }
 
 impl Cli for FancyCli {
@@ -28,7 +28,7 @@ impl Cli for FancyCli {
 		};
 	}
 
-	fn ask_for_commit_message_with_prev(&mut self, prev_commit_msg: String) -> Result<String, Box<dyn Error>> {
+	fn ask_for_commit_message_with_pre_populated(&mut self, prev_commit_msg: String) -> Result<String, Box<dyn Error>> {
 		match self
 			.reader
 			.readline_with_initial("Enter your commit message:\n", (prev_commit_msg.as_str(), ""))

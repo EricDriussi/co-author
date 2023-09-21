@@ -27,4 +27,8 @@ pub struct Args {
 	/// Pre-populate prompt/editor with (first line of) last commit message
 	#[arg(short, long, default_value = "false")]
 	pub pre_populate: bool,
+
+	/// Sort authors signatures when adding to commit message
+	#[arg(short, long, default_value = "false")]
+	pub sort: bool,
 }
