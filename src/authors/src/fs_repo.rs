@@ -72,14 +72,22 @@ impl FSRepo {
 
 impl AuthorsRepo for FSRepo {
 	fn find(&self, aliases: Vec<String>) -> Vec<Author> {
-		match self.read_lines() {
-			Some(lines) => lines
-				.filter_map(std::io::Result::ok)
-				.filter(|line| Self::filter_by_alias(line, &aliases))
-				.filter_map(|matching_line| Self::parse_author(matching_line.as_str()))
-				.collect(),
-			None => Vec::new(),
-		}
+		let mut matching_authors: Vec<Author> = Vec::new();
+
+		if let Some(lines) = self.read_lines() {
+			let valid_lines = lines.filter_map(std::io::Result::ok).collect::<Vec<_>>();
+			for alias in aliases {
+				for line in valid_lines.clone() {
+					if Self::filter_by_alias(&line, &[alias.clone()]) {
+						if let Some(author) = Self::parse_author(&line) {
+							matching_authors.push(author);
+						}
+					}
+				}
+			}
+		};
+
+		return matching_authors;
 	}
 
 	fn all(&self) -> Vec<Author> {
