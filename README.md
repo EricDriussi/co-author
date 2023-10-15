@@ -2,6 +2,8 @@
 
 Give credit to your teammates when pairing or mob-programming.
 
+[co-author](https://github.com/EricDriussi/co-author/assets/46979145/0946f729-e970-4e23-afcf-008d4d05e6a8)
+
 ## Use Case
 
 When working within a team, it's useful to know who to ask when struggling with
@@ -99,8 +101,8 @@ Use a pre-defined alias list.
 Something like
 
 ```sh
-alias coa_proj_a=co-author --list a,b,c
-alias coa_proj_x=co-author --list x,y,z
+alias coa_proj_a="co-author --list a,b,c"
+alias coa_proj_x="co-author --list x,y,z"
 ```
 
 Might be useful.
