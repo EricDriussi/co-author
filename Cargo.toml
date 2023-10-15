@@ -2,16 +2,20 @@
 name = "co-author"
 version = "0.1.0"
 edition = "2021"
+license = "AGPL-3.0"
+description = "Co-Author your git commits"
+readme = "README.md"
+repository = "https://github.com/rust-lang/cargo/"
+keywords = ["git", "libgit2", "git2rs"]
+categories = ["command-line-interface", "command-line-utilities", "development-tools"]
 
 [dependencies]
-git = { path = "src/git" }
-authors = { path = "src/authors" }
-conf = { path = "src/conf" }
+git2 = "0.18.0"
 clap = { version = "4.3.19", features = ["derive"] }
 rustyline = "12.0.0"
+colored = "2.0.4"
+config = "0.13.1"
+toml = "0.5"
 
-[workspace]
-members = [
-    "src/git",
-    "src/authors",
-]
+[dev-dependencies]
+serial_test = "2.0"

@@ -5,6 +5,7 @@ use std::{
 	process::{Command, Output, Stdio},
 };
 
+use co_author::conf;
 use git2::Config;
 
 pub fn open() {

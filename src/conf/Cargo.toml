@@ -1,8 +1,0 @@
-[package]
-name = "conf"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-config = "0.13.1"
-toml = "0.5"

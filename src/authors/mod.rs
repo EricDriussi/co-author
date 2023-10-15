@@ -22,3 +22,6 @@ pub fn fs_default_setup(default_authors_file: String) -> Result<AuthorsService<F
 		Err(e) => Err(AuthorError::new(format!("Couldn't load file: {}", e))),
 	};
 }
+
+#[cfg(test)]
+mod test;

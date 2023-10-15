@@ -1,4 +1,4 @@
-use crate::author::{Author, AuthorsRepo};
+use super::author::{Author, AuthorsRepo};
 
 pub struct AuthorsService<T: AuthorsRepo> {
 	repo: T,

@@ -1,4 +1,4 @@
-use authors::{
+use crate::authors::{
 	author::{Author, AuthorsRepo},
 	service::AuthorsService,
 };

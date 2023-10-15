@@ -16,3 +16,6 @@ pub fn libgit_setup() -> Result<GitService<LibGitWrapper>, String> {
 	};
 	return serv;
 }
+
+#[cfg(test)]
+mod test;

@@ -1,12 +1,13 @@
-use git::{
-	git::{CommitBody, GitWrapper},
-	libgit_wrapper::LibGitWrapper,
-};
 use git2::{Repository, RepositoryInitOptions};
 use serial_test::serial;
 use std::{
 	fs::{self, File},
 	path::{Path, PathBuf},
+};
+
+use crate::git::{
+	git::{CommitBody, GitWrapper},
+	libgit_wrapper::LibGitWrapper,
 };
 
 const REPO_PATH: &'static str = "/var/tmp/coa";
@@ -93,7 +94,7 @@ fn test_prepares_editmsg_file() {
 	assert!(repo.is_ok());
 	repo.unwrap().add_status_to_editmsg().unwrap();
 
-	let commit_editmsg_path = "/var/tmp/coa_file/.git/COMMIT_EDITMSG";
+	let commit_editmsg_path = "/var/tmp/coa/.git/COMMIT_EDITMSG";
 	let contents = std::fs::read_to_string(&Path::new(commit_editmsg_path));
 	assert_eq!(
 		contents.unwrap(),

@@ -1,6 +1,8 @@
 use std::{error::Error, path::PathBuf, process::Command};
 
 mod hook_err;
+use co_author::conf;
+
 use self::hook_err::HookError;
 
 pub struct HookRunner {

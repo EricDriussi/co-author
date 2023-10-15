@@ -1,7 +1,6 @@
 use std::error::Error;
 
-use authors::author::Author;
-use co_author::{args::Args, cli::Cli, handle_authors, handle_commit_msg};
+use co_author::{args::Args, authors::author::Author, cli::Cli, handle_authors, handle_commit_msg};
 
 #[test]
 fn commit_message_is_gathered_from_arg() {

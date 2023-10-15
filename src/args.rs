@@ -8,7 +8,7 @@ pub struct Args {
 	#[arg(short, long)]
 	pub file: Option<String>,
 
-	/// List of comma spearated author aliases
+	/// List of comma separated author aliases
 	#[arg(short, long)]
 	pub list: Option<String>,
 

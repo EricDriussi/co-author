@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use crate::{
+use super::{
 	editor,
 	git::{CommitBody, GitWrapper},
 	hook_runner::HookRunner,

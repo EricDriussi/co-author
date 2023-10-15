@@ -1,13 +1,15 @@
-use authors::{
-	author::{Author, AuthorsRepo},
-	fs_repo::FSRepo,
-};
-use serial_test::serial;
+use crate::conf;
 use std::fs;
+
+use serial_test::serial;
+
+use crate::authors::author::Author;
+use crate::authors::author::AuthorsRepo;
+use crate::authors::fs_repo::FSRepo;
 
 #[test]
 fn should_init_from_a_given_existing_file() {
-	assert!(FSRepo::from(some_valid_authors_file()).is_ok());
+	assert!(FSRepo::from(conf::authors_file()).is_ok());
 }
 
 #[test]
@@ -35,7 +37,7 @@ fn should_fail_to_init_when_no_valid_file_is_found() {
 
 #[test]
 fn should_fetch_all_available_authors() {
-	let repo = FSRepo::from(some_valid_authors_file()).unwrap();
+	let repo = FSRepo::from(conf::authors_file()).unwrap();
 
 	let actual_authors = repo.all();
 
@@ -50,7 +52,7 @@ fn should_fetch_all_available_authors() {
 
 #[test]
 fn should_fetch_authors_based_on_alias() {
-	let repo = FSRepo::from(some_valid_authors_file()).unwrap();
+	let repo = FSRepo::from(conf::authors_file()).unwrap();
 
 	let alias = "a";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));
@@ -61,7 +63,7 @@ fn should_fetch_authors_based_on_alias() {
 
 #[test]
 fn should_fetch_all_authors_for_a_given_alias() {
-	let repo = FSRepo::from(some_valid_authors_file()).unwrap();
+	let repo = FSRepo::from(conf::authors_file()).unwrap();
 
 	let alias = "b";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));
@@ -75,15 +77,11 @@ fn should_fetch_all_authors_for_a_given_alias() {
 
 #[test]
 fn should_return_an_empty_list_if_no_author_mathces_alias() {
-	let repo = FSRepo::from(some_valid_authors_file()).unwrap();
+	let repo = FSRepo::from(conf::authors_file()).unwrap();
 
 	let alias = "z";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));
 
 	let expected_authors = Vec::from([]);
 	assert_eq!(actual_authors, expected_authors);
-}
-
-fn some_valid_authors_file() -> String {
-	conf::get_config().get::<String>("authors_file_from_authors_crate").unwrap()
 }

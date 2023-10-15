@@ -3,9 +3,10 @@ use std::{
 	io::{BufRead, BufReader},
 };
 
+use co_author::conf;
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 
-use crate::git::CommitBody;
+use crate::git::git::CommitBody;
 
 pub fn write_commit_to_file(commit_body: CommitBody) -> Result<(), Box<dyn Error>> {
 	std::fs::write(conf::editmsg(), commit_body.formatted_body())?;
@@ -139,9 +140,9 @@ mod test {
 
 	#[test]
 	fn test_removes_commented_lines_when_reading_commit_message() {
-		let commit_editmsg_path = "../../.git/COMMIT_EDITMSG_TEST_COMMENTS";
+		let commit_editmsg_path = ".git/COMMIT_EDITMSG_TEST_COMMENTS";
 		std::fs::write(
-			commit_editmsg_path.clone(),
+			commit_editmsg_path,
 			"Test commit message.\n# This is a commented line.\n#And another one."
 				.to_string()
 				.clone(),
@@ -159,8 +160,8 @@ mod test {
 	#[test]
 	fn test_trims_lines_when_reading_commit_message() {
 		let test_commit_message = "  Test commit message.\nThis is a second line. \n".to_string();
-		let commit_editmsg_path = "../../.git/COMMIT_EDITMSG_TEST_TRIM";
-		std::fs::write(commit_editmsg_path.clone(), test_commit_message.clone()).unwrap();
+		let commit_editmsg_path = ".git/COMMIT_EDITMSG_TEST_TRIM";
+		std::fs::write(commit_editmsg_path, test_commit_message.clone()).unwrap();
 
 		let result = read(commit_editmsg_path.to_string());
 

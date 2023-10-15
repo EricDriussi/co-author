@@ -1,7 +1,8 @@
 use std::{error::Error, process};
 
-use authors::author::Author;
 use rustyline::{error::ReadlineError::Interrupted, DefaultEditor};
+
+use crate::authors::author::Author;
 
 use self::cli_err::CliError;
 mod cli_err;

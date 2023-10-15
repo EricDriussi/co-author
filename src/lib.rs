@@ -2,6 +2,8 @@ use std::error::Error;
 
 use args::Args;
 use cli::Cli;
+pub mod authors;
+pub mod conf;
 
 pub mod args;
 pub mod cli;

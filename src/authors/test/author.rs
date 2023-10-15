@@ -1,4 +1,4 @@
-use authors::author::Author;
+use crate::authors::author::Author;
 
 #[test]
 fn should_omit_email_presenting_author() {

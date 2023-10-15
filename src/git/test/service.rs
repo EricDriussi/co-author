@@ -1,10 +1,13 @@
+use crate::git::git;
+use crate::git::git::GitWrapper;
+use crate::git::GitService;
 use serial_test::serial;
 use std::error::Error;
 
-use git::{git::GitWrapper, service::GitService};
 use git2::Config;
 
 #[test]
+#[serial]
 fn should_commit() {
 	let spy = MockWrapper::new();
 	let service = GitService::new(spy);
@@ -13,7 +16,11 @@ fn should_commit() {
 
 	let result = service.commit(commit_message, aliases);
 
+	println!();
+	println!("result: {:?}", result);
+	println!();
 	assert!(result.is_ok());
+	// assert!(false)
 }
 
 #[test]
@@ -24,8 +31,7 @@ fn should_commit_using_git_editor() {
 	let aliases = vec![String::from("a")];
 
 	let editmsg = ".git/COMMIT_EDITMSG_TEST";
-	let editmsg_from_root = format!("../../{}", editmsg);
-	std::fs::write(editmsg_from_root.clone(), "himom").unwrap();
+	std::fs::write(editmsg, "himom").unwrap();
 	let mut config = Config::open_default().unwrap();
 	config.set_str("core.editor", "echo").unwrap();
 
@@ -33,7 +39,7 @@ fn should_commit_using_git_editor() {
 
 	assert!(result.is_ok());
 	// Cleanup
-	std::fs::remove_file(editmsg_from_root).unwrap();
+	std::fs::remove_file(editmsg).unwrap();
 	config.remove("core.editor").unwrap();
 }
 
@@ -45,8 +51,7 @@ fn should_commit_using_env_editor() {
 	let aliases = vec![String::from("a")];
 
 	let editmsg = ".git/COMMIT_EDITMSG_TEST";
-	let editmsg_from_root = format!("../../{}", editmsg);
-	std::fs::write(editmsg_from_root.clone(), "himom").unwrap();
+	std::fs::write(editmsg, "himom").unwrap();
 	let mut config = Config::open_default().unwrap();
 	config.set_str("core.editor", "NOT_REAL").unwrap();
 	std::env::set_var("EDITOR", "echo");
@@ -55,7 +60,7 @@ fn should_commit_using_env_editor() {
 
 	assert!(result.is_ok());
 	// Cleanup
-	std::fs::remove_file(editmsg_from_root).unwrap();
+	std::fs::remove_file(editmsg).unwrap();
 	config.remove("core.editor").unwrap();
 }
 
@@ -107,7 +112,7 @@ impl GitWrapper for MockWrapper {
 		return Ok(());
 	}
 
-	fn write_to_editmsg(&self, _: git::git::CommitBody) -> Result<(), Box<dyn Error>> {
+	fn write_to_editmsg(&self, _: git::CommitBody) -> Result<(), Box<dyn Error>> {
 		return Ok(());
 	}
 

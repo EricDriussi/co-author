@@ -1,8 +1,9 @@
 use std::{error::Error, fs::OpenOptions, io::Write, path::PathBuf};
 
+use co_author::conf;
 use git2::{Repository, Signature};
 
-use crate::git::{CommitBody, GitWrapper};
+use super::git::{CommitBody, GitWrapper};
 
 pub mod editmsg_handler;
 

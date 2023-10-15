@@ -13,7 +13,13 @@ tasks:
     env:
       COA_ENV: test
     cmds:
-      - cargo test && cargo test -p conf -p git -p authors
+      - cargo test
+  test-loop:
+    desc: "Loop all tests"
+    env:
+      COA_ENV: test
+    cmds:
+      - for i in {1..20}; do cargo test; done
   build:
     desc: "Build binary"
     cmds:

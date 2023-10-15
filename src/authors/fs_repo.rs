@@ -7,7 +7,7 @@ use std::{
 	result::Result,
 };
 
-use crate::{
+use super::{
 	author::{Author, AuthorsRepo},
 	author_err::AuthorError,
 };
@@ -115,7 +115,7 @@ mod test {
 
 	#[test]
 	fn should_read_lines() {
-		let repo = FSRepo::from("tests/data/authors".to_string()).unwrap();
+		let repo = FSRepo::from("src/authors/test/data/authors".to_string()).unwrap();
 		let contents = repo.read_lines();
 
 		assert!(contents.is_some());
