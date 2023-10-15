@@ -6,7 +6,15 @@ const DEFAULT_CONFIG: &str = include_str!("configs/default.yaml");
 const TEST_CONFIG: &str = include_str!("configs/test.yaml");
 
 pub fn authors_file() -> String {
-	get_config().get::<String>("authors_file").unwrap()
+	let raw_config_string = get_config().get::<String>("authors_file").unwrap();
+	let base = "BASE_PATH";
+	match env::var("XDG_CONFIG_HOME") {
+		Ok(env_var) => raw_config_string.replace(&format!("${}", base), &env_var),
+		Err(_) => match env::var("HOME") {
+			Ok(env_var) => raw_config_string.replace(&format!("${}", base), &format!("{}/.config", env_var)),
+			Err(_) => panic!("Your $HOME is not set, can't locate authors file!"),
+		},
+	}
 }
 
 pub fn hooks_path() -> String {

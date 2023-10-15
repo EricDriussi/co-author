@@ -14,7 +14,7 @@ impl CommitBody {
 	}
 
 	pub fn formatted_body(&self) -> String {
-		format!("{}\n\n{}", self.message, self.signatures.join("\n"))
+		format!("{}\n\n\n{}", self.message, self.signatures.join("\n"))
 	}
 }
 
