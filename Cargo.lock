@@ -183,7 +183,6 @@ dependencies = [
  "git2",
  "rustyline",
  "serial_test",
- "toml",
 ]
 
 [[package]]
