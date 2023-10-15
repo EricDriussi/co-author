@@ -11,7 +11,7 @@ impl std::fmt::Display for AuthorError {
 
 impl Error for AuthorError {}
 impl AuthorError {
-	pub fn new(msg: String) -> Box<dyn Error> {
+	pub fn with(msg: String) -> Box<dyn Error> {
 		Box::new(AuthorError(msg))
 	}
 }

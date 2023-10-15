@@ -29,20 +29,20 @@ pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Bo
 	}
 
 	let aliases = cli.ask_for_aliases(authors_service.all_available())?;
-	return match args.sort {
+	match args.sort {
 		true => Ok(sort(authors_service.signatures_of(aliases))),
 		false => Ok(authors_service.signatures_of(aliases)),
-	};
+	}
 }
 
 pub fn handle_commit_msg(args: &Args, cli: &mut impl Cli, prev: String) -> Result<String, Box<dyn Error>> {
 	if args.message.is_some() {
 		return Ok(args.message.clone().unwrap());
 	}
-	return match args.pre_populate {
+	match args.pre_populate {
 		false => cli.ask_for_commit_message(),
 		true => cli.ask_for_commit_message_with_pre_populated(prev),
-	};
+	}
 }
 
 pub fn sort<String: Ord>(mut vector: Vec<String>) -> Vec<String> {

@@ -35,9 +35,9 @@ fn env_fallback(path: &Path) {
 	match env::var("EDITOR") {
 		Ok(editor) => match open_editor(&editor, path) {
 			Ok(_) => (),
-			Err(_) => return vim_fallback(path),
+			Err(_) => vim_fallback(path),
 		},
-		Err(_) => return vim_fallback(path),
+		Err(_) => vim_fallback(path),
 	}
 }
 

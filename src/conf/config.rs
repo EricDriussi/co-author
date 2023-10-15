@@ -2,19 +2,19 @@ use std::env;
 
 use config::Config;
 
-const DEFAULT_CONFIG: &'static str = include_str!("configs/default.yaml");
-const TEST_CONFIG: &'static str = include_str!("configs/test.yaml");
+const DEFAULT_CONFIG: &str = include_str!("configs/default.yaml");
+const TEST_CONFIG: &str = include_str!("configs/test.yaml");
 
 pub fn authors_file() -> String {
-	return get_config().get::<String>("authors_file").unwrap();
+	get_config().get::<String>("authors_file").unwrap()
 }
 
 pub fn hooks_path() -> String {
-	return get_config().get::<String>("hooks_path").unwrap();
+	get_config().get::<String>("hooks_path").unwrap()
 }
 
 pub fn editmsg() -> String {
-	return get_config().get::<String>("editmsg").unwrap();
+	get_config().get::<String>("editmsg").unwrap()
 }
 
 pub fn get_config() -> Config {
@@ -28,8 +28,8 @@ pub fn get_config() -> Config {
 		DEFAULT_CONFIG
 	};
 
-	return Config::builder()
+	Config::builder()
 		.add_source(config::File::from_str(config_file, config::FileFormat::Yaml))
 		.build()
-		.unwrap();
+		.unwrap()
 }

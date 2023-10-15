@@ -6,11 +6,11 @@ use std::{
 };
 
 use crate::git::{
-	git::{CommitBody, GitWrapper},
+	commit_body::{CommitBody, GitWrapper},
 	libgit_wrapper::LibGitWrapper,
 };
 
-const REPO_PATH: &'static str = "/var/tmp/coa";
+const REPO_PATH: &str = "/var/tmp/coa";
 
 #[test]
 #[serial]
@@ -84,9 +84,9 @@ fn test_prepares_editmsg_file() {
 	create_and_add_file_to_git_tree(&git_repo, "bar");
 	// modify but don't add foo
 	let root = git_repo.path().parent().unwrap();
-	std::fs::write(&root.join("foo"), "text").unwrap();
+	std::fs::write(root.join("foo"), "text").unwrap();
 	// add baz but keep untracked
-	std::fs::write(&root.join("baz"), "text").unwrap();
+	std::fs::write(root.join("baz"), "text").unwrap();
 
 	add_commit(&git_repo, tree, "IRRELEVANT");
 
@@ -95,7 +95,7 @@ fn test_prepares_editmsg_file() {
 	repo.unwrap().add_status_to_editmsg().unwrap();
 
 	let commit_editmsg_path = "/var/tmp/coa/.git/COMMIT_EDITMSG";
-	let contents = std::fs::read_to_string(&Path::new(commit_editmsg_path));
+	let contents = std::fs::read_to_string(Path::new(commit_editmsg_path));
 	assert_eq!(
 		contents.unwrap(),
 		"
@@ -151,7 +151,7 @@ fn init_repo(path: &str) -> Repository {
 	repo.commit(Some("HEAD"), &sig, &sig, "initial commit", &tree, &[])
 		.unwrap();
 	drop(tree);
-	return repo;
+	repo
 }
 
 fn add_commit(repo: &Repository, tree: git2::Tree<'_>, msg: &str) {
@@ -163,7 +163,7 @@ fn add_commit(repo: &Repository, tree: git2::Tree<'_>, msg: &str) {
 
 fn create_and_add_file_to_git_tree(repo: &Repository, file_name: &str) {
 	let root = repo.path().parent().unwrap();
-	File::create(&root.join(file_name)).unwrap();
+	File::create(root.join(file_name)).unwrap();
 
 	let mut index = repo.index().unwrap();
 	index.add_path(Path::new(file_name)).unwrap();

@@ -18,7 +18,7 @@ impl Author {
 	}
 
 	pub fn signature(&self) -> String {
-		return String::from(format!("Co-Authored-by: {} <{}>", self.name, self.email));
+		format!("Co-Authored-by: {} <{}>", self.name, self.email)
 	}
 }
 
@@ -27,7 +27,7 @@ impl PartialEq for Author {
 		let same_alias = self.alias == other.alias;
 		let same_name = self.name == other.name;
 		let same_email = self.email == other.email;
-		return same_alias && same_name && same_email;
+		same_alias && same_name && same_email
 	}
 }
 

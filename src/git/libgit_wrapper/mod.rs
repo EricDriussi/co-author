@@ -3,7 +3,7 @@ use std::{error::Error, fs::OpenOptions, io::Write, path::PathBuf};
 use co_author::conf;
 use git2::{Repository, Signature};
 
-use super::git::{CommitBody, GitWrapper};
+use super::commit_body::{CommitBody, GitWrapper};
 
 pub mod editmsg_handler;
 
@@ -28,11 +28,11 @@ impl GitWrapper for LibGitWrapper {
 	}
 
 	fn write_to_editmsg(&self, commit_body: CommitBody) -> Result<(), Box<dyn Error>> {
-		return editmsg_handler::write_commit_to_file(commit_body);
+		editmsg_handler::write_commit_to_file(commit_body)
 	}
 
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
-		let status = editmsg_handler::get_status_for_commit_file(&self.repo.as_ref().unwrap());
+		let status = editmsg_handler::get_status_for_commit_file(self.repo.as_ref().unwrap());
 
 		let mut file_to_append = OpenOptions::new().create(true).append(true).open(conf::editmsg())?;
 		file_to_append.write_all(status.as_bytes())?;
@@ -58,7 +58,7 @@ impl LibGitWrapper {
 				false => Ok(Self { repo: Some(repo) }),
 			};
 		}
-		return Err("Could not open the repo".to_string());
+		Err("Could not open the repo".to_string())
 	}
 
 	fn no_staged_changes(repo: &Repository) -> bool {
@@ -66,7 +66,7 @@ impl LibGitWrapper {
 		let tree = head.peel_to_tree().unwrap();
 		let index = repo.index().unwrap();
 		let diff = repo.diff_tree_to_index(Some(&tree), Some(&index), None).unwrap();
-		return diff.deltas().count() == 0;
+		diff.deltas().count() == 0
 	}
 
 	fn try_to_commit(&self, signature: Signature, commit_message: String) -> Result<(), git2::Error> {

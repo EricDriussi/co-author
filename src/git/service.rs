@@ -1,8 +1,8 @@
 use std::error::Error;
 
 use super::{
+	commit_body::{CommitBody, GitWrapper},
 	editor,
-	git::{CommitBody, GitWrapper},
 	hook_runner::HookRunner,
 };
 
@@ -27,7 +27,7 @@ impl<T: GitWrapper> GitService<T> {
 		self.hook_runner.pre_commit()?;
 		self.git_wrapper.write_to_editmsg(CommitBody::new(message, authors))?;
 		self.hook_runner.commit_msg()?;
-		return self.git_wrapper.commit();
+		self.git_wrapper.commit()
 	}
 
 	pub fn commit_with_editor(&self, authors: Vec<String>) -> Result<(), Box<dyn Error>> {
@@ -36,7 +36,7 @@ impl<T: GitWrapper> GitService<T> {
 		self.git_wrapper.add_status_to_editmsg()?;
 		editor::open();
 		self.hook_runner.commit_msg()?;
-		return self.git_wrapper.commit();
+		self.git_wrapper.commit()
 	}
 
 	pub fn commit_with_pre_populated_editor(&self, message: &str, authors: Vec<String>) -> Result<(), Box<dyn Error>> {
@@ -45,6 +45,6 @@ impl<T: GitWrapper> GitService<T> {
 		self.git_wrapper.add_status_to_editmsg()?;
 		editor::open();
 		self.hook_runner.commit_msg()?;
-		return self.git_wrapper.commit();
+		self.git_wrapper.commit()
 	}
 }

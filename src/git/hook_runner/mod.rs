@@ -18,18 +18,18 @@ impl HookRunner {
 
 	pub fn pre_commit(&self) -> Result<(), Box<dyn Error>> {
 		let p = PathBuf::from(format!("{}/pre-commit", self.path));
-		return match p.exists() {
+		match p.exists() {
 			true => {
 				let status = Command::new(p).status();
 				let succeeded = status.is_ok() && status.unwrap().success();
 
 				match succeeded {
 					true => Ok(()),
-					false => Err(HookError::new("Pre-commit")),
+					false => Err(HookError::with("Pre-commit")),
 				}
 			}
 			false => Ok(()),
-		};
+		}
 	}
 
 	pub fn commit_msg(&self) -> Result<(), Box<dyn Error>> {
@@ -41,7 +41,7 @@ impl HookRunner {
 
 				match succeeded {
 					true => Ok(()),
-					false => Err(HookError::new("Commit-msg")),
+					false => Err(HookError::with("Commit-msg")),
 				}
 			}
 			false => Ok(()),

@@ -1,4 +1,4 @@
-use crate::git::git::CommitBody;
+use crate::git::commit_body::CommitBody;
 
 #[test]
 fn should_produce_a_correctly_formatted_commit_body() {

@@ -6,7 +6,7 @@ use std::{
 use co_author::conf;
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 
-use crate::git::git::CommitBody;
+use crate::git::commit_body::CommitBody;
 
 pub fn write_commit_to_file(commit_body: CommitBody) -> Result<(), Box<dyn Error>> {
 	std::fs::write(conf::editmsg(), commit_body.formatted_body())?;
@@ -22,12 +22,10 @@ fn read(editmsg_path: String) -> Option<String> {
 	let reader = BufReader::new(file);
 	let mut commit_body = String::new();
 
-	for line in reader.lines() {
-		if let Ok(line) = line {
-			if !line.starts_with('#') {
-				commit_body.push_str(&line.trim());
-				commit_body.push('\n');
-			}
+	for line in reader.lines().flatten() {
+		if !line.starts_with('#') {
+			commit_body.push_str(line.trim());
+			commit_body.push('\n');
 		}
 	}
 	let trimmed_body = commit_body.trim().to_string();
@@ -38,7 +36,7 @@ fn read(editmsg_path: String) -> Option<String> {
 	}
 }
 
-fn has_message(commit_body: &String) -> bool {
+fn has_message(commit_body: &str) -> bool {
 	let lines_without_co_author = commit_body
 		.lines()
 		.filter(|line| !line.starts_with("Co-Authored-by"))
@@ -46,7 +44,7 @@ fn has_message(commit_body: &String) -> bool {
 		.join("\n");
 
 	let contains_lines_without_co_author = !lines_without_co_author.trim().is_empty();
-	return contains_lines_without_co_author;
+	contains_lines_without_co_author
 }
 
 pub fn get_status_for_commit_file(repo: &Repository) -> String {
@@ -95,7 +93,7 @@ fn changes_to_be_committed(file_statuses: &Statuses) -> String {
 	if content.is_empty() {
 		String::new()
 	} else {
-		format!("{}\n{}", heading.to_string(), content)
+		format!("{}\n{}", heading, content)
 	}
 }
 
@@ -110,7 +108,7 @@ fn changes_not_staged_for_commit(file_statuses: &Statuses) -> String {
 	if content.is_empty() {
 		String::new()
 	} else {
-		format!("{}\n{}", heading.to_string(), content)
+		format!("{}\n{}", heading, content)
 	}
 }
 
@@ -125,12 +123,12 @@ fn untracked_files(file_statuses: &Statuses) -> String {
 	if content.is_empty() {
 		String::new()
 	} else {
-		format!("{}\n{}", heading.to_string(), content)
+		format!("{}\n{}", heading, content)
 	}
 }
 
 fn format_file_path(entry: StatusEntry) -> String {
-	return format!("#\t{}\n", entry.path().unwrap());
+	format!("#\t{}\n", entry.path().unwrap())
 }
 
 #[cfg(test)]

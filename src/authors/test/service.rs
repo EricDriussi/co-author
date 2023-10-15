@@ -38,7 +38,7 @@ impl MockRepo {
 	}
 
 	fn hardcoded_authors() -> Vec<Author> {
-		return Vec::from([Author::new("a", "John", "Doe"), Author::new("b", "Jane", "Smith")]);
+		Vec::from([Author::new("a", "John", "Doe"), Author::new("b", "Jane", "Smith")])
 	}
 }
 
@@ -51,10 +51,10 @@ impl AuthorsRepo for MockRepo {
 		if aliases.contains(&"b".to_string()) {
 			authors.push(MockRepo::hardcoded_authors()[1].clone());
 		}
-		return authors;
+		authors
 	}
 
 	fn all(&self) -> Vec<Author> {
-		return MockRepo::hardcoded_authors();
+		MockRepo::hardcoded_authors()
 	}
 }

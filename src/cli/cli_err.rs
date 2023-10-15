@@ -11,7 +11,7 @@ impl std::fmt::Display for CliError {
 
 impl Error for CliError {}
 impl CliError {
-	pub fn new(msg: &str) -> Box<dyn Error> {
+	pub fn with(msg: &str) -> Box<dyn Error> {
 		Box::new(CliError(msg.to_string()))
 	}
 }

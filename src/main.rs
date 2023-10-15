@@ -44,7 +44,7 @@ fn run(args: Args) -> Result<(), Box<dyn Error>> {
 
 fn set_cwd_to_git_root() -> Result<(), Box<dyn Error>> {
 	let project_root_dir = get_project_root_dir()?;
-	env::set_current_dir(&project_root_dir).map_err(|_| "Something went wrong")?;
+	env::set_current_dir(project_root_dir).map_err(|_| "Something went wrong")?;
 	Ok(())
 }
 

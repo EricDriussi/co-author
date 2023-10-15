@@ -1,5 +1,5 @@
-use crate::git::git;
-use crate::git::git::GitWrapper;
+use crate::git::commit_body;
+use crate::git::commit_body::GitWrapper;
 use crate::git::GitService;
 use serial_test::serial;
 use std::error::Error;
@@ -109,21 +109,21 @@ impl MockWrapper {
 
 impl GitWrapper for MockWrapper {
 	fn commit(&self) -> Result<(), Box<dyn Error>> {
-		return Ok(());
+		Ok(())
 	}
 
-	fn write_to_editmsg(&self, _: git::CommitBody) -> Result<(), Box<dyn Error>> {
-		return Ok(());
+	fn write_to_editmsg(&self, _: commit_body::CommitBody) -> Result<(), Box<dyn Error>> {
+		Ok(())
 	}
 
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
-		return Ok(());
+		Ok(())
 	}
 
 	fn prev_commit_msg(&self) -> Result<String, Box<dyn Error>> {
-		return match &self.last_commit {
+		match &self.last_commit {
 			Ok(msg) => Ok(msg.into()),
 			Err(_) => Err("".into()),
-		};
+		}
 	}
 }

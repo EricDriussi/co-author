@@ -11,7 +11,7 @@ impl std::fmt::Display for HookError {
 
 impl Error for HookError {}
 impl HookError {
-	pub fn new(msg: &str) -> Box<dyn Error> {
+	pub fn with(msg: &str) -> Box<dyn Error> {
 		Box::new(HookError(msg.to_string()))
 	}
 }

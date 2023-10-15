@@ -20,13 +20,13 @@ pub trait Cli {
 impl Cli for FancyCli {
 	fn ask_for_commit_message(&mut self) -> Result<String, Box<dyn Error>> {
 		match self.reader.readline("Enter your commit message:\n") {
-			Ok(commit_message) => return FancyCli::process_commit_msg(commit_message),
+			Ok(commit_message) => FancyCli::process_commit_msg(commit_message),
 			Err(Interrupted) => {
 				eprintln!("^C");
 				process::exit(1);
 			}
-			Err(_) => return Err(CliError::new("Unexpected error")),
-		};
+			Err(_) => Err(CliError::with("Unexpected error")),
+		}
 	}
 
 	fn ask_for_commit_message_with_pre_populated(&mut self, prev_commit_msg: String) -> Result<String, Box<dyn Error>> {
@@ -34,8 +34,8 @@ impl Cli for FancyCli {
 			.reader
 			.readline_with_initial("Enter your commit message:\n", (prev_commit_msg.as_str(), ""))
 		{
-			Ok(commit_message) => return FancyCli::process_commit_msg(commit_message),
-			Err(_) => return Err(CliError::new("Unexpected error")),
+			Ok(commit_message) => FancyCli::process_commit_msg(commit_message),
+			Err(_) => Err(CliError::with("Unexpected error")),
 		}
 	}
 
@@ -53,12 +53,12 @@ impl Cli for FancyCli {
 			)
 			.as_str(),
 		) {
-			Ok(aliases) => return Ok(FancyCli::process_aliases(aliases)),
+			Ok(aliases) => Ok(FancyCli::process_aliases(aliases)),
 			Err(Interrupted) => {
 				eprintln!("^C");
 				process::exit(1);
 			}
-			Err(_) => return Err(CliError::new("Unexpected error")),
+			Err(_) => Err(CliError::with("Unexpected error")),
 		}
 	}
 }
@@ -78,12 +78,18 @@ impl FancyCli {
 	fn validate_commit_msg(msg: String) -> Result<String, Box<dyn Error>> {
 		match msg.is_empty() {
 			false => Ok(msg),
-			true => Err(CliError::new("Commit message cannot be empty.")),
+			true => Err(CliError::with("Commit message cannot be empty.")),
 		}
 	}
 
 	fn process_aliases(aliases: String) -> Vec<String> {
 		aliases.split_whitespace().map(|s| s.to_string()).collect()
+	}
+}
+
+impl Default for FancyCli {
+	fn default() -> Self {
+		Self::new()
 	}
 }
 
