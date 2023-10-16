@@ -1,4 +1,4 @@
-use git2::{Repository, RepositoryInitOptions};
+use git2::{Repository, RepositoryInitOptions, Signature};
 use serial_test::serial;
 use std::{
 	fs::{self, File},
@@ -143,22 +143,47 @@ fn init_repo(path: &str) -> Repository {
 	let dir = PathBuf::from(path);
 	fs::remove_dir_all(&dir).ok();
 	let repo = Repository::init_opts(&dir, &RepositoryInitOptions::new()).unwrap();
+	set_user_and_email(&repo);
 
 	let mut index = repo.index().unwrap();
 	let id = index.write_tree().unwrap();
 	let tree = repo.find_tree(id).unwrap();
-	let sig = repo.signature().unwrap();
-	repo.commit(Some("HEAD"), &sig, &sig, "initial commit", &tree, &[])
-		.unwrap();
+	repo.commit(
+		Some("HEAD"),
+		&repo.signature().unwrap(),
+		&repo.signature().unwrap(),
+		"initial commit",
+		&tree,
+		&[],
+	)
+	.unwrap();
 	drop(tree);
 	repo
 }
 
-fn add_commit(repo: &Repository, tree: git2::Tree<'_>, msg: &str) {
-	let sig = repo.signature().unwrap();
-	let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
-	repo.commit(Some("HEAD"), &sig, &sig, msg, &tree, &[&head_commit])
+fn set_user_and_email(repo: &Repository) {
+	let sig = Signature::now("a_name", "an_email").unwrap();
+	repo.config()
+		.unwrap()
+		.set_str("user.name", sig.name().unwrap())
 		.unwrap();
+	repo.config()
+		.unwrap()
+		.set_str("user.email", sig.email().unwrap())
+		.unwrap();
+}
+
+fn add_commit(repo: &Repository, tree: git2::Tree<'_>, msg: &str) {
+	let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
+	repo.commit(
+		Some("HEAD"),
+		&repo.signature().unwrap(),
+		&repo.signature().unwrap(),
+		msg,
+		&tree,
+		&[&head_commit],
+	)
+	.unwrap();
 }
 
 fn create_and_add_file_to_git_tree(repo: &Repository, file_name: &str) {
