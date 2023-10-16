@@ -16,11 +16,7 @@ fn should_commit() {
 
 	let result = service.commit(commit_message, aliases);
 
-	println!();
-	println!("result: {:?}", result);
-	println!();
 	assert!(result.is_ok());
-	// assert!(false)
 }
 
 #[test]
