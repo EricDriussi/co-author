@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TOKEN }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+
+      - name: Bump Version
+        run: |
+          TAG=${{ github.ref }}
+          VERSION=${TAG#refs/tags/}
+
+          sed -i "s/^version = .*/version = \"$VERSION\"/" Cargo.toml
+
+          git checkout -b ci
+          git add Cargo.toml
+          git commit -m "Bump to $VERSION"
+          git push origin ci
+
+      - name: Set up Rust
+        run: rustup update stable && rustup default stable
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2.2.1
+
+      - run: cargo publish --token ${CRATES_TOKEN} --no-verify
+        env:
+          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
