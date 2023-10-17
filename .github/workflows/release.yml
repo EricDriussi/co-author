@@ -32,9 +32,10 @@ jobs:
           git push origin ci
 
       - name: Set up Rust
-        uses: ATiltedTree/setup-rust@v1
-        with:
-          rust-version: stable
+        run: rustup update stable && rustup default stable
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2.2.1
 
       - run: cargo publish --token ${CRATES_TOKEN} --no-verify
         env:
