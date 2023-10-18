@@ -33,7 +33,12 @@ fn should_err_pre_commit_hook() {
 	let result = runner.pre_commit();
 
 	assert!(result.is_err());
-	assert_eq!(result.unwrap_err().to_string(), "Pre-commit hook failed, aborting");
+	assert_eq!(
+		result
+			.unwrap_err()
+			.to_string(),
+		"Pre-commit hook failed, aborting"
+	);
 	// Cleanup
 	std::fs::remove_file(pre_commit_hook_path).unwrap();
 }
@@ -66,7 +71,12 @@ fn should_err_commit_msg_hook() {
 	let result = runner.commit_msg();
 
 	assert!(result.is_err());
-	assert_eq!(result.unwrap_err().to_string(), "Commit-msg hook failed, aborting");
+	assert_eq!(
+		result
+			.unwrap_err()
+			.to_string(),
+		"Commit-msg hook failed, aborting"
+	);
 	// Cleanup
 	std::fs::remove_file(commit_msg_hook_path).unwrap();
 }
@@ -79,6 +89,7 @@ fn create_test_hook(path: &str, hook_code: &str) {
 		.mode(0o755)
 		.open(path)
 		.unwrap();
-	file.write_all(hook_code.as_bytes()).unwrap();
+	file.write_all(hook_code.as_bytes())
+		.unwrap();
 	drop(file);
 }

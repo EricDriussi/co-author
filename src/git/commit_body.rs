@@ -14,13 +14,24 @@ impl CommitBody {
 	}
 
 	pub fn formatted_body(&self) -> String {
-		format!("{}\n\n\n{}", self.message, self.signatures.join("\n"))
+		format!(
+			"{}\n\n\n{}",
+			self.message,
+			self.signatures
+				.join("\n")
+		)
 	}
 }
 
 impl Display for CommitBody {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "{}\n\n{}", self.message, self.signatures.join("\n"))
+		write!(
+			f,
+			"{}\n\n{}",
+			self.message,
+			self.signatures
+				.join("\n")
+		)
 	}
 }
 

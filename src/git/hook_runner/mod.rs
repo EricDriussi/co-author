@@ -21,7 +21,10 @@ impl HookRunner {
 		match p.exists() {
 			true => {
 				let status = Command::new(p).status();
-				let succeeded = status.is_ok() && status.unwrap().success();
+				let succeeded = status.is_ok()
+					&& status
+						.unwrap()
+						.success();
 
 				match succeeded {
 					true => Ok(()),
@@ -36,8 +39,13 @@ impl HookRunner {
 		let p = PathBuf::from(format!("{}/commit-msg", self.path));
 		return match p.exists() {
 			true => {
-				let status = Command::new(p).arg(conf::editmsg()).status();
-				let succeeded = status.is_ok() && status.unwrap().success();
+				let status = Command::new(p)
+					.arg(conf::editmsg())
+					.status();
+				let succeeded = status.is_ok()
+					&& status
+						.unwrap()
+						.success();
 
 				match succeeded {
 					true => Ok(()),

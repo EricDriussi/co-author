@@ -11,7 +11,7 @@ pub mod cli;
 pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Box<dyn Error>> {
 	let authors_service = match &args.file {
 		Some(file) => authors::fs_setup_from_file(file.to_string())?,
-		None => authors::fs_default_setup(conf::authors_file())?,
+		None => authors::fs_default_setup()?,
 	};
 
 	if args.all {
@@ -36,12 +36,10 @@ pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Bo
 }
 
 pub fn handle_commit_msg(args: &Args, cli: &mut impl Cli, prev: String) -> Result<String, Box<dyn Error>> {
-	if args.message.is_some() {
-		return Ok(args.message.clone().unwrap());
-	}
-	match args.pre_populate {
-		false => cli.ask_for_commit_message(),
-		true => cli.ask_for_commit_message_with_pre_populated(prev),
+	match (args.message.clone(), args.pre_populate) {
+		(Some(msg), _) => Ok(msg),
+		(None, false) => cli.ask_for_commit_message(),
+		(None, true) => cli.ask_for_commit_message_with_pre_populated(prev),
 	}
 }
 

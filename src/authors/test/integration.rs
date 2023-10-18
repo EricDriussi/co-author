@@ -27,5 +27,4 @@ fn authors_crate_setup_works_when_an_authors_file_is_found() {
 #[serial]
 fn authors_crate_fails_to_set_up_if_no_authors_file_is_found() {
 	assert!(authors::fs_setup_from_file("no_file_here".to_string()).is_err());
-	assert!(authors::fs_default_setup("or_here".to_string()).is_err());
 }

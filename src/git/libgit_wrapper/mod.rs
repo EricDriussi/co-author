@@ -32,19 +32,35 @@ impl GitWrapper for LibGitWrapper {
 	}
 
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
-		let status = editmsg_handler::get_status_for_commit_file(self.repo.as_ref().unwrap());
+		let status = editmsg_handler::get_status_for_commit_file(
+			self.repo
+				.as_ref()
+				.unwrap(),
+		);
 
-		let mut file_to_append = OpenOptions::new().create(true).append(true).open(conf::editmsg())?;
+		let mut file_to_append = OpenOptions::new()
+			.create(true)
+			.append(true)
+			.open(conf::editmsg())?;
 		file_to_append.write_all(status.as_bytes())?;
 		Ok(())
 	}
 
 	fn prev_commit_msg(&self) -> Result<String, Box<dyn Error>> {
-		let head_ref = self.repo.as_ref().unwrap().head()?;
+		let head_ref = self
+			.repo
+			.as_ref()
+			.unwrap()
+			.head()?;
 		let last_commit = head_ref.peel_to_commit()?;
 
-		let commit_message = last_commit.message().unwrap_or_default();
-		let first_line = commit_message.lines().next().unwrap_or_default();
+		let commit_message = last_commit
+			.message()
+			.unwrap_or_default();
+		let first_line = commit_message
+			.lines()
+			.next()
+			.unwrap_or_default();
 
 		Ok(first_line.to_string())
 	}
@@ -62,17 +78,40 @@ impl LibGitWrapper {
 	}
 
 	fn no_staged_changes(repo: &Repository) -> bool {
-		let head = repo.head().unwrap();
-		let tree = head.peel_to_tree().unwrap();
-		let index = repo.index().unwrap();
-		let diff = repo.diff_tree_to_index(Some(&tree), Some(&index), None).unwrap();
-		diff.deltas().count() == 0
+		let head = repo
+			.head()
+			.unwrap();
+		let tree = head
+			.peel_to_tree()
+			.unwrap();
+		let index = repo
+			.index()
+			.unwrap();
+		let diff = repo
+			.diff_tree_to_index(Some(&tree), Some(&index), None)
+			.unwrap();
+		diff.deltas()
+			.count() == 0
 	}
 
 	fn try_to_commit(&self, signature: Signature, commit_message: String) -> Result<(), git2::Error> {
-		let oid = self.repo.as_ref().unwrap().index()?.write_tree()?;
-		let tree = self.repo.as_ref().unwrap().find_tree(oid)?;
-		let parent_commit = self.repo.as_ref().unwrap().head()?.peel_to_commit()?;
+		let oid = self
+			.repo
+			.as_ref()
+			.unwrap()
+			.index()?
+			.write_tree()?;
+		let tree = self
+			.repo
+			.as_ref()
+			.unwrap()
+			.find_tree(oid)?;
+		let parent_commit = self
+			.repo
+			.as_ref()
+			.unwrap()
+			.head()?
+			.peel_to_commit()?;
 		self.repo
 			.as_ref()
 			.unwrap()

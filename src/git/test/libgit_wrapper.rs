@@ -42,7 +42,9 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", REPO_PATH);
 	std::fs::write(editmsg_path, commit_body.formatted_body()).unwrap();
 
-	let result = repo.unwrap().commit();
+	let result = repo
+		.unwrap()
+		.commit();
 
 	assert!(result.is_ok());
 }
@@ -61,7 +63,9 @@ fn should_error_out_if_commit_body_is_empty() {
 	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", REPO_PATH);
 	std::fs::write(editmsg_path, commit_body.formatted_body()).unwrap();
 
-	let result = repo.unwrap().commit();
+	let result = repo
+		.unwrap()
+		.commit();
 
 	assert!(result
 		.unwrap_err()
@@ -75,15 +79,24 @@ fn test_prepares_editmsg_file() {
 	let git_repo = init_repo(REPO_PATH);
 	create_and_add_file_to_git_tree(&git_repo, "foo");
 
-	let mut index = git_repo.index().unwrap();
-	let id = index.write_tree().unwrap();
-	let tree = git_repo.find_tree(id).unwrap();
+	let mut index = git_repo
+		.index()
+		.unwrap();
+	let id = index
+		.write_tree()
+		.unwrap();
+	let tree = git_repo
+		.find_tree(id)
+		.unwrap();
 	add_commit(&git_repo, tree.clone(), "IRRELEVANT");
 
 	// add bar
 	create_and_add_file_to_git_tree(&git_repo, "bar");
 	// modify but don't add foo
-	let root = git_repo.path().parent().unwrap();
+	let root = git_repo
+		.path()
+		.parent()
+		.unwrap();
 	std::fs::write(root.join("foo"), "text").unwrap();
 	// add baz but keep untracked
 	std::fs::write(root.join("baz"), "text").unwrap();
@@ -92,7 +105,9 @@ fn test_prepares_editmsg_file() {
 
 	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
 	assert!(repo.is_ok());
-	repo.unwrap().add_status_to_editmsg().unwrap();
+	repo.unwrap()
+		.add_status_to_editmsg()
+		.unwrap();
 
 	let commit_editmsg_path = "/var/tmp/coa/.git/COMMIT_EDITMSG";
 	let contents = std::fs::read_to_string(Path::new(commit_editmsg_path));
@@ -124,9 +139,15 @@ fn should_only_return_the_first_line_from_the_last_commit() {
 	let git_repo = init_repo(REPO_PATH);
 	create_and_add_file_to_git_tree(&git_repo, "foo");
 
-	let mut index = git_repo.index().unwrap();
-	let id = index.write_tree().unwrap();
-	let tree = git_repo.find_tree(id).unwrap();
+	let mut index = git_repo
+		.index()
+		.unwrap();
+	let id = index
+		.write_tree()
+		.unwrap();
+	let tree = git_repo
+		.find_tree(id)
+		.unwrap();
 	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
 	assert!(repo.is_ok());
 
@@ -134,7 +155,9 @@ fn should_only_return_the_first_line_from_the_last_commit() {
 	let msg = format!("{}\nSECOND_LINE", first_line);
 	add_commit(&git_repo, tree, msg.as_str());
 
-	let result = repo.unwrap().prev_commit_msg();
+	let result = repo
+		.unwrap()
+		.prev_commit_msg();
 
 	assert_eq!(result.unwrap(), first_line);
 }
@@ -145,13 +168,23 @@ fn init_repo(path: &str) -> Repository {
 	let repo = Repository::init_opts(&dir, &RepositoryInitOptions::new()).unwrap();
 	set_user_and_email(&repo);
 
-	let mut index = repo.index().unwrap();
-	let id = index.write_tree().unwrap();
-	let tree = repo.find_tree(id).unwrap();
+	let mut index = repo
+		.index()
+		.unwrap();
+	let id = index
+		.write_tree()
+		.unwrap();
+	let tree = repo
+		.find_tree(id)
+		.unwrap();
 	repo.commit(
 		Some("HEAD"),
-		&repo.signature().unwrap(),
-		&repo.signature().unwrap(),
+		&repo
+			.signature()
+			.unwrap(),
+		&repo
+			.signature()
+			.unwrap(),
 		"initial commit",
 		&tree,
 		&[],
@@ -165,20 +198,36 @@ fn set_user_and_email(repo: &Repository) {
 	let sig = Signature::now("a_name", "an_email").unwrap();
 	repo.config()
 		.unwrap()
-		.set_str("user.name", sig.name().unwrap())
+		.set_str(
+			"user.name",
+			sig.name()
+				.unwrap(),
+		)
 		.unwrap();
 	repo.config()
 		.unwrap()
-		.set_str("user.email", sig.email().unwrap())
+		.set_str(
+			"user.email",
+			sig.email()
+				.unwrap(),
+		)
 		.unwrap();
 }
 
 fn add_commit(repo: &Repository, tree: git2::Tree<'_>, msg: &str) {
-	let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
+	let head_commit = repo
+		.head()
+		.unwrap()
+		.peel_to_commit()
+		.unwrap();
 	repo.commit(
 		Some("HEAD"),
-		&repo.signature().unwrap(),
-		&repo.signature().unwrap(),
+		&repo
+			.signature()
+			.unwrap(),
+		&repo
+			.signature()
+			.unwrap(),
 		msg,
 		&tree,
 		&[&head_commit],
@@ -187,10 +236,19 @@ fn add_commit(repo: &Repository, tree: git2::Tree<'_>, msg: &str) {
 }
 
 fn create_and_add_file_to_git_tree(repo: &Repository, file_name: &str) {
-	let root = repo.path().parent().unwrap();
+	let root = repo
+		.path()
+		.parent()
+		.unwrap();
 	File::create(root.join(file_name)).unwrap();
 
-	let mut index = repo.index().unwrap();
-	index.add_path(Path::new(file_name)).unwrap();
-	index.write().unwrap();
+	let mut index = repo
+		.index()
+		.unwrap();
+	index
+		.add_path(Path::new(file_name))
+		.unwrap();
+	index
+		.write()
+		.unwrap();
 }
