@@ -1,10 +1,8 @@
-use colored::Colorize;
-use std::fmt::Display;
 
 #[derive(Debug, Clone)]
 pub struct Author {
-	alias: String,
-	name: String,
+	pub alias: String,
+	pub name: String,
 	email: String,
 }
 
@@ -28,19 +26,6 @@ impl PartialEq for Author {
 		let same_name = self.name == other.name;
 		let same_email = self.email == other.email;
 		same_alias && same_name && same_email
-	}
-}
-
-impl Display for Author {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(
-			f,
-			"{} {} {} {}",
-			"⦔".yellow(),
-			self.alias.blue(),
-			"->".green(),
-			self.name
-		)
 	}
 }
 

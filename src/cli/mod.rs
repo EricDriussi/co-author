@@ -1,10 +1,12 @@
 use std::{error::Error, process};
 
+use colored::Colorize;
 use rustyline::{error::ReadlineError::Interrupted, DefaultEditor};
 
 use crate::authors::author::Author;
 
 use self::cli_err::CliError;
+
 mod cli_err;
 
 pub struct FancyCli {
@@ -40,19 +42,18 @@ impl Cli for FancyCli {
 	}
 
 	fn ask_for_aliases(&mut self, authors: Vec<Author>) -> Result<Vec<String>, Box<dyn Error>> {
-		let printable_authors = authors
+		let formatted_authors = authors
 			.iter()
-			.map(|a| a.to_string())
+			.map(|a| Self::format_author(a))
 			.collect::<Vec<String>>()
 			.join("\n");
 
-		match self.reader.readline(
-			format!(
-				"\n{}\n\nEnter co-authors aliases separated by spaces:\n",
-				printable_authors
-			)
-			.as_str(),
-		) {
+		let prompt = format!(
+			"\n{}\n\nEnter co-authors aliases separated by spaces:\n",
+			formatted_authors
+		);
+
+		match self.reader.readline(prompt.as_str()) {
 			Ok(aliases) => Ok(FancyCli::process_aliases(aliases)),
 			Err(Interrupted) => {
 				eprintln!("^C");
@@ -84,6 +85,16 @@ impl FancyCli {
 
 	fn process_aliases(aliases: String) -> Vec<String> {
 		aliases.split_whitespace().map(|s| s.to_string()).collect()
+	}
+
+	fn format_author(author: &Author) -> String {
+		format!(
+			"{} {} {} {}",
+			"⦔".yellow(),
+			author.alias.blue(),
+			"->".green(),
+			author.name
+		)
 	}
 }
 
