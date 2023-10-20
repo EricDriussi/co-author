@@ -1,13 +1,11 @@
 use crate::authors::author::Author;
 
 #[test]
-fn should_omit_email_presenting_author() {
+fn should_present_the_correct_signature() {
 	let alias = "a";
 	let name = "alice";
 	let email = "alice@wonderland.not";
 	let author = Author::new(alias, name, email);
 
-	assert!(author.to_string().contains(alias));
-	assert!(author.to_string().contains(name));
-	assert!(!author.to_string().contains(email));
+	assert_eq!(author.signature(), "Co-authored-by: alice <alice@wonderland.not>");
 }
