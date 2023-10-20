@@ -18,7 +18,7 @@ impl Author {
 	}
 
 	pub fn signature(&self) -> String {
-		format!("Co-Authored-by: {} <{}>", self.name, self.email)
+		format!("Co-authored-by: {} <{}>", self.name, self.email)
 	}
 }
 

@@ -43,7 +43,7 @@ cd,Another Surname,someone@something.hi
 If no options are passed, it will prompt you for a space-separated list of
 aliases and then for a commit message.
 
-It will produce a commit message with the formatted as follows:
+It will produce a commit message with the following format:
 
 ```txt
 a commit message
