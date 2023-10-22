@@ -29,8 +29,8 @@ cargo install co-author
 
 ## Usage
 
-The tool expects a CSV `authors` file in `$XDG_CONFIG_HOME/coa/authors`
-(defaults to `$HOME/.config/coa/authors`).
+The tool expects a CSV `authors` file in `$XDG_CONFIG_HOME/co-author/authors`
+(defaults to `$HOME/.config/co-author/authors`).
 
 This file should follow the structure `alias,name,email`, as in the example:
 
