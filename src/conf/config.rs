@@ -5,6 +5,8 @@ use config::Config;
 const DEFAULT_CONFIG: &str = include_str!("configs/default.yaml");
 const TEST_CONFIG: &str = include_str!("configs/test.yaml");
 
+// FIXME: add config for aurhors_file
+// FIXME: this should be authors_path
 pub fn authors_file() -> String {
 	let raw_config_string = get_config().get::<String>("authors_file").unwrap();
 	let base = "BASE_PATH";
