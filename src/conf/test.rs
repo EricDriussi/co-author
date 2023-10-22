@@ -2,14 +2,20 @@ use super::*;
 
 #[test]
 fn should_return_expected_test_authors_file_path() {
-	let authors_file_path = config::authors_file();
+	let authors_file_path = config::authors_file_path();
 	assert_eq!(authors_file_path, "src/authors/test/data/authors");
+}
+
+#[test]
+fn should_return_expected_test_authors_file_name() {
+	let authors_file_path = config::authors_file_name();
+	assert_eq!(authors_file_path, "authors");
 }
 
 #[test]
 fn should_return_expected_test_hooks_path() {
 	let hooks_path = config::hooks_path();
-	assert_eq!(hooks_path, ".git/hooks");
+	assert_eq!(hooks_path, ".git/hooks/");
 }
 
 #[test]

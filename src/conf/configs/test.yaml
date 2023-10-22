@@ -1,3 +1,5 @@
-authors_file: "src/authors/test/data/authors"
-hooks_path: ".git/hooks"
+authors_file_path: "src/authors/test/data/"
+authors_file_name: "authors"
+dummy_data: "src/authors/test/data/dummy_data"
+hooks_path: ".git/hooks/"
 editmsg: "/var/tmp/coa/.git/COMMIT_EDITMSG"

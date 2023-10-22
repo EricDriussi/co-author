@@ -29,13 +29,12 @@ impl FSRepo {
 
 	pub fn new_default() -> Result<Self, Box<dyn Error>> {
 		let mut local_file = env::current_dir().unwrap();
-		// FIXME: extract to config
-		local_file.push("authors");
+		local_file.push(conf::authors_file_name());
 		if local_file.is_file() {
 			return Ok(Self { src: local_file });
 		}
 
-		let file = PathBuf::from(conf::authors_file());
+		let file = PathBuf::from(conf::authors_file_path());
 		match file.is_file() {
 			true => Ok(Self { src: file }),
 			false => Err(AuthorError::with("No file found!".to_string())),

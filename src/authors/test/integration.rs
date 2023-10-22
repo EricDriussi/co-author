@@ -7,7 +7,7 @@ use crate::{
 
 #[test]
 fn authors_service_returns_stored_authors_signatures() {
-	let repo = FSRepo::from("src/authors/test/data/dummy_data".to_string()).unwrap();
+	let repo = FSRepo::from(conf::dummy_data()).unwrap();
 	let app_service = AuthorsService::new(repo);
 
 	let authors = app_service.signatures_of(Vec::from([String::from("a")]));
@@ -18,7 +18,7 @@ fn authors_service_returns_stored_authors_signatures() {
 #[test]
 #[ignore]
 fn authors_crate_setup_works_when_an_authors_file_is_found() {
-	let valid_authors_file = conf::authors_file();
+	let valid_authors_file = conf::authors_file_path();
 
 	assert!(authors::fs_setup_from_file(valid_authors_file).is_ok());
 }

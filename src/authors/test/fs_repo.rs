@@ -11,9 +11,9 @@ use crate::authors::fs_repo::FSRepo;
 #[serial]
 fn should_connect_to_an_authors_file_in_cwd_if_available() {
 	// FIXME: why strings instead of PathBufs?
-	let cwd_authors_file_path = "./authors";
-	fs::File::create(cwd_authors_file_path).unwrap();
-	let _after = AfterAssert::cleanup(&[cwd_authors_file_path]);
+	let cwd_authors_file_path = conf::authors_file_name();
+	fs::File::create(cwd_authors_file_path.clone()).unwrap();
+	let _after = AfterAssert::cleanup(&[&cwd_authors_file_path]);
 
 	assert!(FSRepo::new_default().is_ok());
 }
@@ -21,7 +21,7 @@ fn should_connect_to_an_authors_file_in_cwd_if_available() {
 #[test]
 #[serial]
 fn should_connect_to_the_default_authors_file_if_no_file_is_available_in_cwd() {
-	let default_authors_file_path = conf::authors_file();
+	let default_authors_file_path = conf::authors_file_path();
 	fs::File::create(&default_authors_file_path).unwrap();
 	let _after = AfterAssert::cleanup(&[default_authors_file_path.as_str()]);
 
@@ -50,7 +50,7 @@ fn should_not_connect_to_a_given_non_existing_file() {
 
 #[test]
 fn should_fetch_all_available_authors() {
-	let an_authors_file_path = "src/authors/test/data/dummy_data";
+	let an_authors_file_path = conf::dummy_data();
 	let repo = FSRepo::from(an_authors_file_path.to_string()).unwrap();
 
 	let actual_authors = repo.all();
@@ -68,7 +68,7 @@ fn should_fetch_all_available_authors() {
 
 #[test]
 fn should_fetch_authors_based_on_alias() {
-	let an_authors_file_path = "src/authors/test/data/dummy_data";
+	let an_authors_file_path = conf::dummy_data();
 	let repo = FSRepo::from(an_authors_file_path.to_string()).unwrap();
 
 	let alias = "a";
@@ -82,7 +82,7 @@ fn should_fetch_authors_based_on_alias() {
 
 #[test]
 fn should_fetch_all_authors_for_a_given_alias() {
-	let an_authors_file_path = "src/authors/test/data/dummy_data";
+	let an_authors_file_path = conf::dummy_data();
 	let repo = FSRepo::from(an_authors_file_path.to_string()).unwrap();
 
 	let alias = "b";
@@ -99,7 +99,7 @@ fn should_fetch_all_authors_for_a_given_alias() {
 
 #[test]
 fn should_return_an_empty_list_if_no_author_mathces_alias() {
-	let an_authors_file_path = "src/authors/test/data/dummy_data";
+	let an_authors_file_path = conf::dummy_data();
 	let repo = FSRepo::from(an_authors_file_path.to_string()).unwrap();
 
 	let alias = "z";
