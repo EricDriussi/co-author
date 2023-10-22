@@ -1,8 +1,7 @@
-
 #[derive(Debug, Clone)]
 pub struct Author {
-	pub alias: String,
-	pub name: String,
+	alias: String,
+	name: String,
 	email: String,
 }
 
@@ -17,6 +16,14 @@ impl Author {
 
 	pub fn signature(&self) -> String {
 		format!("Co-authored-by: {} <{}>", self.name, self.email)
+	}
+
+	pub fn alias(&self) -> &String {
+		&self.alias
+	}
+
+	pub fn name(&self) -> &String {
+		&self.name
 	}
 }
 

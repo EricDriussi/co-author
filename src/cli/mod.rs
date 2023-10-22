@@ -44,7 +44,7 @@ impl Cli for FancyCli {
 	fn ask_for_aliases(&mut self, authors: Vec<Author>) -> Result<Vec<String>, Box<dyn Error>> {
 		let formatted_authors = authors
 			.iter()
-			.map(|a| Self::format_author(a))
+			.map(Self::format_author)
 			.collect::<Vec<String>>()
 			.join("\n");
 
@@ -91,9 +91,9 @@ impl FancyCli {
 		format!(
 			"{} {} {} {}",
 			"⦔".yellow(),
-			author.alias.blue(),
+			author.alias().blue(),
 			"->".green(),
-			author.name
+			author.name()
 		)
 	}
 }
