@@ -4,6 +4,7 @@ use args::Args;
 use cli::Cli;
 pub mod authors;
 pub mod conf;
+pub mod test_utils;
 
 pub mod args;
 pub mod cli;
