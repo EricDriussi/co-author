@@ -1,4 +1,6 @@
 use crate::conf;
+use crate::test_utils::file_cleanup::AfterAssert;
+
 use std::fs;
 
 use serial_test::serial;
@@ -10,7 +12,6 @@ use crate::authors::fs_repo::FSRepo;
 #[test]
 #[serial]
 fn should_connect_to_an_authors_file_in_cwd_if_available() {
-	// FIXME: why strings instead of PathBufs?
 	let cwd_authors_file_path = conf::authors_file_name();
 	fs::File::create(cwd_authors_file_path.clone()).unwrap();
 	let _after = AfterAssert::cleanup(&[&cwd_authors_file_path]);
@@ -57,12 +58,12 @@ fn should_fetch_all_available_authors() {
 
 	assert_eq!(
 		actual_authors,
-		Vec::from([
+		[
 			Author::new("a", "Name Surname", "someone@users.noreply.github.com"),
 			Author::new("b", "username", "something@gmail.com"),
 			Author::new("b", "username2", "something2@gmail.com"),
 			Author::new("ab", "Another Surname", "someone@something.hi"),
-		])
+		]
 	);
 }
 
@@ -76,7 +77,7 @@ fn should_fetch_authors_based_on_alias() {
 
 	assert_eq!(
 		actual_author,
-		Vec::from([Author::new(alias, "Name Surname", "someone@users.noreply.github.com")])
+		[Author::new(alias, "Name Surname", "someone@users.noreply.github.com")]
 	);
 }
 
@@ -90,10 +91,10 @@ fn should_fetch_all_authors_for_a_given_alias() {
 
 	assert_eq!(
 		actual_authors,
-		Vec::from([
+		[
 			Author::new(alias, "username", "something@gmail.com"),
 			Author::new(alias, "username2", "something2@gmail.com"),
-		])
+		]
 	);
 }
 
@@ -105,23 +106,5 @@ fn should_return_an_empty_list_if_no_author_mathces_alias() {
 	let alias = "z";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));
 
-	assert_eq!(actual_authors, Vec::from([]));
-}
-
-struct AfterAssert {
-	files: Vec<String>,
-}
-impl AfterAssert {
-	pub fn cleanup(files: &[&str]) -> Self {
-		Self {
-			files: files.iter().map(|f| f.to_string()).collect(),
-		}
-	}
-}
-impl Drop for AfterAssert {
-	fn drop(&mut self) {
-		for file in &self.files {
-			fs::remove_file(file).unwrap()
-		}
-	}
+	assert_eq!(actual_authors, []);
 }

@@ -5,6 +5,7 @@ use serial_test::serial;
 use crate::{
 	authors::{self, author::Author},
 	conf,
+	test_utils::file_cleanup::AfterAssert,
 };
 
 #[test]
@@ -26,28 +27,10 @@ fn authors_module_should_setup_repo_from_given_file_path_if_present() {
 	let result = authors::fs_setup_from_file(conf::dummy_data());
 
 	assert!(result.is_ok_and(|service| service.all_available()
-		== Vec::from([
+		== [
 			Author::new("a", "Name Surname", "someone@users.noreply.github.com"),
 			Author::new("b", "username", "something@gmail.com"),
 			Author::new("b", "username2", "something2@gmail.com"),
 			Author::new("ab", "Another Surname", "someone@something.hi"),
-		])));
-}
-
-struct AfterAssert {
-	files: Vec<String>,
-}
-impl AfterAssert {
-	pub fn cleanup(files: &[&str]) -> Self {
-		Self {
-			files: files.iter().map(|f| f.to_string()).collect(),
-		}
-	}
-}
-impl Drop for AfterAssert {
-	fn drop(&mut self) {
-		for file in &self.files {
-			fs::remove_file(file).unwrap()
-		}
-	}
+		]));
 }

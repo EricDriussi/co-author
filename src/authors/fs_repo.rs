@@ -26,11 +26,11 @@ impl FSRepo {
 			return Ok(Self { src: local_file });
 		}
 
-		let file = PathBuf::from(conf::authors_file_path());
-		match file.is_file() {
-			true => Ok(Self { src: file }),
-			false => Err(AuthorError::with("No file found!".to_string())),
+		let default_file = PathBuf::from(conf::authors_file_path());
+		if default_file.is_file() {
+			return Ok(Self { src: default_file });
 		}
+		Err(AuthorError::with("No file found!".to_string()))
 	}
 
 	pub fn from(authors_file: String) -> Result<Self, Box<dyn Error>> {
@@ -60,12 +60,10 @@ impl FSRepo {
 
 	fn parse_author(line: &str) -> Option<Author> {
 		let fields: Vec<&str> = line.split(',').collect();
-
-		if fields.len() == 3 {
-			Some(Author::new(fields[0], fields[1], fields[2]))
-		} else {
-			None
+		if fields.len() != 3 {
+			return None;
 		}
+		Some(Author::new(fields[0], fields[1], fields[2]))
 	}
 
 	fn extract_mathcing_authors_from_lines(alias: String, valid_lines: &[String], matching_authors: &mut Vec<Author>) {
@@ -110,7 +108,7 @@ mod test {
 
 	#[test]
 	fn should_read_lines() {
-		let repo = FSRepo::from("src/authors/test/data/dummy_data".to_string()).unwrap();
+		let repo = FSRepo::from(conf::dummy_data()).unwrap();
 		let contents = repo.read_lines();
 
 		assert!(contents.is_some());
