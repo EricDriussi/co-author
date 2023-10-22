@@ -11,7 +11,7 @@ pub mod cli;
 pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Box<dyn Error>> {
 	let authors_service = match &args.file {
 		Some(file) => authors::fs_setup_from_file(file.to_string())?,
-		None => authors::fs_default_setup()?,
+		None => authors::new_fs_default_setup()?,
 	};
 
 	if args.all {

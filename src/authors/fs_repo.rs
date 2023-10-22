@@ -19,14 +19,6 @@ pub struct FSRepo {
 }
 
 impl FSRepo {
-	pub fn default(default_authors_file: String) -> Result<Self, Box<dyn Error>> {
-		let default_file = PathBuf::from(default_authors_file);
-		match default_file.is_file() {
-			true => Ok(Self { src: default_file }),
-			false => Self::try_with_local_file(),
-		}
-	}
-
 	pub fn new_default() -> Result<Self, Box<dyn Error>> {
 		let mut local_file = env::current_dir().unwrap();
 		local_file.push(conf::authors_file_name());
@@ -49,16 +41,6 @@ impl FSRepo {
 				"No file at path {:?}",
 				path.to_str().unwrap()
 			))),
-		}
-	}
-
-	fn try_with_local_file() -> Result<FSRepo, Box<dyn Error>> {
-		let mut local_file = env::current_dir().unwrap();
-		// FIXME: extract to config
-		local_file.push("authors");
-		match local_file.is_file() {
-			true => Ok(Self { src: local_file }),
-			false => Err(AuthorError::with("No file found!".to_string())),
 		}
 	}
 

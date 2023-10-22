@@ -1,30 +1,53 @@
+use std::fs;
+
 use serial_test::serial;
 
 use crate::{
-	authors::{self, fs_repo::FSRepo, service::AuthorsService},
+	authors::{self, author::Author},
 	conf,
 };
 
 #[test]
-fn authors_service_returns_stored_authors_signatures() {
-	let repo = FSRepo::from(conf::dummy_data()).unwrap();
-	let app_service = AuthorsService::new(repo);
-
-	let authors = app_service.signatures_of(Vec::from([String::from("a")]));
-
-	assert_eq!(authors.len(), 1);
-}
-
-#[test]
-#[ignore]
-fn authors_crate_setup_works_when_an_authors_file_is_found() {
-	let valid_authors_file = conf::authors_file_path();
-
-	assert!(authors::fs_setup_from_file(valid_authors_file).is_ok());
-}
-
-#[test]
 #[serial]
-fn authors_crate_fails_to_set_up_if_no_authors_file_is_found() {
-	assert!(authors::fs_setup_from_file("no_file_here".to_string()).is_err());
+fn authors_module_should_setup_repo_from_default_file_path_if_present() {
+	assert!(authors::new_fs_default_setup().is_err());
+
+	let default_authors_file_path = conf::authors_file_path();
+	fs::File::create(&default_authors_file_path).unwrap();
+	let _after = AfterAssert::cleanup(&[default_authors_file_path.as_str()]);
+
+	assert!(authors::new_fs_default_setup().is_ok());
+}
+
+#[test]
+fn authors_module_should_setup_repo_from_given_file_path_if_present() {
+	assert!(authors::fs_setup_from_file("/tmp/not_real".to_string()).is_err());
+
+	let result = authors::fs_setup_from_file(conf::dummy_data());
+
+	assert!(result.is_ok_and(|service| service.all_available()
+		== Vec::from([
+			Author::new("a", "Name Surname", "someone@users.noreply.github.com"),
+			Author::new("b", "username", "something@gmail.com"),
+			Author::new("b", "username2", "something2@gmail.com"),
+			Author::new("ab", "Another Surname", "someone@something.hi"),
+		])));
+}
+
+struct AfterAssert {
+	files: Vec<String>,
+}
+impl AfterAssert {
+	pub fn cleanup(files: &[&str]) -> Self {
+		Self {
+			files: files.iter().map(|f| f.to_string()).collect(),
+		}
+	}
+}
+impl Drop for AfterAssert {
+	fn drop(&mut self) {
+		for file in &self.files {
+			fs::remove_file(file).unwrap()
+		}
+	}
 }
