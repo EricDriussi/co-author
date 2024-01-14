@@ -8,7 +8,7 @@ use co_author::{args::Args, cli::FancyCli, handle_authors, handle_commit_msg};
 // TODO: review optional/result handling
 // TODO: fix bug with first commit in new repo
 // TODO: automatically create on the fly aliases for authors
-// TODO: add amend option -> update authors of last commit if no message, update message if no authors, normal amend if no message nor author
+// TODO: add amend option -> update authors if given and update message if given (how does this work with --editor?)
 // TODO: use with fzf or add fuzzy finding
 
 fn main() {
@@ -44,6 +44,14 @@ fn set_cwd_to_git_root() -> Result<(), Box<dyn Error>> {
 	let project_root_dir = get_project_root_dir().ok_or("Not in a valid git repo")?;
 	env::set_current_dir(project_root_dir).map_err(|_| "Something went wrong".into())
 }
+
+// TODO: eval if this should be used to get the root dir, maybe expose it from the git module
+// How does this differ from open()?
+// let repo = Repository::discover(".")?;
+// Get the path to the .git directory
+// let git_dir = repo.path();
+// The parent of the .git directory is the root of the repository
+// let root_dir = git_dir.parent().unwrap();
 
 fn get_project_root_dir() -> Option<PathBuf> {
 	let mut cwd = env::current_dir().ok()?;
