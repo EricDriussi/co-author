@@ -11,12 +11,13 @@ pub mod cli;
 
 pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Box<dyn Error>> {
 	let authors_service = match &args.file {
-		Some(file) => authors::fs_setup_from_file(file.to_string())?,
-		None => authors::new_fs_default_setup()?,
+		Some(file) => authors::from_file(file.to_string())?,
+		None => authors::default()?,
 	};
 
 	if args.all {
 		return match args.sort {
+			// TODO: get sorted from service
 			true => Ok(sort(authors_service.all_signatures())),
 			false => Ok(authors_service.all_signatures()),
 		};
@@ -44,6 +45,7 @@ pub fn handle_commit_msg(args: &Args, cli: &mut impl Cli, prev: String) -> Resul
 	}
 }
 
+// TODO: Don't mutate
 pub fn sort<String: Ord>(mut vector: Vec<String>) -> Vec<String> {
 	vector.sort();
 	vector

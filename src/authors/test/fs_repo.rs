@@ -16,7 +16,7 @@ fn should_connect_to_an_authors_file_in_cwd_if_available() {
 	fs::File::create(cwd_authors_file_path.clone()).unwrap();
 	let _after = AfterAssert::cleanup(&[&cwd_authors_file_path]);
 
-	assert!(FSRepo::new_default().is_ok());
+	assert!(FSRepo::from_cwd_with_home_fallback().is_ok());
 }
 
 #[test]
@@ -26,13 +26,13 @@ fn should_connect_to_the_default_authors_file_if_no_file_is_available_in_cwd() {
 	fs::File::create(&default_authors_file_path).unwrap();
 	let _after = AfterAssert::cleanup(&[default_authors_file_path.as_str()]);
 
-	assert!(FSRepo::new_default().is_ok());
+	assert!(FSRepo::from_cwd_with_home_fallback().is_ok());
 }
 
 #[test]
 #[serial]
 fn should_error_when_neither_cwd_or_default_authors_file_are_available() {
-	assert!(FSRepo::new_default().is_err());
+	assert!(FSRepo::from_cwd_with_home_fallback().is_err());
 }
 
 #[test]
@@ -59,10 +59,10 @@ fn should_fetch_all_available_authors() {
 	assert_eq!(
 		actual_authors,
 		[
-			Author::new("a", "Name Surname", "someone@users.noreply.github.com"),
-			Author::new("b", "username", "something@gmail.com"),
-			Author::new("b", "username2", "something2@gmail.com"),
-			Author::new("ab", "Another Surname", "someone@something.hi"),
+			Author::from("a", "Name Surname", "someone@users.noreply.github.com"),
+			Author::from("b", "username", "something@gmail.com"),
+			Author::from("b", "username2", "something2@gmail.com"),
+			Author::from("ab", "Another Surname", "someone@something.hi"),
 		]
 	);
 }
@@ -77,7 +77,7 @@ fn should_fetch_authors_based_on_alias() {
 
 	assert_eq!(
 		actual_author,
-		[Author::new(alias, "Name Surname", "someone@users.noreply.github.com")]
+		[Author::from(alias, "Name Surname", "someone@users.noreply.github.com")]
 	);
 }
 
@@ -92,8 +92,8 @@ fn should_fetch_all_authors_for_a_given_alias() {
 	assert_eq!(
 		actual_authors,
 		[
-			Author::new(alias, "username", "something@gmail.com"),
-			Author::new(alias, "username2", "something2@gmail.com"),
+			Author::from(alias, "username", "something@gmail.com"),
+			Author::from(alias, "username2", "something2@gmail.com"),
 		]
 	);
 }

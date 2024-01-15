@@ -38,7 +38,7 @@ impl MockRepo {
 	}
 
 	fn hardcoded_authors() -> Vec<Author> {
-		Vec::from([Author::new("a", "John", "Doe"), Author::new("b", "Jane", "Smith")])
+		Vec::from([Author::from("a", "John", "Doe"), Author::from("b", "Jane", "Smith")])
 	}
 }
 

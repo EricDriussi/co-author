@@ -1,10 +1,13 @@
-use std::error::Error;
+use std::{
+	error::Error,
+	fmt::{Display, Formatter, Result},
+};
 
 #[derive(Debug)]
 pub struct AuthorError(String);
 
-impl std::fmt::Display for AuthorError {
-	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl Display for AuthorError {
+	fn fmt(&self, f: &mut Formatter) -> Result {
 		write!(f, "AUTHORS: {}", self.0)
 	}
 }

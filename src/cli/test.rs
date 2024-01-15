@@ -47,7 +47,7 @@ fn should_parse_an_empty_list_of_aliases() {
 
 #[test]
 fn should_format_authors_for_prompt() {
-	let author = Author::new("alias", "name", "email");
+	let author = Author::from("alias", "name", "email");
 	let prompt = FancyCli::format_author(&author);
 	assert_eq!(strip_ansi::strip_ansi(prompt.as_str()), "⦔ alias -> name");
 }

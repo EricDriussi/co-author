@@ -6,7 +6,7 @@ pub struct Author {
 }
 
 impl Author {
-	pub fn new(alias: &str, name: &str, email: &str) -> Self {
+	pub fn from(alias: &str, name: &str, email: &str) -> Self {
 		Self {
 			alias: String::from(alias),
 			name: String::from(name),

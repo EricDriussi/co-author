@@ -5,7 +5,7 @@ fn setup_author() -> Author {
 	let alias = "a";
 	let name = "alice";
 	let email = "alice@wonderland.not";
-	Author::new(alias, name, email)
+	Author::from(alias, name, email)
 }
 
 #[test]
@@ -28,17 +28,17 @@ fn should_provide_a_name_getter() {
 
 #[test]
 fn should_be_equal_to_another_author_with_equal_data() {
-	let author = Author::new("a", "alice", "alice@wonderland.not");
-	let same_author = Author::new("a", "alice", "alice@wonderland.not");
+	let author = Author::from("a", "alice", "alice@wonderland.not");
+	let same_author = Author::from("a", "alice", "alice@wonderland.not");
 	assert_eq!(author, same_author)
 }
 
 #[parameterized(different_author = {
-	Author::new("b", "alice", "alice@wonderland.not"),
-	Author::new("a", "not_alice", "alice@wonderland.not"),
-	Author::new("a", "alice", "someone@wonderland.not")
+	Author::from("b", "alice", "alice@wonderland.not"),
+	Author::from("a", "not_alice", "alice@wonderland.not"),
+	Author::from("a", "alice", "someone@wonderland.not")
 })]
 fn should_not_be_equal_to_another_author_with_different_data(different_author: Author) {
-	let author = Author::new("a", "alice", "alice@wonderland.not");
+	let author = Author::from("a", "alice", "alice@wonderland.not");
 	assert_ne!(author, different_author)
 }

@@ -9,15 +9,15 @@ mod author_err;
 pub mod fs_repo;
 pub mod service;
 
-pub fn fs_setup_from_file(authors_file: String) -> Result<AuthorsService<FSRepo>, Box<dyn Error>> {
+pub fn from_file(authors_file: String) -> Result<AuthorsService<FSRepo>, Box<dyn Error>> {
 	match FSRepo::from(authors_file) {
 		Ok(repo) => Ok(AuthorsService::new(repo)),
 		Err(e) => Err(AuthorError::with(format!("Couldn't load file: {}", e))),
 	}
 }
 
-pub fn new_fs_default_setup() -> Result<AuthorsService<FSRepo>, Box<dyn Error>> {
-	match FSRepo::new_default() {
+pub fn default() -> Result<AuthorsService<FSRepo>, Box<dyn Error>> {
+	match FSRepo::from_cwd_with_home_fallback() {
 		Ok(repo) => Ok(AuthorsService::new(repo)),
 		Err(e) => Err(AuthorError::with(format!("Couldn't load file: {}", e))),
 	}
