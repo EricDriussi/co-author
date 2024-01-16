@@ -1,35 +1,40 @@
 use crate::authors::author::Author;
 use parameterized::parameterized;
 
-fn setup_author() -> Author {
-	let alias = "a";
-	let name = "alice";
-	let email = "alice@wonderland.not";
-	Author::from(alias, name, email)
-}
-
 #[test]
 fn should_present_the_correct_signature() {
-	let author = setup_author();
-	assert_eq!(author.signature(), "Co-authored-by: alice <alice@wonderland.not>");
+	let name = "alice";
+	let email = "alice@wonderland.not";
+	let author = Author::from("a", name, email);
+
+	assert_eq!(author.signature(), format!("Co-Authored-by: {} <{}>", name, email));
 }
 
 #[test]
 fn should_provide_an_alias_getter() {
-	let author = setup_author();
-	assert_eq!(author.alias(), "a");
+	let alias = "a";
+	let author = Author::from(alias, "alice", "alice@wonderland.not");
+
+	assert_eq!(author.alias(), alias);
 }
 
 #[test]
 fn should_provide_a_name_getter() {
-	let author = setup_author();
-	assert_eq!(author.name(), "alice");
+	let name = "alice";
+	let author = Author::from("a", name, "alice@wonderland.not");
+
+	assert_eq!(author.name(), name);
 }
 
 #[test]
 fn should_be_equal_to_another_author_with_equal_data() {
-	let author = Author::from("a", "alice", "alice@wonderland.not");
-	let same_author = Author::from("a", "alice", "alice@wonderland.not");
+	let alias = "a";
+	let name = "alice";
+	let email = "alice@wonderland.not";
+
+	let author = Author::from(alias, name, email);
+	let same_author = Author::from(alias, name, email);
+
 	assert_eq!(author, same_author)
 }
 
@@ -39,6 +44,5 @@ fn should_be_equal_to_another_author_with_equal_data() {
 	Author::from("a", "alice", "someone@wonderland.not")
 })]
 fn should_not_be_equal_to_another_author_with_different_data(different_author: Author) {
-	let author = Author::from("a", "alice", "alice@wonderland.not");
-	assert_ne!(author, different_author)
+	assert_ne!(Author::from("a", "alice", "alice@wonderland.not"), different_author)
 }

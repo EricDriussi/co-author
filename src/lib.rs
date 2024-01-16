@@ -30,7 +30,7 @@ pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Bo
 		};
 	}
 
-	let aliases = cli.ask_for_aliases(authors_service.all_available())?;
+	let aliases = cli.ask_for_aliases(authors_service.all_authors())?;
 	match args.sort {
 		true => Ok(sort(authors_service.signatures_of(aliases))),
 		false => Ok(authors_service.signatures_of(aliases)),

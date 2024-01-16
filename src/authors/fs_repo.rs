@@ -12,6 +12,7 @@ use crate::conf;
 use super::{
 	author::{Author, AuthorsRepo},
 	author_err::AuthorError,
+	csv_mapper::CsvMapper,
 };
 
 pub struct FSRepo {
@@ -58,17 +59,9 @@ impl FSRepo {
 		})
 	}
 
-	fn parse_author(line: &str) -> Option<Author> {
-		let fields: Vec<&str> = line.split(',').collect();
-		if fields.len() != 3 {
-			return None;
-		}
-		Some(Author::from(fields[0], fields[1], fields[2]))
-	}
-
 	fn extract_author(line: &str, aliases: &[&str]) -> Option<Author> {
 		if Self::line_contains_any_alias(line, aliases) {
-			Self::parse_author(line)
+			CsvMapper::to_author(line)
 		} else {
 			None
 		}
@@ -104,7 +97,7 @@ impl AuthorsRepo for FSRepo {
 			None => Vec::new(),
 			Some(lines) => lines
 				.map_while(Result::ok)
-				.filter_map(|line| Self::parse_author(line.as_str()))
+				.filter_map(|line| CsvMapper::to_author(line.as_str()))
 				.collect(),
 		}
 	}
@@ -129,15 +122,6 @@ mod test {
 
 		let no_matching_alias = !FSRepo::line_contains_any_alias("b,Jane,Dane", &["a"]);
 		assert!(no_matching_alias);
-	}
-
-	#[test]
-	fn should_parse_author() {
-		let valid_result = FSRepo::parse_author("j,John,email");
-		assert!(valid_result.is_some_and(|a| a == Author::from("j", "John", "email")));
-
-		let invalid_result = FSRepo::parse_author("hi,invalid_line");
-		assert!(invalid_result.is_none());
 	}
 
 	#[test]

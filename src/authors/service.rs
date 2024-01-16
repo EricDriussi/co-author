@@ -9,7 +9,7 @@ impl<T: AuthorsRepo> AuthorsService<T> {
 		Self { repo }
 	}
 
-	pub fn all_available(&self) -> Vec<Author> {
+	pub fn all_authors(&self) -> Vec<Author> {
 		self.repo.all()
 	}
 

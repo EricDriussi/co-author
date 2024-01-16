@@ -6,6 +6,7 @@ use service::AuthorsService;
 
 pub mod author;
 mod author_err;
+mod csv_mapper;
 pub mod fs_repo;
 pub mod service;
 

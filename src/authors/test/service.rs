@@ -26,7 +26,7 @@ fn should_find_all_authors_signatures() {
 #[test]
 fn should_get_all_available_authors() {
 	let author_service = AuthorsService::new(MockRepo::new());
-	let actual_authors = author_service.all_available();
+	let actual_authors = author_service.all_authors();
 	assert_eq!(actual_authors, MockRepo::hardcoded_authors());
 }
 

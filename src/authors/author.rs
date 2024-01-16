@@ -15,15 +15,15 @@ impl Author {
 	}
 
 	pub fn signature(&self) -> String {
-		format!("Co-authored-by: {} <{}>", self.name, self.email)
+		format!("Co-Authored-by: {} <{}>", self.name, self.email)
 	}
 
-	pub fn alias(&self) -> &String {
-		&self.alias
+	pub fn alias(&self) -> String {
+		self.alias.clone()
 	}
 
-	pub fn name(&self) -> &String {
-		&self.name
+	pub fn name(&self) -> String {
+		self.name.clone()
 	}
 }
 

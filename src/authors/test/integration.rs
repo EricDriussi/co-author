@@ -26,7 +26,7 @@ fn authors_module_should_setup_repo_from_given_file_path_if_present() {
 
 	let result = authors::from_file(conf::dummy_data());
 
-	assert!(result.is_ok_and(|service| service.all_available()
+	assert!(result.is_ok_and(|service| service.all_authors()
 		== [
 			Author::from("a", "Name Surname", "someone@users.noreply.github.com"),
 			Author::from("b", "username", "something@gmail.com"),
