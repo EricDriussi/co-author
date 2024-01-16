@@ -9,7 +9,7 @@ fn should_map_from_valid_csv_line() {
 
 	let author_from_csv = CsvMapper::to_author(format!("{},{},{}", alias, name, email).as_str());
 
-	assert_eq!(author_from_csv.unwrap(), Author::from(alias, name, email));
+	assert_eq!(author_from_csv, Some(Author::from(alias, name, email)));
 }
 
 #[test]
