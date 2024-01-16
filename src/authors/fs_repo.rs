@@ -51,7 +51,7 @@ impl FSRepo {
 		}
 	}
 
-	fn line_contains_any_alias(line: &str, aliases: &[String]) -> bool {
+	fn line_contains_any_alias(line: &str, aliases: &[&str]) -> bool {
 		aliases.iter().any(|given_alias| {
 			let found_alias: &str = line.split(',').collect::<Vec<&str>>()[0];
 			given_alias.eq_ignore_ascii_case(found_alias.trim())
@@ -66,7 +66,7 @@ impl FSRepo {
 		Some(Author::from(fields[0], fields[1], fields[2]))
 	}
 
-	fn extract_author(line: &str, aliases: &[String]) -> Option<Author> {
+	fn extract_author(line: &str, aliases: &[&str]) -> Option<Author> {
 		if Self::line_contains_any_alias(line, aliases) {
 			Self::parse_author(line)
 		} else {
@@ -74,10 +74,10 @@ impl FSRepo {
 		}
 	}
 
-	fn extract_mathcing_authors_from_lines(alias: String, valid_lines: &[String]) -> Vec<Author> {
+	fn extract_mathcing_authors_from_lines(alias: &str, valid_lines: &[String]) -> Vec<Author> {
 		let mut matching_authors: Vec<Author> = Vec::new();
 		valid_lines.iter().for_each(|line| {
-			if let Some(author) = Self::extract_author(line, &[alias.clone()]) {
+			if let Some(author) = Self::extract_author(line, &[alias]) {
 				matching_authors.push(author);
 			}
 		});
@@ -91,14 +91,10 @@ impl AuthorsRepo for FSRepo {
 			None => Vec::new(),
 			Some(lines) => {
 				let valid_lines = lines.map_while(Result::ok).collect::<Vec<_>>();
-				let mut matching_authors: Vec<Author> = Vec::new();
-				aliases.iter().for_each(|alias| {
-					matching_authors.append(&mut Self::extract_mathcing_authors_from_lines(
-						alias.clone(),
-						&valid_lines,
-					));
-				});
-				matching_authors
+				aliases
+					.iter()
+					.flat_map(|alias| Self::extract_mathcing_authors_from_lines(alias.as_str(), &valid_lines))
+					.collect()
 			}
 		}
 	}
@@ -128,10 +124,10 @@ mod test {
 
 	#[test]
 	fn should_filter_by_alias() {
-		let matching_alias = FSRepo::line_contains_any_alias("a,John,Doe", &[String::from("a")]);
+		let matching_alias = FSRepo::line_contains_any_alias("a,John,Doe", &["a"]);
 		assert!(matching_alias);
 
-		let no_matching_alias = !FSRepo::line_contains_any_alias("b,Jane,Dane", &[String::from("a")]);
+		let no_matching_alias = !FSRepo::line_contains_any_alias("b,Jane,Dane", &["a"]);
 		assert!(no_matching_alias);
 	}
 
@@ -146,17 +142,17 @@ mod test {
 
 	#[test]
 	fn should_extract_author() {
-		let valid_result = FSRepo::extract_author("j,John,email", &[String::from("j")]);
+		let valid_result = FSRepo::extract_author("j,John,email", &["j"]);
 		assert!(valid_result.is_some_and(|a| a == Author::from("j", "John", "email")));
 
-		let invalid_result = FSRepo::extract_author("a,alice,gmail", &[String::from("j")]);
+		let invalid_result = FSRepo::extract_author("a,alice,gmail", &["j"]);
 		assert!(invalid_result.is_none());
 	}
 
 	#[test]
 	fn should_extract_mathcing_authors_from_lines() {
 		let matching_authors: Vec<Author> = FSRepo::extract_mathcing_authors_from_lines(
-			"j".to_string(),
+			"j",
 			&["j,John,email".to_string(), "a,alice,gmail".to_string()],
 		);
 
