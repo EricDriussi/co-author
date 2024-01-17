@@ -36,7 +36,7 @@ impl PartialEq for Author {
 	}
 }
 
-pub trait AuthorsRepo {
+pub trait AuthorsProvider {
 	fn find(&self, aliases: Vec<String>) -> Vec<Author>;
 	fn all(&self) -> Vec<Author>;
 }

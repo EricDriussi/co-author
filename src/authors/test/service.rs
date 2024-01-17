@@ -1,5 +1,5 @@
 use crate::authors::{
-	author::{Author, AuthorsRepo},
+	author::{Author, AuthorsProvider},
 	service::AuthorsService,
 };
 
@@ -42,7 +42,7 @@ impl MockRepo {
 	}
 }
 
-impl AuthorsRepo for MockRepo {
+impl AuthorsProvider for MockRepo {
 	fn find(&self, aliases: Vec<String>) -> Vec<Author> {
 		let mut authors = Vec::new();
 		if aliases.contains(&"a".to_string()) {

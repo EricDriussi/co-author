@@ -1,10 +1,10 @@
-use super::author::{Author, AuthorsRepo};
+use super::author::{Author, AuthorsProvider};
 
-pub struct AuthorsService<T: AuthorsRepo> {
+pub struct AuthorsService<T: AuthorsProvider> {
 	repo: T,
 }
 
-impl<T: AuthorsRepo> AuthorsService<T> {
+impl<T: AuthorsProvider> AuthorsService<T> {
 	pub fn new(repo: T) -> Self {
 		Self { repo }
 	}

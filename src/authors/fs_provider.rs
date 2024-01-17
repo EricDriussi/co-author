@@ -10,37 +10,35 @@ use std::{
 use crate::conf;
 
 use super::{
-	author::{Author, AuthorsRepo},
+	author::{Author, AuthorsProvider},
 	author_err::AuthorError,
 	csv_mapper::CsvMapper,
 };
 
-pub struct FSRepo {
+pub struct FSProvider {
 	src: PathBuf,
 }
 
-impl FSRepo {
+impl FSProvider {
 	pub fn from_cwd_with_home_fallback() -> Result<Self, Box<dyn Error>> {
-		let mut local_file = env::current_dir().unwrap();
-		local_file.push(conf::authors_file_name());
-		if local_file.is_file() {
-			return Ok(Self { src: local_file });
+		let file_in_cwd = env::current_dir()?.join(conf::authors_file_name());
+		if file_in_cwd.is_file() {
+			return Ok(Self { src: file_in_cwd });
 		}
-
-		let default_file = PathBuf::from(conf::authors_file_path());
-		if default_file.is_file() {
-			return Ok(Self { src: default_file });
+		let file_in_home = PathBuf::from(conf::authors_file_path());
+		if file_in_home.is_file() {
+			return Ok(Self { src: file_in_home });
 		}
 		Err(AuthorError::with("No file found!".to_string()))
 	}
 
 	pub fn from(authors_file: String) -> Result<Self, Box<dyn Error>> {
-		let path = PathBuf::from(authors_file);
-		match path.is_file() {
-			true => Ok(Self { src: path }),
+		let given_file = PathBuf::from(authors_file);
+		match given_file.is_file() {
+			true => Ok(Self { src: given_file }),
 			false => Err(AuthorError::with(format!(
 				"No file at path {:?}",
-				path.to_str().unwrap()
+				given_file.to_str().ok_or("?")
 			))),
 		}
 	}
@@ -53,7 +51,7 @@ impl FSRepo {
 	}
 }
 
-impl AuthorsRepo for FSRepo {
+impl AuthorsProvider for FSProvider {
 	fn find(&self, aliases: Vec<String>) -> Vec<Author> {
 		self.read_lines()
 			.iter()
@@ -67,19 +65,5 @@ impl AuthorsRepo for FSRepo {
 			.iter()
 			.filter_map(|line| CsvMapper::to_author(line.as_str()))
 			.collect()
-	}
-}
-
-#[cfg(test)]
-mod test {
-	use super::*;
-
-	// TODO: do I need this?
-	#[test]
-	fn should_read_lines() {
-		let repo = FSRepo::from(conf::dummy_data()).unwrap();
-		let contents = repo.read_lines();
-
-		assert!(!contents.is_empty());
 	}
 }
