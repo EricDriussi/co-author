@@ -1,5 +1,6 @@
 use crate::conf;
 use crate::test_utils::file_cleanup::AfterAssert;
+use crate::test_utils::set_test_env;
 
 use std::fs;
 
@@ -12,6 +13,7 @@ use crate::authors::fs_provider::FSProvider;
 #[test]
 #[serial]
 fn should_connect_to_an_authors_file_in_cwd_if_available() {
+	set_test_env();
 	let cwd_authors_file_path = conf::authors_file_name();
 	fs::File::create(cwd_authors_file_path.clone()).unwrap();
 	let _after = AfterAssert::cleanup(&[&cwd_authors_file_path]);
@@ -22,6 +24,7 @@ fn should_connect_to_an_authors_file_in_cwd_if_available() {
 #[test]
 #[serial]
 fn should_connect_to_the_default_authors_file_if_no_file_is_available_in_cwd() {
+	set_test_env();
 	let default_authors_file_path = conf::authors_file_path();
 	fs::File::create(&default_authors_file_path).unwrap();
 	let _after = AfterAssert::cleanup(&[default_authors_file_path.as_str()]);
@@ -32,11 +35,13 @@ fn should_connect_to_the_default_authors_file_if_no_file_is_available_in_cwd() {
 #[test]
 #[serial]
 fn should_error_when_neither_cwd_or_default_authors_file_are_available() {
+	set_test_env();
 	assert!(FSProvider::from_cwd_with_home_fallback().is_err());
 }
 
 #[test]
 fn should_connect_to_a_given_existing_authors_file() {
+	set_test_env();
 	let an_authors_file_path = "/tmp/an_authors_file";
 	fs::File::create(an_authors_file_path).unwrap();
 	let _after = AfterAssert::cleanup(&[an_authors_file_path]);
@@ -46,11 +51,13 @@ fn should_connect_to_a_given_existing_authors_file() {
 
 #[test]
 fn should_not_connect_to_a_given_non_existing_file() {
+	set_test_env();
 	assert!(FSProvider::from("/tmp/no_file_here".to_string()).is_err());
 }
 
 #[test]
 fn should_fetch_all_available_authors() {
+	set_test_env();
 	let an_authors_file_path = conf::dummy_data();
 	let repo = FSProvider::from(an_authors_file_path.to_string()).unwrap();
 
@@ -69,6 +76,7 @@ fn should_fetch_all_available_authors() {
 
 #[test]
 fn should_fetch_authors_based_on_alias() {
+	set_test_env();
 	let an_authors_file_path = conf::dummy_data();
 	let repo = FSProvider::from(an_authors_file_path.to_string()).unwrap();
 
@@ -83,6 +91,7 @@ fn should_fetch_authors_based_on_alias() {
 
 #[test]
 fn should_fetch_all_authors_for_a_given_alias() {
+	set_test_env();
 	let an_authors_file_path = conf::dummy_data();
 	let repo = FSProvider::from(an_authors_file_path.to_string()).unwrap();
 
@@ -100,6 +109,7 @@ fn should_fetch_all_authors_for_a_given_alias() {
 
 #[test]
 fn should_return_an_empty_list_if_no_author_mathces_alias() {
+	set_test_env();
 	let an_authors_file_path = conf::dummy_data();
 	let repo = FSProvider::from(an_authors_file_path.to_string()).unwrap();
 

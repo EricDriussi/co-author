@@ -1,20 +1,22 @@
 use std::env;
 
-use config::Config;
+use config::{Config, Environment, File, FileFormat};
 
 const DEFAULT_CONFIG: &str = include_str!("configs/default.yaml");
 const TEST_CONFIG: &str = include_str!("configs/test.yaml");
 
 pub fn authors_file_path() -> String {
-	let path = get_config().get::<String>("authors_file_path").unwrap();
-	let file = authors_file_name();
-	let raw_config_string = format!("{}{}", path, file);
-	let base = "BASE_PATH";
+	let path_to_config_dir = get_config().get::<String>("authors_file_path").unwrap();
+	let file_name = authors_file_name();
+	let full_file_path = format!("{}{}", path_to_config_dir, file_name);
+	let home_placeholder = "PLACEHOLDER";
 	match env::var("XDG_CONFIG_HOME") {
-		Ok(env_var) => raw_config_string.replace(&format!("${}", base), &env_var),
+		Ok(env_home_var) => full_file_path.replace(&format!("${}", home_placeholder), &env_home_var),
 		Err(_) => match env::var("HOME") {
-			Ok(env_var) => raw_config_string.replace(&format!("${}", base), &format!("{}/.config", env_var)),
-			Err(_) => panic!("Your $HOME is not set, can't locate authors file!"),
+			Ok(env_home_var) => {
+				full_file_path.replace(&format!("${}", home_placeholder), &format!("{}/.config", env_home_var))
+			}
+			Err(_) => panic!("Your $HOME is not set, can't locate default authors file!"),
 		},
 	}
 }
@@ -35,19 +37,24 @@ pub fn editmsg() -> String {
 	get_config().get::<String>("editmsg").unwrap()
 }
 
-pub fn get_config() -> Config {
-	let config_file = if let Ok(test_env) = env::var("COA_ENV") {
-		if test_env == "test" {
-			TEST_CONFIG
-		} else {
-			DEFAULT_CONFIG
-		}
-	} else {
-		DEFAULT_CONFIG
-	};
+fn get_config() -> Config {
+	let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "default".to_string());
 
-	Config::builder()
-		.add_source(config::File::from_str(config_file, config::FileFormat::Yaml))
-		.build()
-		.unwrap()
+	match run_mode.as_str() {
+		"test" => Config::builder()
+			.add_source(File::from_str(DEFAULT_CONFIG, FileFormat::Yaml))
+			// optional config, overrides default
+			.add_source(File::from_str(TEST_CONFIG, FileFormat::Yaml))
+			// allow settings from the environment (with a prefix of APP)
+			.add_source(Environment::with_prefix("app"))
+			.build()
+			.unwrap(),
+
+		_ => Config::builder()
+			.add_source(File::from_str(DEFAULT_CONFIG, FileFormat::Yaml))
+			// allow settings from the environment (with a prefix of APP)
+			.add_source(Environment::with_prefix("app"))
+			.build()
+			.unwrap(),
+	}
 }

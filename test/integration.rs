@@ -1,4 +1,5 @@
 use std::error::Error;
+// TODO: these tests are being ignored
 
 use co_author::{args::Args, authors::author::Author, cli::Cli, handle_authors, handle_commit_msg};
 
