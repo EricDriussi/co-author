@@ -1,6 +1,6 @@
 use clap::Parser;
 
-/// Co-author your git commits
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {

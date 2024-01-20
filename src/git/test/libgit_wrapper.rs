@@ -18,14 +18,14 @@ const REPO_PATH: &str = "/var/tmp/coa";
 fn should_determine_if_is_valid_git_repo() {
 	let git_repo = init_repo(REPO_PATH);
 
-	let repo_with_no_staged_changes = LibGitWrapper::from(PathBuf::from(REPO_PATH));
+	let repo_with_no_staged_changes = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
 	assert!(repo_with_no_staged_changes.is_err());
 
 	create_and_add_file_to_git_tree(&git_repo, "foo");
-	let valid_repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
+	let valid_repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
 	assert!(valid_repo.is_ok());
 
-	let invalid_repo = LibGitWrapper::from(PathBuf::from("/path"));
+	let invalid_repo = LibGitWrapper::from(&PathBuf::from("/path"));
 	assert!(invalid_repo.is_err());
 }
 
@@ -36,7 +36,7 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 	let git_repo = init_repo(REPO_PATH);
 	create_and_add_file_to_git_tree(&git_repo, "foo");
 
-	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
+	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
 	assert!(repo.is_ok());
 	let authors = vec!["random author".to_string()];
 	let commit_body = CommitBody::new("irrelevant message", authors);
@@ -55,7 +55,7 @@ fn should_error_out_if_commit_body_is_empty() {
 	let git_repo = init_repo(REPO_PATH);
 	create_and_add_file_to_git_tree(&git_repo, "foo");
 
-	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
+	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
 	assert!(repo.is_ok());
 	let no_authors = vec!["".to_string()];
 	let commit_body = CommitBody::new("", no_authors);
@@ -93,7 +93,7 @@ fn test_prepares_editmsg_file() {
 
 	add_commit(&git_repo, tree, "IRRELEVANT");
 
-	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
+	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
 	assert!(repo.is_ok());
 	repo.unwrap().add_status_to_editmsg().unwrap();
 
@@ -130,7 +130,7 @@ fn should_only_return_the_first_line_from_the_last_commit() {
 	let mut index = git_repo.index().unwrap();
 	let id = index.write_tree().unwrap();
 	let tree = git_repo.find_tree(id).unwrap();
-	let repo = LibGitWrapper::from(PathBuf::from(REPO_PATH));
+	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
 	assert!(repo.is_ok());
 
 	let first_line = "FIRST LINE".to_string();

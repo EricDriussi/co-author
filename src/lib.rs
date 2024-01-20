@@ -16,24 +16,26 @@ pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Bo
 	};
 
 	if args.all {
-		return match args.sort {
-			// TODO: get sorted from service
-			true => Ok(sort(authors_service.all_signatures())),
-			false => Ok(authors_service.all_signatures()),
+		return if args.sort {
+			Ok(sort(authors_service.all_signatures()))
+		} else {
+			Ok(authors_service.all_signatures())
 		};
 	}
 	if let Some(list) = &args.list {
-		let given_aliases = list.split(',').map(|alias| alias.to_string()).collect();
-		return match args.sort {
-			true => Ok(sort(authors_service.signatures_of(given_aliases))),
-			false => Ok(authors_service.signatures_of(given_aliases)),
+		let given_aliases = list.split(',').map(ToString::to_string).collect();
+		return if args.sort {
+			Ok(sort(authors_service.signatures_of(given_aliases)))
+		} else {
+			Ok(authors_service.signatures_of(given_aliases))
 		};
 	}
 
 	let aliases = cli.ask_for_aliases(authors_service.all_authors())?;
-	match args.sort {
-		true => Ok(sort(authors_service.signatures_of(aliases))),
-		false => Ok(authors_service.signatures_of(aliases)),
+	if args.sort {
+		Ok(sort(authors_service.signatures_of(aliases)))
+	} else {
+		Ok(authors_service.signatures_of(aliases))
 	}
 }
 

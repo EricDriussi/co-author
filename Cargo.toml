@@ -26,3 +26,21 @@ config = "0.13.1"
 serial_test = "2.0"
 strip-ansi = "0.1.0"
 parameterized = "1.1.0"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+enum_glob_use = "deny" # No * imports
+pedantic = "deny" # Strict checks
+unwrap_used = "deny" # No unwraps
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow" # TODO: Remove this?
+
+[profile.release]
+opt-level = "z" # Very optimized
+lto = true # Very optimized
+strip = "symbols" # Reduce binary size
+panic = "abort"

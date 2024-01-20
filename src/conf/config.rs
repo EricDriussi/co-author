@@ -4,37 +4,36 @@ use config::{Config, Environment, File, FileFormat};
 
 const DEFAULT_CONFIG: &str = include_str!("configs/default.yaml");
 const TEST_CONFIG: &str = include_str!("configs/test.yaml");
+const CONFIG_ERR_MSG: &str = "Config not loaded properly";
 
 pub fn authors_file_path() -> String {
-	let path_to_config_dir = get_config().get::<String>("authors_file_path").unwrap();
 	let file_name = authors_file_name();
-	let full_file_path = format!("{}{}", path_to_config_dir, file_name);
+	let path_to_config_dir = get_config().get::<String>("authors_file_path").expect(CONFIG_ERR_MSG);
+	let full_file_path = format!("{path_to_config_dir}{file_name}");
 	let home_placeholder = "PLACEHOLDER";
-	match env::var("XDG_CONFIG_HOME") {
-		Ok(env_home_var) => full_file_path.replace(&format!("${}", home_placeholder), &env_home_var),
-		Err(_) => match env::var("HOME") {
-			Ok(env_home_var) => {
-				full_file_path.replace(&format!("${}", home_placeholder), &format!("{}/.config", env_home_var))
-			}
-			Err(_) => panic!("Your $HOME is not set, can't locate default authors file!"),
-		},
+
+	if let Ok(env_home_var) = env::var("XDG_CONFIG_HOME") {
+		full_file_path.replace(&format!("${home_placeholder}"), &env_home_var)
+	} else {
+		let env_home_var = env::var("HOME").expect("Your $HOME is not set, can't locate default authors file path!");
+		full_file_path.replace(&format!("${home_placeholder}"), &format!("{env_home_var}/.config"))
 	}
 }
 
 pub fn authors_file_name() -> String {
-	get_config().get::<String>("authors_file_name").unwrap()
+	get_config().get::<String>("authors_file_name").expect(CONFIG_ERR_MSG)
 }
 
 pub fn dummy_data() -> String {
-	get_config().get::<String>("dummy_data").unwrap()
+	get_config().get::<String>("dummy_data").expect(CONFIG_ERR_MSG)
 }
 
 pub fn hooks_path() -> String {
-	get_config().get::<String>("hooks_path").unwrap()
+	get_config().get::<String>("hooks_path").expect(CONFIG_ERR_MSG)
 }
 
 pub fn editmsg() -> String {
-	get_config().get::<String>("editmsg").unwrap()
+	get_config().get::<String>("editmsg").expect(CONFIG_ERR_MSG)
 }
 
 fn get_config() -> Config {
@@ -48,13 +47,13 @@ fn get_config() -> Config {
 			// allow settings from the environment (with a prefix of APP)
 			.add_source(Environment::with_prefix("app"))
 			.build()
-			.unwrap(),
+			.expect(CONFIG_ERR_MSG),
 
 		_ => Config::builder()
 			.add_source(File::from_str(DEFAULT_CONFIG, FileFormat::Yaml))
 			// allow settings from the environment (with a prefix of APP)
 			.add_source(Environment::with_prefix("app"))
 			.build()
-			.unwrap(),
+			.expect(CONFIG_ERR_MSG),
 	}
 }

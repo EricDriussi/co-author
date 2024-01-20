@@ -34,13 +34,13 @@ impl FSProvider {
 
 	pub fn from(authors_file: String) -> Result<Self, Box<dyn Error>> {
 		let given_file = PathBuf::from(authors_file);
-		match given_file.is_file() {
-			true => Ok(Self { src: given_file }),
-			false => Err(AuthorError::with(format!(
-				"No file at path {:?}",
-				given_file.to_str().ok_or("?")
-			))),
+		if given_file.is_file() {
+			return Ok(Self { src: given_file });
 		}
+		Err(AuthorError::with(format!(
+			"No file at path {:?}",
+			given_file.to_str().ok_or("?")
+		)))
 	}
 
 	fn read_lines(&self) -> Vec<String> {

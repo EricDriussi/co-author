@@ -29,18 +29,14 @@ fn should_commit_using_git_editor() {
 	let editmsg = ".git/COMMIT_EDITMSG_TEST";
 	std::fs::write(editmsg, "himom").unwrap();
 	let mut config = Config::open_default().unwrap();
-	config
-		.set_str("core.editor", "echo")
-		.unwrap();
+	config.set_str("core.editor", "echo").unwrap();
 
 	let result = service.commit_with_editor(aliases);
 
 	assert!(result.is_ok());
 	// Cleanup
 	std::fs::remove_file(editmsg).unwrap();
-	config
-		.remove("core.editor")
-		.unwrap();
+	config.remove("core.editor").unwrap();
 }
 
 #[test]
@@ -53,9 +49,7 @@ fn should_commit_using_env_editor() {
 	let editmsg = ".git/COMMIT_EDITMSG_TEST";
 	std::fs::write(editmsg, "himom").unwrap();
 	let mut config = Config::open_default().unwrap();
-	config
-		.set_str("core.editor", "NOT_REAL")
-		.unwrap();
+	config.set_str("core.editor", "NOT_REAL").unwrap();
 	std::env::set_var("EDITOR", "echo");
 
 	let result = service.commit_with_editor(aliases);
@@ -63,9 +57,7 @@ fn should_commit_using_env_editor() {
 	assert!(result.is_ok());
 	// Cleanup
 	std::fs::remove_file(editmsg).unwrap();
-	config
-		.remove("core.editor")
-		.unwrap();
+	config.remove("core.editor").unwrap();
 }
 
 #[test]
@@ -116,7 +108,7 @@ impl GitWrapper for MockWrapper {
 		Ok(())
 	}
 
-	fn write_to_editmsg(&self, _: commit_body::CommitBody) -> Result<(), Box<dyn Error>> {
+	fn write_to_editmsg(&self, _: &commit_body::CommitBody) -> Result<(), Box<dyn Error>> {
 		Ok(())
 	}
 

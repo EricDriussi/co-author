@@ -5,9 +5,15 @@ pub struct AfterAssert {
 }
 
 impl AfterAssert {
-	pub fn cleanup(files: &[&str]) -> Self {
+	pub fn cleanup_files(files: &[&str]) -> Self {
 		Self {
-			files: files.iter().map(|f| f.to_string()).collect(),
+			files: files.iter().map(ToString::to_string).collect(),
+		}
+	}
+
+	pub fn cleanup_file(file: &str) -> Self {
+		Self {
+			files: vec![file.to_string()],
 		}
 	}
 }
@@ -15,7 +21,7 @@ impl AfterAssert {
 impl Drop for AfterAssert {
 	fn drop(&mut self) {
 		for file in &self.files {
-			fs::remove_file(file).unwrap()
+			fs::remove_file(file).expect("Could not cleanup files");
 		}
 	}
 }

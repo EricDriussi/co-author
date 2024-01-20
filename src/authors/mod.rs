@@ -13,14 +13,14 @@ pub mod service;
 pub fn from_file(authors_file: String) -> Result<AuthorsService<FSProvider>, Box<dyn Error>> {
 	match FSProvider::from(authors_file) {
 		Ok(repo) => Ok(AuthorsService::new(repo)),
-		Err(e) => Err(AuthorError::with(format!("Couldn't load file: {}", e))),
+		Err(e) => Err(AuthorError::with(format!("Couldn't load file: {e}"))),
 	}
 }
 
 pub fn default() -> Result<AuthorsService<FSProvider>, Box<dyn Error>> {
 	match FSProvider::from_cwd_with_home_fallback() {
 		Ok(repo) => Ok(AuthorsService::new(repo)),
-		Err(e) => Err(AuthorError::with(format!("Couldn't load file: {}", e))),
+		Err(e) => Err(AuthorError::with(format!("Couldn't load file: {e}"))),
 	}
 }
 

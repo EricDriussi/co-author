@@ -7,7 +7,7 @@ fn should_present_the_correct_signature() {
 	let email = "alice@wonderland.not";
 	let author = Author::from("a", name, email);
 
-	assert_eq!(author.signature(), format!("Co-Authored-by: {} <{}>", name, email));
+	assert_eq!(author.signature(), format!("Co-Authored-by: {name} <{email}>"));
 }
 
 #[test]

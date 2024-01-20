@@ -17,42 +17,32 @@ impl HookRunner {
 	}
 
 	pub fn pre_commit(&self) -> Result<(), Box<dyn Error>> {
-		let p = PathBuf::from(format!("{}/pre-commit", self.path));
-		match p.exists() {
-			true => {
-				let status = Command::new(p).status();
-				let succeeded = status.is_ok()
-					&& status
-						.unwrap()
-						.success();
-
-				match succeeded {
-					true => Ok(()),
-					false => Err(HookError::with("Pre-commit")),
-				}
-			}
-			false => Ok(()),
+		let hook = PathBuf::from(format!("{}/pre-commit", self.path));
+		if !hook.exists() {
+			return Ok(());
 		}
+
+		return if Command::new(hook).status().is_ok_and(|s| s.success()) {
+			Ok(())
+		} else {
+			Err(HookError::with("Pre-commit"))
+		};
 	}
 
 	pub fn commit_msg(&self) -> Result<(), Box<dyn Error>> {
-		let p = PathBuf::from(format!("{}/commit-msg", self.path));
-		return match p.exists() {
-			true => {
-				let status = Command::new(p)
-					.arg(conf::editmsg())
-					.status();
-				let succeeded = status.is_ok()
-					&& status
-						.unwrap()
-						.success();
+		let hook = PathBuf::from(format!("{}/commit-msg", self.path));
+		if !hook.exists() {
+			return Ok(());
+		}
 
-				match succeeded {
-					true => Ok(()),
-					false => Err(HookError::with("Commit-msg")),
-				}
-			}
-			false => Ok(()),
+		return if Command::new(hook)
+			.arg(conf::editmsg())
+			.status()
+			.is_ok_and(|s| s.success())
+		{
+			Ok(())
+		} else {
+			Err(HookError::with("Commit-msg"))
 		};
 	}
 }

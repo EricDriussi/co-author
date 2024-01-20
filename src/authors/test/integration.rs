@@ -15,7 +15,7 @@ fn authors_module_should_setup_repo_from_default_file_path_if_present() {
 
 	let default_authors_file_path = conf::authors_file_path();
 	fs::File::create(&default_authors_file_path).unwrap();
-	let _after = AfterAssert::cleanup(&[default_authors_file_path.as_str()]);
+	let _after = AfterAssert::cleanup_file(default_authors_file_path.as_str());
 
 	assert!(authors::default().is_ok());
 }

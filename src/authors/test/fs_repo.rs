@@ -16,7 +16,7 @@ fn should_connect_to_an_authors_file_in_cwd_if_available() {
 	set_test_env();
 	let cwd_authors_file_path = conf::authors_file_name();
 	fs::File::create(cwd_authors_file_path.clone()).unwrap();
-	let _after = AfterAssert::cleanup(&[&cwd_authors_file_path]);
+	let _after = AfterAssert::cleanup_file(&&cwd_authors_file_path);
 
 	assert!(FSProvider::from_cwd_with_home_fallback().is_ok());
 }
@@ -27,7 +27,7 @@ fn should_connect_to_the_default_authors_file_if_no_file_is_available_in_cwd() {
 	set_test_env();
 	let default_authors_file_path = conf::authors_file_path();
 	fs::File::create(&default_authors_file_path).unwrap();
-	let _after = AfterAssert::cleanup(&[default_authors_file_path.as_str()]);
+	let _after = AfterAssert::cleanup_file(&default_authors_file_path.as_str());
 
 	assert!(FSProvider::from_cwd_with_home_fallback().is_ok());
 }
@@ -44,7 +44,7 @@ fn should_connect_to_a_given_existing_authors_file() {
 	set_test_env();
 	let an_authors_file_path = "/tmp/an_authors_file";
 	fs::File::create(an_authors_file_path).unwrap();
-	let _after = AfterAssert::cleanup(&[an_authors_file_path]);
+	let _after = AfterAssert::cleanup_file(&an_authors_file_path);
 
 	assert!(FSProvider::from(an_authors_file_path.to_string()).is_ok());
 }

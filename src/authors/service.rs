@@ -14,14 +14,10 @@ impl<T: AuthorsProvider> AuthorsService<T> {
 	}
 
 	pub fn signatures_of(&self, aliases: Vec<String>) -> Vec<String> {
-		self.repo
-			.find(aliases)
-			.iter()
-			.map(|author| author.signature())
-			.collect()
+		self.repo.find(aliases).iter().map(Author::signature).collect()
 	}
 
 	pub fn all_signatures(&self) -> Vec<String> {
-		self.repo.all().iter().map(|author| author.signature()).collect()
+		self.repo.all().iter().map(Author::signature).collect()
 	}
 }

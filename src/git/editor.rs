@@ -42,11 +42,7 @@ fn env_fallback(path: &Path) {
 }
 
 fn vim_fallback(path: &Path) {
-	match open_editor("vim", path) {
-		Ok(_) => (),
-		Err(_) => match open_editor("vi", path) {
-			Ok(_) => (),
-			Err(_) => panic!("No editor available!"),
-		},
-	}
+	open_editor("vim", path)
+		.or_else(|_| open_editor("vi", path))
+		.expect("No editor available!");
 }

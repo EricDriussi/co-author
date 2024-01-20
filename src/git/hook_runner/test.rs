@@ -1,5 +1,6 @@
 use std::{fs::OpenOptions, io::Write};
 
+use co_author::test_utils::file_cleanup::AfterAssert;
 use serial_test::serial;
 use std::os::unix::fs::OpenOptionsExt;
 
@@ -12,13 +13,12 @@ fn should_run_pre_commit_hook() {
 	let ok_hook_code = "#!/bin/sh\nexit 0";
 
 	create_test_hook(pre_commit_hook_path.as_str(), ok_hook_code);
+	let _after = AfterAssert::cleanup_file(pre_commit_hook_path.as_str());
 
 	let runner = HookRunner::new();
 	let result = runner.pre_commit();
 
 	assert!(result.is_ok());
-	// Cleanup
-	std::fs::remove_file(pre_commit_hook_path).unwrap();
 }
 
 #[test]
@@ -33,12 +33,7 @@ fn should_err_pre_commit_hook() {
 	let result = runner.pre_commit();
 
 	assert!(result.is_err());
-	assert_eq!(
-		result
-			.unwrap_err()
-			.to_string(),
-		"Pre-commit hook failed, aborting"
-	);
+	assert_eq!(result.unwrap_err().to_string(), "Pre-commit hook failed, aborting");
 	// Cleanup
 	std::fs::remove_file(pre_commit_hook_path).unwrap();
 }
@@ -71,12 +66,7 @@ fn should_err_commit_msg_hook() {
 	let result = runner.commit_msg();
 
 	assert!(result.is_err());
-	assert_eq!(
-		result
-			.unwrap_err()
-			.to_string(),
-		"Commit-msg hook failed, aborting"
-	);
+	assert_eq!(result.unwrap_err().to_string(), "Commit-msg hook failed, aborting");
 	// Cleanup
 	std::fs::remove_file(commit_msg_hook_path).unwrap();
 }
@@ -89,7 +79,6 @@ fn create_test_hook(path: &str, hook_code: &str) {
 		.mode(0o755)
 		.open(path)
 		.unwrap();
-	file.write_all(hook_code.as_bytes())
-		.unwrap();
+	file.write_all(hook_code.as_bytes()).unwrap();
 	drop(file);
 }
