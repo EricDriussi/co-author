@@ -13,17 +13,17 @@ use co_author::{args::Args, cli::FancyCli, handle_authors, handle_commit_msg};
 
 fn main() {
 	let args = Args::parse();
-	if let Err(e) = run(args) {
-		eprintln!("[Error] {}", e);
+	if let Err(e) = run(&args) {
+		eprintln!("[Error] {e}");
 		process::exit(1);
 	}
 }
 
-fn run(args: Args) -> Result<(), Box<dyn Error>> {
+fn run(args: &Args) -> Result<(), Box<dyn Error>> {
 	set_cwd_to_git_root()?;
 
 	let mut cli = FancyCli::new();
-	let authors_signatures = handle_authors(&args, &mut cli)?;
+	let authors_signatures = handle_authors(args, &mut cli)?;
 
 	// FIXME. Find a way to pass this to handle_commit_msg (clone/copy)
 	let git_service = git::libgit_setup()?;
@@ -35,7 +35,7 @@ fn run(args: Args) -> Result<(), Box<dyn Error>> {
 		}
 		return git_service.commit_with_editor(authors_signatures);
 	}
-	let msg = handle_commit_msg(&args, &mut cli, prev)?;
+	let msg = handle_commit_msg(args, &mut cli, prev)?;
 
 	return git_service.commit(msg.as_str(), authors_signatures);
 }

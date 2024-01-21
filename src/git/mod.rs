@@ -10,7 +10,8 @@ pub mod libgit_wrapper;
 pub mod service;
 
 pub fn libgit_setup() -> Result<GitService<LibGitWrapper>, String> {
-	match LibGitWrapper::from(&env::current_dir().unwrap()) {
+	let cwd = env::current_dir().map_err(|_| "Could not get current directory".to_string())?;
+	match LibGitWrapper::from(&cwd) {
 		Ok(repo) => Ok(GitService::new(repo)),
 		Err(e) => Err(e),
 	}

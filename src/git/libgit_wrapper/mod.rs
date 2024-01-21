@@ -50,7 +50,7 @@ impl GitWrapper for LibGitWrapper {
 
 impl LibGitWrapper {
 	pub fn from(path: &PathBuf) -> Result<Self, String> {
-		if let Ok(repo) = Repository::open(path.clone()) {
+		if let Ok(repo) = Repository::open(path) {
 			return if Self::no_staged_changes(&repo) {
 				Err("No staged changes".to_string())
 			} else {
@@ -84,8 +84,8 @@ impl LibGitWrapper {
 			.repo
 			.commit(
 				Some("HEAD"),
-				&signature,
-				&signature,
+				signature,
+				signature,
 				commit_message,
 				&tree,
 				&[&parent_commit],

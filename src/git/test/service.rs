@@ -1,6 +1,7 @@
 use crate::git::commit_body;
 use crate::git::commit_body::GitWrapper;
 use crate::git::GitService;
+use co_author::test_utils::file_cleanup::AfterAssert;
 use serial_test::serial;
 use std::error::Error;
 
@@ -21,43 +22,46 @@ fn should_commit() {
 
 #[test]
 #[serial]
-fn should_commit_using_git_editor() {
+fn should_commit_using_git_editor() -> Result<(), Box<dyn std::error::Error>> {
 	let spy = MockWrapper::new();
 	let service = GitService::new(spy);
 	let aliases = vec![String::from("a")];
 
 	let editmsg = ".git/COMMIT_EDITMSG_TEST";
-	std::fs::write(editmsg, "himom").unwrap();
-	let mut config = Config::open_default().unwrap();
-	config.set_str("core.editor", "echo").unwrap();
+	std::fs::write(editmsg, "himom")?;
+	let _after = AfterAssert::cleanup_file(editmsg);
+	let mut config = Config::open_default()?;
+	config.set_str("core.editor", "echo")?;
 
 	let result = service.commit_with_editor(aliases);
 
 	assert!(result.is_ok());
 	// Cleanup
-	std::fs::remove_file(editmsg).unwrap();
-	config.remove("core.editor").unwrap();
+	std::fs::remove_file(editmsg)?;
+	config.remove("core.editor")?;
+	Ok(())
 }
 
 #[test]
 #[serial]
-fn should_commit_using_env_editor() {
+fn should_commit_using_env_editor() -> Result<(), Box<dyn std::error::Error>> {
 	let spy = MockWrapper::new();
 	let service = GitService::new(spy);
 	let aliases = vec![String::from("a")];
 
 	let editmsg = ".git/COMMIT_EDITMSG_TEST";
-	std::fs::write(editmsg, "himom").unwrap();
-	let mut config = Config::open_default().unwrap();
-	config.set_str("core.editor", "NOT_REAL").unwrap();
+	std::fs::write(editmsg, "himom")?;
+	let _after = AfterAssert::cleanup_file(editmsg);
+	let mut config = Config::open_default()?;
+	config.set_str("core.editor", "NOT_REAL")?;
 	std::env::set_var("EDITOR", "echo");
 
 	let result = service.commit_with_editor(aliases);
 
 	assert!(result.is_ok());
 	// Cleanup
-	std::fs::remove_file(editmsg).unwrap();
-	config.remove("core.editor").unwrap();
+	config.remove("core.editor")?;
+	Ok(())
 }
 
 #[test]
@@ -88,7 +92,7 @@ struct MockWrapper {
 impl MockWrapper {
 	fn new() -> Self {
 		Self {
-			last_commit: Ok("".to_string()),
+			last_commit: Ok(String::new()),
 		}
 	}
 

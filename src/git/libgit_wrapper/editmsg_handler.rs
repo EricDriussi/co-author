@@ -137,6 +137,8 @@ fn format_path(file: StatusEntry) -> Option<String> {
 #[cfg(test)]
 mod test {
 
+	use co_author::test_utils::file_cleanup::AfterAssert;
+
 	use super::*;
 
 	#[test]
@@ -148,27 +150,23 @@ mod test {
 				.to_string()
 				.clone(),
 		)
-		.unwrap();
+		.expect("Could not create test EDITMSG");
+		let _after = AfterAssert::cleanup_file(commit_editmsg_path);
 
 		let result = read(commit_editmsg_path.to_string());
 
 		assert_eq!(result, Some("Test commit message.".to_string()));
-
-		// Cleanup
-		std::fs::remove_file(commit_editmsg_path).unwrap();
 	}
 
 	#[test]
 	fn test_trims_lines_when_reading_commit_message() {
 		let test_commit_message = "  Test commit message.\nThis is a second line. \n".to_string();
 		let commit_editmsg_path = ".git/COMMIT_EDITMSG_TEST_TRIM";
-		std::fs::write(commit_editmsg_path, test_commit_message.clone()).unwrap();
+		std::fs::write(commit_editmsg_path, test_commit_message.clone()).expect("Could not create test EDITMSG");
+		let _after = AfterAssert::cleanup_file(commit_editmsg_path);
 
 		let result = read(commit_editmsg_path.to_string());
 
 		assert_eq!(result, Some(test_commit_message.trim().to_string()));
-
-		// Cleanup
-		std::fs::remove_file(commit_editmsg_path).unwrap();
 	}
 }

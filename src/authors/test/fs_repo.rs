@@ -15,8 +15,8 @@ use crate::authors::fs_provider::FSProvider;
 fn should_connect_to_an_authors_file_in_cwd_if_available() {
 	set_test_env();
 	let cwd_authors_file_path = conf::authors_file_name();
-	fs::File::create(cwd_authors_file_path.clone()).unwrap();
-	let _after = AfterAssert::cleanup_file(&&cwd_authors_file_path);
+	fs::File::create(cwd_authors_file_path.clone()).expect("Could not setup test authors file");
+	let _after = AfterAssert::cleanup_file(&cwd_authors_file_path);
 
 	assert!(FSProvider::from_cwd_with_home_fallback().is_ok());
 }
@@ -26,8 +26,8 @@ fn should_connect_to_an_authors_file_in_cwd_if_available() {
 fn should_connect_to_the_default_authors_file_if_no_file_is_available_in_cwd() {
 	set_test_env();
 	let default_authors_file_path = conf::authors_file_path();
-	fs::File::create(&default_authors_file_path).unwrap();
-	let _after = AfterAssert::cleanup_file(&default_authors_file_path.as_str());
+	fs::File::create(default_authors_file_path.clone()).expect("Could not setup test authors file");
+	let _after = AfterAssert::cleanup_file(default_authors_file_path.as_str());
 
 	assert!(FSProvider::from_cwd_with_home_fallback().is_ok());
 }
@@ -43,8 +43,8 @@ fn should_error_when_neither_cwd_or_default_authors_file_are_available() {
 fn should_connect_to_a_given_existing_authors_file() {
 	set_test_env();
 	let an_authors_file_path = "/tmp/an_authors_file";
-	fs::File::create(an_authors_file_path).unwrap();
-	let _after = AfterAssert::cleanup_file(&an_authors_file_path);
+	fs::File::create(an_authors_file_path).expect("Could not setup test authors file");
+	let _after = AfterAssert::cleanup_file(an_authors_file_path);
 
 	assert!(FSProvider::from(an_authors_file_path.to_string()).is_ok());
 }
@@ -59,7 +59,7 @@ fn should_not_connect_to_a_given_non_existing_file() {
 fn should_fetch_all_available_authors() {
 	set_test_env();
 	let an_authors_file_path = conf::dummy_data();
-	let repo = FSProvider::from(an_authors_file_path.to_string()).unwrap();
+	let repo = FSProvider::from(an_authors_file_path.to_string()).expect("Could not setup FSProvider for test");
 
 	let actual_authors = repo.all();
 
@@ -78,7 +78,7 @@ fn should_fetch_all_available_authors() {
 fn should_fetch_authors_based_on_alias() {
 	set_test_env();
 	let an_authors_file_path = conf::dummy_data();
-	let repo = FSProvider::from(an_authors_file_path.to_string()).unwrap();
+	let repo = FSProvider::from(an_authors_file_path.to_string()).expect("Could not setup FSProvider for test");
 
 	let alias = "a";
 	let actual_author = repo.find(Vec::from([String::from(alias)]));
@@ -93,7 +93,7 @@ fn should_fetch_authors_based_on_alias() {
 fn should_fetch_all_authors_for_a_given_alias() {
 	set_test_env();
 	let an_authors_file_path = conf::dummy_data();
-	let repo = FSProvider::from(an_authors_file_path.to_string()).unwrap();
+	let repo = FSProvider::from(an_authors_file_path.to_string()).expect("Could not setup FSProvider for test");
 
 	let alias = "b";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));
@@ -111,7 +111,7 @@ fn should_fetch_all_authors_for_a_given_alias() {
 fn should_return_an_empty_list_if_no_author_mathces_alias() {
 	set_test_env();
 	let an_authors_file_path = conf::dummy_data();
-	let repo = FSProvider::from(an_authors_file_path.to_string()).unwrap();
+	let repo = FSProvider::from(an_authors_file_path.to_string()).expect("Could not setup FSProvider for test");
 
 	let alias = "z";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));

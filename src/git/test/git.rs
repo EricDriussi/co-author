@@ -9,5 +9,5 @@ fn should_produce_a_correctly_formatted_commit_body() {
 
 	assert!(commit_body
 		.to_string()
-		.eq(&format!("{}\n\n{}\n{}", message, author1, author2)));
+		.eq(&format!("{message}\n\n{author1}\n{author2}")));
 }

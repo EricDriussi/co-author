@@ -22,11 +22,11 @@ impl HookRunner {
 			return Ok(());
 		}
 
-		return if Command::new(hook).status().is_ok_and(|s| s.success()) {
+		if Command::new(hook).status().is_ok_and(|s| s.success()) {
 			Ok(())
 		} else {
 			Err(HookError::with("Pre-commit"))
-		};
+		}
 	}
 
 	pub fn commit_msg(&self) -> Result<(), Box<dyn Error>> {
@@ -35,7 +35,7 @@ impl HookRunner {
 			return Ok(());
 		}
 
-		return if Command::new(hook)
+		if Command::new(hook)
 			.arg(conf::editmsg())
 			.status()
 			.is_ok_and(|s| s.success())
@@ -43,7 +43,7 @@ impl HookRunner {
 			Ok(())
 		} else {
 			Err(HookError::with("Commit-msg"))
-		};
+		}
 	}
 }
 

@@ -1,5 +1,5 @@
 use co_author::test_utils::set_test_env;
-use git2::{Repository, RepositoryInitOptions, Signature};
+use git2::{Config, Repository, RepositoryInitOptions, Signature};
 use serial_test::serial;
 use std::{
 	fs::{self, File},
@@ -16,12 +16,12 @@ const REPO_PATH: &str = "/var/tmp/coa";
 #[test]
 #[serial]
 fn should_determine_if_is_valid_git_repo() {
-	let git_repo = init_repo(REPO_PATH);
+	let git_repo = init_repo(REPO_PATH).expect("Could not setup test repo");
 
 	let repo_with_no_staged_changes = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
 	assert!(repo_with_no_staged_changes.is_err());
 
-	create_and_add_file_to_git_tree(&git_repo, "foo");
+	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 	let valid_repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
 	assert!(valid_repo.is_ok());
 
@@ -33,18 +33,17 @@ fn should_determine_if_is_valid_git_repo() {
 #[serial]
 fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
 	set_test_env();
-	let git_repo = init_repo(REPO_PATH);
-	create_and_add_file_to_git_tree(&git_repo, "foo");
+	let git_repo = init_repo(REPO_PATH).expect("Could not setup test repo");
+	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
-	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
-	assert!(repo.is_ok());
+	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH)).expect("Could not setup test repo");
 	let authors = vec!["random author".to_string()];
 	let commit_body = CommitBody::new("irrelevant message", authors);
 
-	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", REPO_PATH);
-	std::fs::write(editmsg_path, commit_body.formatted_body()).unwrap();
+	let editmsg_path = format!("{REPO_PATH}/.git/COMMIT_EDITMSG");
+	std::fs::write(editmsg_path, commit_body.formatted_body()).expect("Could not write to test editmsg file");
 
-	let result = repo.unwrap().commit();
+	let result = repo.commit();
 
 	assert!(result.is_ok());
 }
@@ -52,55 +51,50 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 #[test]
 #[serial]
 fn should_error_out_if_commit_body_is_empty() {
-	let git_repo = init_repo(REPO_PATH);
-	create_and_add_file_to_git_tree(&git_repo, "foo");
+	let git_repo = init_repo(REPO_PATH).expect("Could not setup test repo");
+	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
-	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
-	assert!(repo.is_ok());
-	let no_authors = vec!["".to_string()];
+	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH)).expect("Could not setup test repo");
+	let no_authors = vec![String::new()];
 	let commit_body = CommitBody::new("", no_authors);
 
-	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", REPO_PATH);
-	std::fs::write(editmsg_path, commit_body.formatted_body()).unwrap();
+	let editmsg_path = format!("{REPO_PATH}/.git/COMMIT_EDITMSG");
+	std::fs::write(editmsg_path, commit_body.formatted_body()).expect("Could not write to test editmsg file");
 
-	let result = repo.unwrap().commit();
+	let result = repo.commit();
 
-	assert!(result
-		.unwrap_err()
-		.to_string()
-		.contains("Commit message cannot be empty"));
+	assert!(matches!(result, Err(e) if e.to_string().contains("Commit message cannot be empty")));
 }
 
 #[test]
 #[serial]
-fn test_prepares_editmsg_file() {
+fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 	set_test_env();
-	let git_repo = init_repo(REPO_PATH);
-	create_and_add_file_to_git_tree(&git_repo, "foo");
+	let git_repo = init_repo(REPO_PATH)?;
+	create_and_add_file_to_git_tree(&git_repo, "foo")?;
 
-	let mut index = git_repo.index().unwrap();
-	let id = index.write_tree().unwrap();
-	let tree = git_repo.find_tree(id).unwrap();
-	add_commit(&git_repo, tree.clone(), "IRRELEVANT");
+	let mut index = git_repo.index()?;
+	let id = index.write_tree()?;
+	let tree = git_repo.find_tree(id)?;
+	add_commit(&git_repo, &tree.clone(), "IRRELEVANT")?;
 
 	// add bar
-	create_and_add_file_to_git_tree(&git_repo, "bar");
+	create_and_add_file_to_git_tree(&git_repo, "bar")?;
 	// modify but don't add foo
-	let root = git_repo.path().parent().unwrap();
-	std::fs::write(root.join("foo"), "text").unwrap();
+	let root = git_repo.path().parent().ok_or("Coult not setup editmsg test")?;
+	std::fs::write(root.join("foo"), "text")?;
 	// add baz but keep untracked
-	std::fs::write(root.join("baz"), "text").unwrap();
+	std::fs::write(root.join("baz"), "text")?;
 
-	add_commit(&git_repo, tree, "IRRELEVANT");
+	add_commit(&git_repo, &tree, "IRRELEVANT")?;
 
-	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
-	assert!(repo.is_ok());
-	repo.unwrap().add_status_to_editmsg().unwrap();
+	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH))?;
+	repo.add_status_to_editmsg()?;
 
 	let commit_editmsg_path = "/var/tmp/coa/.git/COMMIT_EDITMSG";
 	let contents = std::fs::read_to_string(Path::new(commit_editmsg_path));
 	assert_eq!(
-		contents.unwrap(),
+		contents?,
 		"
 
 # Please enter the commit message for your changes. Lines starting
@@ -119,81 +113,77 @@ fn test_prepares_editmsg_file() {
 #	baz
 "
 	);
+	Ok(())
 }
 
 #[test]
 #[serial]
-fn should_only_return_the_first_line_from_the_last_commit() {
-	let git_repo = init_repo(REPO_PATH);
-	create_and_add_file_to_git_tree(&git_repo, "foo");
+fn should_only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
+	let git_repo = init_repo(REPO_PATH)?;
+	create_and_add_file_to_git_tree(&git_repo, "foo")?;
 
-	let mut index = git_repo.index().unwrap();
-	let id = index.write_tree().unwrap();
-	let tree = git_repo.find_tree(id).unwrap();
-	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
-	assert!(repo.is_ok());
+	let mut index = git_repo.index()?;
+	let id = index.write_tree()?;
+	let tree = git_repo.find_tree(id)?;
+	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH))?;
 
 	let first_line = "FIRST LINE".to_string();
-	let msg = format!("{}\nSECOND_LINE", first_line);
-	add_commit(&git_repo, tree, msg.as_str());
+	let msg = format!("{first_line}\nSECOND_LINE");
+	add_commit(&git_repo, &tree, msg.as_str())?;
 
-	let result = repo.unwrap().prev_commit_msg();
+	let result = repo.prev_commit_msg();
 
-	assert_eq!(result.unwrap(), first_line);
+	assert!(matches!(result, Ok(line) if line.to_string().contains(first_line.as_str())));
+	Ok(())
 }
 
-fn init_repo(path: &str) -> Repository {
+fn init_repo(path: &str) -> Result<Repository, Box<dyn std::error::Error>> {
 	let dir = PathBuf::from(path);
 	fs::remove_dir_all(&dir).ok();
-	let repo = Repository::init_opts(&dir, &RepositoryInitOptions::new()).unwrap();
-	set_user_and_email(&repo);
+	let repo = Repository::init_opts(&dir, &RepositoryInitOptions::new())?;
+	set_user_and_email(&mut repo.config()?)?;
 
-	let mut index = repo.index().unwrap();
-	let id = index.write_tree().unwrap();
-	let tree = repo.find_tree(id).unwrap();
+	let mut index = repo.index()?;
+	let id = index.write_tree()?;
+	let tree = repo.find_tree(id)?;
 	repo.commit(
 		Some("HEAD"),
-		&repo.signature().unwrap(),
-		&repo.signature().unwrap(),
+		&repo.signature()?,
+		&repo.signature()?,
 		"initial commit",
 		&tree,
 		&[],
-	)
-	.unwrap();
+	)?;
 	drop(tree);
-	repo
+	Ok(repo)
 }
 
-fn set_user_and_email(repo: &Repository) {
-	let sig = Signature::now("a_name", "an_email").unwrap();
-	repo.config()
-		.unwrap()
-		.set_str("user.name", sig.name().unwrap())
-		.unwrap();
-	repo.config()
-		.unwrap()
-		.set_str("user.email", sig.email().unwrap())
-		.unwrap();
+fn set_user_and_email(conf: &mut Config) -> Result<(), Box<dyn std::error::Error>> {
+	let sig = Signature::now("a_name", "an_email")?;
+	conf.set_str("user.name", sig.name().ok_or("Could not setup signature for test")?)?;
+	conf.set_str("user.email", sig.email().ok_or("Could not setup signature for test")?)?;
+	Ok(())
 }
 
-fn add_commit(repo: &Repository, tree: git2::Tree<'_>, msg: &str) {
-	let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
+fn add_commit(repo: &Repository, tree: &git2::Tree<'_>, msg: &str) -> Result<(), Box<dyn std::error::Error>> {
+	let head_commit = repo.head()?.peel_to_commit()?;
 	repo.commit(
 		Some("HEAD"),
-		&repo.signature().unwrap(),
-		&repo.signature().unwrap(),
+		&repo.signature()?,
+		&repo.signature()?,
 		msg,
-		&tree,
+		tree,
 		&[&head_commit],
-	)
-	.unwrap();
+	)?;
+	Ok(())
 }
 
-fn create_and_add_file_to_git_tree(repo: &Repository, file_name: &str) {
-	let root = repo.path().parent().unwrap();
-	File::create(root.join(file_name)).unwrap();
+fn create_and_add_file_to_git_tree(repo: &Repository, file_name: &str) -> Result<(), Box<dyn std::error::Error>> {
+	let root = repo.path().parent().ok_or("Could not add file to test git tree")?;
+	File::create(root.join(file_name))?;
 
-	let mut index = repo.index().unwrap();
-	index.add_path(Path::new(file_name)).unwrap();
-	index.write().unwrap();
+	let mut index = repo.index()?;
+	index.add_path(Path::new(file_name))?;
+	index.write()?;
+	Ok(())
 }

@@ -35,7 +35,7 @@ fn should_be_equal_to_another_author_with_equal_data() {
 	let author = Author::from(alias, name, email);
 	let same_author = Author::from(alias, name, email);
 
-	assert_eq!(author, same_author)
+	assert_eq!(author, same_author);
 }
 
 #[parameterized(different_author = {
@@ -44,5 +44,5 @@ fn should_be_equal_to_another_author_with_equal_data() {
 	Author::from("a", "alice", "someone@wonderland.not")
 })]
 fn should_not_be_equal_to_another_author_with_different_data(different_author: Author) {
-	assert_ne!(Author::from("a", "alice", "alice@wonderland.not"), different_author)
+	assert_ne!(Author::from("a", "alice", "alice@wonderland.not"), different_author);
 }
