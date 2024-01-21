@@ -6,20 +6,20 @@ use std::{
 	path::PathBuf,
 	result::Result,
 };
+use super::super::author::{Author, AuthorsProvider};
+use super::super::author_err::AuthorError;
 
 use crate::conf;
 
 use super::{
-	author::{Author, AuthorsProvider},
-	author_err::AuthorError,
-	csv_mapper::CsvMapper,
+	csv_mapper
 };
 
-pub struct FSProvider {
+pub struct CSVProvider {
 	src: PathBuf,
 }
 
-impl FSProvider {
+impl CSVProvider {
 	pub fn from_cwd_with_home_fallback() -> Result<Self, Box<dyn Error>> {
 		let file_in_cwd = env::current_dir()?.join(conf::authors_file_name());
 		if file_in_cwd.is_file() {
@@ -51,11 +51,11 @@ impl FSProvider {
 	}
 }
 
-impl AuthorsProvider for FSProvider {
+impl AuthorsProvider for CSVProvider {
 	fn find(&self, aliases: Vec<String>) -> Vec<Author> {
 		self.read_lines()
 			.iter()
-			.filter_map(|line| CsvMapper::to_author(line.as_str()))
+			.filter_map(|line| csv_mapper::to_author(line.as_str()))
 			.filter(|author| aliases.contains(&author.alias()))
 			.collect()
 	}
@@ -63,7 +63,7 @@ impl AuthorsProvider for FSProvider {
 	fn all(&self) -> Vec<Author> {
 		self.read_lines()
 			.iter()
-			.filter_map(|line| CsvMapper::to_author(line.as_str()))
+			.filter_map(|line| csv_mapper::to_author(line.as_str()))
 			.collect()
 	}
 }
