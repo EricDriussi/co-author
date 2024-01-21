@@ -1,12 +1,11 @@
+use crate::authors::author::{Author, AuthorsProvider};
 use crate::conf;
 use crate::test_utils::file_cleanup::AfterAssert;
 use crate::test_utils::set_test_env;
 
-use std::fs;
 use serial_test::serial;
+use std::fs;
 
-
-use crate::authors::author::{Author, AuthorsProvider};
 use super::provider::CSVProvider;
 
 #[test]

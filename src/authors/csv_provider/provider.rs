@@ -1,3 +1,6 @@
+use super::super::author::{Author, AuthorsProvider};
+use super::super::author_err::AuthorError;
+use super::csv_mapper;
 use std::{
 	env,
 	error::Error,
@@ -6,14 +9,8 @@ use std::{
 	path::PathBuf,
 	result::Result,
 };
-use super::super::author::{Author, AuthorsProvider};
-use super::super::author_err::AuthorError;
 
 use crate::conf;
-
-use super::{
-	csv_mapper
-};
 
 pub struct CSVProvider {
 	src: PathBuf,
