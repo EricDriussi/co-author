@@ -7,18 +7,14 @@ use super::commit_body::{CommitBody, GitWrapper};
 
 pub mod editmsg_handler;
 
-const ERR_MSG: &str = "GIT ERROR";
-
 pub struct LibGitWrapper {
-	repo: Option<Repository>,
+	repo: Repository,
 }
 
 impl GitWrapper for LibGitWrapper {
 	fn commit(&self) -> Result<(), Box<dyn Error>> {
 		let signature = self
 			.repo
-			.as_ref()
-			.ok_or(ERR_MSG)?
 			.signature()
 			.map_err(|_| "User name and/or email not set".to_string())?;
 
@@ -34,7 +30,7 @@ impl GitWrapper for LibGitWrapper {
 	}
 
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
-		let status = editmsg_handler::get_status_for_commit_file(self.repo.as_ref().ok_or(ERR_MSG)?);
+		let status = editmsg_handler::get_status_for_commit_file(&self.repo);
 
 		let mut file_to_append = OpenOptions::new().create(true).append(true).open(conf::editmsg())?;
 		file_to_append.write_all(status.as_bytes())?;
@@ -42,7 +38,7 @@ impl GitWrapper for LibGitWrapper {
 	}
 
 	fn prev_commit_msg(&self) -> Result<String, Box<dyn Error>> {
-		let head_ref = self.repo.as_ref().ok_or(ERR_MSG)?.head()?;
+		let head_ref = self.repo.head()?;
 		let last_commit = head_ref.peel_to_commit()?;
 
 		let commit_message = last_commit.message().unwrap_or_default();
@@ -58,7 +54,7 @@ impl LibGitWrapper {
 			return if Self::no_staged_changes(&repo) {
 				Err("No staged changes".to_string())
 			} else {
-				Ok(Self { repo: Some(repo) })
+				Ok(Self { repo })
 			};
 		}
 		Err("Could not open the repo".to_string())
@@ -81,13 +77,11 @@ impl LibGitWrapper {
 	}
 
 	fn try_to_commit(&self, signature: &Signature, commit_message: &str) -> Result<(), Box<dyn Error>> {
-		let oid = self.repo.as_ref().ok_or(ERR_MSG)?.index()?.write_tree()?;
-		let tree = self.repo.as_ref().unwrap().find_tree(oid)?;
-		let parent_commit = self.repo.as_ref().unwrap().head()?.peel_to_commit()?;
+		let oid = self.repo.index()?.write_tree()?;
+		let tree = self.repo.find_tree(oid)?;
+		let parent_commit = self.repo.head()?.peel_to_commit()?;
 		Ok(self
 			.repo
-			.as_ref()
-			.unwrap()
 			.commit(
 				Some("HEAD"),
 				&signature,
