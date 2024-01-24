@@ -4,6 +4,7 @@ use args::Args;
 use cli::Cli;
 pub mod authors;
 pub mod conf;
+pub mod fs_wrapper;
 pub mod test_utils;
 
 pub mod args;
@@ -11,7 +12,7 @@ pub mod cli;
 
 pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Box<dyn Error>> {
 	let authors_service = match &args.file {
-		Some(file) => authors::from_file(file.to_string())?,
+		Some(file) => authors::from_file(file)?,
 		None => authors::default()?,
 	};
 

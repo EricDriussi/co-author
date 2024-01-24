@@ -21,11 +21,13 @@ clap = { version = "4.3.19", features = ["derive"] }
 rustyline = "12.0.0"
 colored = "2.0.4"
 config = "0.13.1"
+mockall = "0.12.1"
 
 [dev-dependencies]
 serial_test = "2.0"
 strip-ansi = "0.1.0"
 parameterized = "1.1.0"
+mockall = "0.12.1"
 
 [lints.rust]
 unsafe_code = "forbid"
@@ -38,6 +40,7 @@ must_use_candidate = "allow"
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"
 module_name_repetitions = "allow" # TODO: Remove this?
+new_without_default = "allow"
 
 [profile.release]
 opt-level = "z" # Very optimized

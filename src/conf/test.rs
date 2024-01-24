@@ -1,5 +1,6 @@
 use super::*;
 
+// TODO: if env test (set_test_env()) is no longer needed, change the assertions to match the prod config values
 #[test]
 fn should_return_expected_test_authors_file_path() {
 	let authors_file_path = config::authors_file_path();

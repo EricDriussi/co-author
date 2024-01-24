@@ -29,7 +29,7 @@ fn should_commit_using_git_editor() -> Result<(), Box<dyn std::error::Error>> {
 
 	let editmsg = ".git/COMMIT_EDITMSG_TEST";
 	std::fs::write(editmsg, "himom")?;
-	let _after = AfterAssert::cleanup_file(editmsg);
+	// let _after = AfterAssert::cleanup_file(editmsg);
 	let mut config = Config::open_default()?;
 	config.set_str("core.editor", "echo")?;
 

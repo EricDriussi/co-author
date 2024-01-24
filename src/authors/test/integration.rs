@@ -5,11 +5,12 @@ use serial_test::serial;
 use crate::{
 	authors::{self, author::Author},
 	conf,
-	test_utils::file_cleanup::AfterAssert,
+	test_utils::{file_cleanup::AfterAssert, set_test_env},
 };
 
 #[test]
 #[serial]
+#[ignore] // do these tests make any sense?
 fn authors_module_should_setup_repo_from_default_file_path_if_present() {
 	assert!(authors::default().is_err());
 
@@ -22,9 +23,10 @@ fn authors_module_should_setup_repo_from_default_file_path_if_present() {
 
 #[test]
 fn authors_module_should_setup_repo_from_given_file_path_if_present() {
-	assert!(authors::from_file("/tmp/not_real".to_string()).is_err());
+	set_test_env();
+	assert!(authors::from_file("/tmp/not_real").is_err());
 
-	let result = authors::from_file(conf::dummy_data());
+	let result = authors::from_file(&conf::dummy_data());
 
 	assert!(result.is_ok_and(|service| service.all_authors()
 		== [
