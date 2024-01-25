@@ -6,9 +6,9 @@ const DEFAULT_CONFIG: &str = include_str!("configs/default.yaml");
 const TEST_CONFIG: &str = include_str!("configs/test.yaml");
 const CONFIG_ERR_MSG: &str = "Config not loaded properly";
 
-pub fn authors_file_path() -> String {
-	let file_name = authors_file_name();
-	let path_to_config_dir = get_config().get::<String>("authors_file_path").expect(CONFIG_ERR_MSG);
+pub fn authors_csv_path() -> String {
+	let file_name = authors_csv_file();
+	let path_to_config_dir = get_config().get::<String>("authors_path").expect(CONFIG_ERR_MSG);
 	let full_file_path = format!("{path_to_config_dir}{file_name}");
 	let home_placeholder = "PLACEHOLDER";
 
@@ -20,8 +20,8 @@ pub fn authors_file_path() -> String {
 	}
 }
 
-pub fn authors_file_name() -> String {
-	get_config().get::<String>("authors_file_name").expect(CONFIG_ERR_MSG)
+pub fn authors_csv_file() -> String {
+	get_config().get::<String>("authors_csv_name").expect(CONFIG_ERR_MSG)
 }
 
 pub fn dummy_data() -> String {

@@ -1,4 +1,5 @@
 use crate::authors::author::{Author, AuthorsProvider};
+use crate::conf;
 use crate::fs::{MockFileLoader, Readable};
 
 use mockall::predicate::{self, eq};
@@ -6,88 +7,88 @@ use mockall::predicate::{self, eq};
 use super::provider::CSVReader;
 
 #[test]
-fn should_connect_to_an_authors_file_in_cwd_if_available() {
-	let mut mock_fs_wrapper = MockFileLoader::new();
-	mock_fs_wrapper
-		.expect_file_in_cwd()
-		.with(predicate::always())
+fn should_build_from_file_in_cwd() {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_file()
+		.with(eq(conf::authors_csv_file()))
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
 
-	assert!(CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).is_ok());
+	assert!(CSVReader::from_cwd_fallback_home(&mock_file_loader).is_ok());
 }
 
 #[test]
-fn should_connect_to_the_default_authors_file_if_no_file_is_available_in_cwd() {
-	let mut mock_fs_wrapper = MockFileLoader::new();
-	mock_fs_wrapper
-		.expect_file_in_cwd()
-		.with(predicate::always())
+fn should_fallback_to_home_file_when_no_file_in_cwd() {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_file()
+		.with(eq(conf::authors_csv_file()))
 		.times(1)
 		.returning(|_| None);
-	mock_fs_wrapper
-		.expect_file_in_abs_path()
-		.with(predicate::always())
+	mock_file_loader
+		.expect_load_file()
+		.with(eq(conf::authors_csv_path()))
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
 
-	assert!(CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).is_ok());
+	assert!(CSVReader::from_cwd_fallback_home(&mock_file_loader).is_ok());
 }
 
 #[test]
-fn should_error_when_neither_cwd_or_default_authors_file_are_available() {
-	let mut mock_fs_wrapper = MockFileLoader::new();
-	mock_fs_wrapper
-		.expect_file_in_cwd()
-		.with(predicate::always())
+fn should_error_when_file_is_not_in_cwd_nor_home() {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_file()
+		.with(eq(conf::authors_csv_file()))
 		.times(1)
 		.returning(|_| None);
-	mock_fs_wrapper
-		.expect_file_in_abs_path()
-		.with(predicate::always())
+	mock_file_loader
+		.expect_load_file()
+		.with(eq(conf::authors_csv_path()))
 		.times(1)
 		.returning(|_| None);
 
-	let result = CSVReader::from_cwd_fallback_home(&mock_fs_wrapper);
-	assert!(matches!(result, Err(e) if e.to_string().contains("No file found")));
+	let result = CSVReader::from_cwd_fallback_home(&mock_file_loader);
+	assert!(matches!(result, Err(e) if e.to_string().contains("No file found in cwd or home")));
 }
 
 #[test]
-fn should_connect_to_a_given_existing_authors_file() {
-	let an_authors_file_path = "/tmp/an_authors_file";
-	let mut mock_fs_wrapper = MockFileLoader::new();
-	mock_fs_wrapper
-		.expect_file_in_abs_path()
-		.with(eq(an_authors_file_path.to_string()))
+fn should_build_from_given_file() {
+	let irrelevant_path = "a/path";
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_file()
+		.with(eq(irrelevant_path.to_string()))
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
 
-	assert!(CSVReader::from(&mock_fs_wrapper, an_authors_file_path).is_ok());
+	assert!(CSVReader::from(&mock_file_loader, irrelevant_path).is_ok());
 }
 
 #[test]
-fn should_not_connect_to_a_given_non_existing_file() {
-	let an_authors_file_path = "/tmp/an_authors_file";
-	let mut mock_fs_wrapper = MockFileLoader::new();
-	mock_fs_wrapper
-		.expect_file_in_abs_path()
-		.with(eq(an_authors_file_path.to_string()))
+fn should_not_build_from_given_file() {
+	let irrelevant_path = "a/path";
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_file()
+		.with(eq(irrelevant_path.to_string()))
 		.times(1)
 		.returning(|_| None);
 
-	let result = CSVReader::from(&mock_fs_wrapper, an_authors_file_path);
+	let result = CSVReader::from(&mock_file_loader, irrelevant_path);
 	assert!(matches!(result, Err(e) if e.to_string().contains("No file at path")));
 }
 
 #[test]
-fn should_return_all_authors_from_file() {
-	let mut mock_fs_wrapper = MockFileLoader::new();
-	mock_fs_wrapper
-		.expect_file_in_cwd()
+fn should_provide_all_authors_in_file() {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_file()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
-	let repo = CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
+	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let retrieved_authors = repo.all();
 
@@ -99,14 +100,14 @@ fn should_return_all_authors_from_file() {
 }
 
 #[test]
-fn should_fetch_authors_based_on_alias() {
-	let mut mock_fs_wrapper = MockFileLoader::new();
-	mock_fs_wrapper
-		.expect_file_in_cwd()
+fn should_provide_author_given_an_alias() {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_file()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
-	let repo = CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
+	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let alias = "a";
 	let actual_author = repo.find(Vec::from([String::from(alias)]));
@@ -118,14 +119,14 @@ fn should_fetch_authors_based_on_alias() {
 }
 
 #[test]
-fn should_fetch_all_authors_for_a_given_alias() {
-	let mut mock_fs_wrapper = MockFileLoader::new();
-	mock_fs_wrapper
-		.expect_file_in_cwd()
+fn should_provide_all_authors_given_an_alias() {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_file()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
-	let repo = CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
+	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let alias = "b";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));
@@ -140,14 +141,14 @@ fn should_fetch_all_authors_for_a_given_alias() {
 }
 
 #[test]
-fn should_return_an_empty_list_if_no_author_matches_alias() {
-	let mut mock_fs_wrapper = MockFileLoader::new();
-	mock_fs_wrapper
-		.expect_file_in_cwd()
+fn should_provide_no_author_when_no_matching_alias_are_found() {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_file()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
-	let repo = CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
+	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let alias = "z";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));
@@ -160,6 +161,7 @@ pub struct DummyAuthorsFile {
 }
 
 impl DummyAuthorsFile {
+	// TODO: this should take the vec as param
 	pub fn default_content() -> Self {
 		Self {
 			content: (vec![

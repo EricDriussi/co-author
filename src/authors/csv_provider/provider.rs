@@ -11,20 +11,20 @@ pub struct CSVReader {
 }
 
 impl CSVReader {
-	pub fn from_cwd_fallback_home(fs_wrapper: &impl FileLoader) -> Result<Self, Box<dyn Error>> {
-		let file_in_cwd = fs_wrapper.file_in_cwd(conf::authors_file_name());
+	pub fn from_cwd_fallback_home(file_loader: &impl FileLoader) -> Result<Self, Box<dyn Error>> {
+		let file_in_cwd = file_loader.load_file(conf::authors_csv_file());
 		if let Some(file) = file_in_cwd {
 			return Ok(Self { src: file });
 		}
-		let file_in_home = fs_wrapper.file_in_abs_path(conf::authors_file_path());
+		let file_in_home = file_loader.load_file(conf::authors_csv_path());
 		match file_in_home {
 			Some(file) => Ok(Self { src: file }),
 			None => Err(AuthorError::with("No file found in cwd or home".to_string())),
 		}
 	}
 
-	pub fn from(fs_wrapper: &impl FileLoader, authors_file: &str) -> Result<Self, Box<dyn Error>> {
-		let given_file = fs_wrapper.file_in_abs_path(authors_file.to_string());
+	pub fn from(file_loader: &impl FileLoader, authors_file: &str) -> Result<Self, Box<dyn Error>> {
+		let given_file = file_loader.load_file(authors_file.to_string());
 		match given_file {
 			Some(file) => Ok(Self { src: file }),
 			None => Err(AuthorError::with(format!(
