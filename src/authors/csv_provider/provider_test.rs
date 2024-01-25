@@ -14,7 +14,7 @@ fn should_connect_to_an_authors_file_in_cwd_if_available() {
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
 
-	assert!(CSVReader::from_cwd_with_home_fallback(&mock_fs_wrapper).is_ok());
+	assert!(CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).is_ok());
 }
 
 #[test]
@@ -31,7 +31,7 @@ fn should_connect_to_the_default_authors_file_if_no_file_is_available_in_cwd() {
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
 
-	assert!(CSVReader::from_cwd_with_home_fallback(&mock_fs_wrapper).is_ok());
+	assert!(CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).is_ok());
 }
 
 #[test]
@@ -48,7 +48,7 @@ fn should_error_when_neither_cwd_or_default_authors_file_are_available() {
 		.times(1)
 		.returning(|_| None);
 
-	let result = CSVReader::from_cwd_with_home_fallback(&mock_fs_wrapper);
+	let result = CSVReader::from_cwd_fallback_home(&mock_fs_wrapper);
 	assert!(matches!(result, Err(e) if e.to_string().contains("No file found")));
 }
 
@@ -87,7 +87,7 @@ fn should_return_all_authors_from_file() {
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
-	let repo = CSVReader::from_cwd_with_home_fallback(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
+	let repo = CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
 
 	let retrieved_authors = repo.all();
 
@@ -106,7 +106,7 @@ fn should_fetch_authors_based_on_alias() {
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
-	let repo = CSVReader::from_cwd_with_home_fallback(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
+	let repo = CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
 
 	let alias = "a";
 	let actual_author = repo.find(Vec::from([String::from(alias)]));
@@ -125,7 +125,7 @@ fn should_fetch_all_authors_for_a_given_alias() {
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
-	let repo = CSVReader::from_cwd_with_home_fallback(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
+	let repo = CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
 
 	let alias = "b";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));
@@ -147,7 +147,7 @@ fn should_return_an_empty_list_if_no_author_matches_alias() {
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| Some(Box::new(DummyAuthorsFile::default_content())));
-	let repo = CSVReader::from_cwd_with_home_fallback(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
+	let repo = CSVReader::from_cwd_fallback_home(&mock_fs_wrapper).expect("Could not setup FSProvider for test");
 
 	let alias = "z";
 	let actual_authors = repo.find(Vec::from([String::from(alias)]));

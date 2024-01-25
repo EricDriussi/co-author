@@ -42,8 +42,11 @@ missing_panics_doc = "allow"
 module_name_repetitions = "allow" # TODO: Remove this?
 new_without_default = "allow"
 
+[profile.dev]
+opt-level = 1 # Very build-time optimized
+
 [profile.release]
-opt-level = "z" # Very optimized
+opt-level = "z" # Very size optimized
 lto = true # Very optimized
 strip = "symbols" # Reduce binary size
 panic = "abort"

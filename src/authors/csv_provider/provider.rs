@@ -11,7 +11,7 @@ pub struct CSVReader {
 }
 
 impl CSVReader {
-	pub fn from_cwd_with_home_fallback(fs_wrapper: &impl FsWrapper) -> Result<Self, Box<dyn Error>> {
+	pub fn from_cwd_fallback_home(fs_wrapper: &impl FsWrapper) -> Result<Self, Box<dyn Error>> {
 		let file_in_cwd = fs_wrapper.file_in_cwd(conf::authors_file_name());
 		if let Some(file) = file_in_cwd {
 			return Ok(Self { src: file });
@@ -19,17 +19,16 @@ impl CSVReader {
 		let file_in_home = fs_wrapper.file_in_abs_path(conf::authors_file_path());
 		match file_in_home {
 			Some(file) => Ok(Self { src: file }),
-			None => Err(AuthorError::with("No file found!".to_string())),
+			None => Err(AuthorError::with("No file found in cwd or home".to_string())),
 		}
 	}
 
 	pub fn from(fs_wrapper: &impl FsWrapper, authors_file: &str) -> Result<Self, Box<dyn Error>> {
 		let given_file = fs_wrapper.file_in_abs_path(authors_file.to_string());
-
 		match given_file {
 			Some(file) => Ok(Self { src: file }),
 			None => Err(AuthorError::with(format!(
-				"No file at path {:?}",
+				"No file at path: {:?}",
 				authors_file.to_string()
 			))),
 		}

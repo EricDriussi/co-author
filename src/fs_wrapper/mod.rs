@@ -15,7 +15,7 @@ impl FsWrapper for SimpleFsWrapper {
 	fn file_in_abs_path(&self, path: String) -> Option<Box<dyn File>> {
 		let file = std::fs::File::open(path);
 		match file {
-			Ok(file) => Some(Box::new(CSVFile::new(file))),
+			Ok(file) => Some(Box::new(SimpleFile::new(file))),
 			Err(_) => None,
 		}
 	}
@@ -23,7 +23,7 @@ impl FsWrapper for SimpleFsWrapper {
 	fn file_in_cwd(&self, file_name: String) -> Option<Box<dyn File>> {
 		let file = std::fs::File::open(std::env::current_dir().ok()?.join(file_name));
 		match file {
-			Ok(file) => Some(Box::new(CSVFile::new(file))),
+			Ok(file) => Some(Box::new(SimpleFile::new(file))),
 			Err(_) => None,
 		}
 	}
@@ -39,17 +39,17 @@ pub trait File {
 	fn read_lines(&self) -> Vec<String>;
 }
 
-pub struct CSVFile {
+pub struct SimpleFile {
 	file: std::fs::File,
 }
 
-impl CSVFile {
+impl SimpleFile {
 	pub fn new(file: std::fs::File) -> Self {
 		Self { file }
 	}
 }
 
-impl File for CSVFile {
+impl File for SimpleFile {
 	fn read_lines(&self) -> Vec<String> {
 		BufReader::new(&self.file).lines().map_while(Result::ok).collect()
 	}
