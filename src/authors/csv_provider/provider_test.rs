@@ -1,5 +1,5 @@
 use crate::authors::author::{Author, AuthorsProvider};
-use crate::fs_wrapper::{File, MockFsWrapper};
+use crate::fs::{MockFileLoader, Readable};
 
 use mockall::predicate::{self, eq};
 
@@ -7,7 +7,7 @@ use super::provider::CSVReader;
 
 #[test]
 fn should_connect_to_an_authors_file_in_cwd_if_available() {
-	let mut mock_fs_wrapper = MockFsWrapper::new();
+	let mut mock_fs_wrapper = MockFileLoader::new();
 	mock_fs_wrapper
 		.expect_file_in_cwd()
 		.with(predicate::always())
@@ -19,7 +19,7 @@ fn should_connect_to_an_authors_file_in_cwd_if_available() {
 
 #[test]
 fn should_connect_to_the_default_authors_file_if_no_file_is_available_in_cwd() {
-	let mut mock_fs_wrapper = MockFsWrapper::new();
+	let mut mock_fs_wrapper = MockFileLoader::new();
 	mock_fs_wrapper
 		.expect_file_in_cwd()
 		.with(predicate::always())
@@ -36,7 +36,7 @@ fn should_connect_to_the_default_authors_file_if_no_file_is_available_in_cwd() {
 
 #[test]
 fn should_error_when_neither_cwd_or_default_authors_file_are_available() {
-	let mut mock_fs_wrapper = MockFsWrapper::new();
+	let mut mock_fs_wrapper = MockFileLoader::new();
 	mock_fs_wrapper
 		.expect_file_in_cwd()
 		.with(predicate::always())
@@ -55,7 +55,7 @@ fn should_error_when_neither_cwd_or_default_authors_file_are_available() {
 #[test]
 fn should_connect_to_a_given_existing_authors_file() {
 	let an_authors_file_path = "/tmp/an_authors_file";
-	let mut mock_fs_wrapper = MockFsWrapper::new();
+	let mut mock_fs_wrapper = MockFileLoader::new();
 	mock_fs_wrapper
 		.expect_file_in_abs_path()
 		.with(eq(an_authors_file_path.to_string()))
@@ -68,7 +68,7 @@ fn should_connect_to_a_given_existing_authors_file() {
 #[test]
 fn should_not_connect_to_a_given_non_existing_file() {
 	let an_authors_file_path = "/tmp/an_authors_file";
-	let mut mock_fs_wrapper = MockFsWrapper::new();
+	let mut mock_fs_wrapper = MockFileLoader::new();
 	mock_fs_wrapper
 		.expect_file_in_abs_path()
 		.with(eq(an_authors_file_path.to_string()))
@@ -81,7 +81,7 @@ fn should_not_connect_to_a_given_non_existing_file() {
 
 #[test]
 fn should_return_all_authors_from_file() {
-	let mut mock_fs_wrapper = MockFsWrapper::new();
+	let mut mock_fs_wrapper = MockFileLoader::new();
 	mock_fs_wrapper
 		.expect_file_in_cwd()
 		.with(predicate::always())
@@ -100,7 +100,7 @@ fn should_return_all_authors_from_file() {
 
 #[test]
 fn should_fetch_authors_based_on_alias() {
-	let mut mock_fs_wrapper = MockFsWrapper::new();
+	let mut mock_fs_wrapper = MockFileLoader::new();
 	mock_fs_wrapper
 		.expect_file_in_cwd()
 		.with(predicate::always())
@@ -119,7 +119,7 @@ fn should_fetch_authors_based_on_alias() {
 
 #[test]
 fn should_fetch_all_authors_for_a_given_alias() {
-	let mut mock_fs_wrapper = MockFsWrapper::new();
+	let mut mock_fs_wrapper = MockFileLoader::new();
 	mock_fs_wrapper
 		.expect_file_in_cwd()
 		.with(predicate::always())
@@ -141,7 +141,7 @@ fn should_fetch_all_authors_for_a_given_alias() {
 
 #[test]
 fn should_return_an_empty_list_if_no_author_matches_alias() {
-	let mut mock_fs_wrapper = MockFsWrapper::new();
+	let mut mock_fs_wrapper = MockFileLoader::new();
 	mock_fs_wrapper
 		.expect_file_in_cwd()
 		.with(predicate::always())
@@ -175,8 +175,12 @@ impl DummyAuthorsFile {
 	}
 }
 
-impl File for DummyAuthorsFile {
-	fn read_lines(&self) -> Vec<String> {
+impl Readable for DummyAuthorsFile {
+	fn non_empty_lines(&self) -> Vec<String> {
+		self.content.clone()
+	}
+
+	fn all_lines(&self) -> Vec<String> {
 		self.content.clone()
 	}
 }

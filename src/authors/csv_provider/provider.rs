@@ -4,14 +4,14 @@ use super::csv_mapper;
 use std::{error::Error, result::Result};
 
 use crate::conf;
-use crate::fs_wrapper::{File, FsWrapper};
+use crate::fs::{FileLoader, Readable};
 
 pub struct CSVReader {
-	src: Box<dyn File>,
+	src: Box<dyn Readable>,
 }
 
 impl CSVReader {
-	pub fn from_cwd_fallback_home(fs_wrapper: &impl FsWrapper) -> Result<Self, Box<dyn Error>> {
+	pub fn from_cwd_fallback_home(fs_wrapper: &impl FileLoader) -> Result<Self, Box<dyn Error>> {
 		let file_in_cwd = fs_wrapper.file_in_cwd(conf::authors_file_name());
 		if let Some(file) = file_in_cwd {
 			return Ok(Self { src: file });
@@ -23,7 +23,7 @@ impl CSVReader {
 		}
 	}
 
-	pub fn from(fs_wrapper: &impl FsWrapper, authors_file: &str) -> Result<Self, Box<dyn Error>> {
+	pub fn from(fs_wrapper: &impl FileLoader, authors_file: &str) -> Result<Self, Box<dyn Error>> {
 		let given_file = fs_wrapper.file_in_abs_path(authors_file.to_string());
 		match given_file {
 			Some(file) => Ok(Self { src: file }),
@@ -38,7 +38,7 @@ impl CSVReader {
 impl AuthorsProvider for CSVReader {
 	fn find(&self, aliases: Vec<String>) -> Vec<Author> {
 		self.src
-			.read_lines()
+			.non_empty_lines()
 			.iter()
 			.filter_map(|line| csv_mapper::to_author(line.as_str()))
 			.filter(|author| aliases.contains(&author.alias()))
@@ -47,7 +47,7 @@ impl AuthorsProvider for CSVReader {
 
 	fn all(&self) -> Vec<Author> {
 		self.src
-			.read_lines()
+			.non_empty_lines()
 			.iter()
 			.filter_map(|line| csv_mapper::to_author(line.as_str()))
 			.collect()
