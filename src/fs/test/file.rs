@@ -1,14 +1,14 @@
 use crate::fs::file::File;
 
 #[test]
-fn should_build_if_file_is_present() {
+fn should_build_from_path_when_file_is_present() {
 	let file = File::from("src/fs/test/test_file.txt".to_string());
 
 	assert!(file.is_some());
 }
 
 #[test]
-fn should_not_build_if_file_is_absent() {
+fn should_not_build_from_path_when_file_is_absent() {
 	let file = File::from("not/a/real/path/whatever.something".to_string());
 
 	assert!(file.is_none());
