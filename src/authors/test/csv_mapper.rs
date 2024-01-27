@@ -1,5 +1,4 @@
-use crate::authors::author::Author;
-use crate::authors::csv::mapper;
+use crate::authors::{author::Author, csv::mapper};
 
 #[test]
 fn should_map_from_valid_csv_line() {

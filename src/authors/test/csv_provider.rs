@@ -1,11 +1,10 @@
 use crate::authors::author::AuthorsProvider;
+use crate::authors::csv::provider::CSVReader;
 use crate::conf;
 use crate::fs::file::Readable;
 use crate::fs::wrapper::MockFileLoader;
 
 use mockall::predicate::{self, eq};
-
-use super::provider::CSVReader;
 
 const IRRELEVANT_FILE_PATH: &str = "a/path/file.hi";
 

@@ -70,7 +70,16 @@ fn get_project_root_dir() -> Option<PathBuf> {
 }
 
 mod args;
-mod authors;
+mod authors {
+	pub mod author;
+	mod author_err;
+	pub mod csv {
+		pub mod mapper;
+		pub mod provider;
+	}
+	#[cfg(test)]
+	mod test;
+}
 mod cli;
 pub mod conf;
 mod git;
