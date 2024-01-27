@@ -1,5 +1,5 @@
 use crate::authors::author::Author;
-use crate::authors::csv_provider::csv_mapper;
+use crate::authors::csv::mapper;
 
 #[test]
 fn should_map_from_valid_csv_line() {
@@ -7,7 +7,7 @@ fn should_map_from_valid_csv_line() {
 	let name = "alice";
 	let email = "alice@wonderland.not";
 
-	let author_from_csv = csv_mapper::to_author(format!("{alias},{name},{email}").as_str());
+	let author_from_csv = mapper::to_author(format!("{alias},{name},{email}").as_str());
 
 	assert_eq!(author_from_csv, Some(Author::from(alias, name, email)));
 }
@@ -17,7 +17,7 @@ fn should_not_map_from_invalid_csv_line() {
 	let name = "alice";
 	let email = "alice@wonderland.not";
 
-	let no_author = csv_mapper::to_author(format!("{name},{email}").as_str());
+	let no_author = mapper::to_author(format!("{name},{email}").as_str());
 
 	assert_eq!(no_author, None);
 }

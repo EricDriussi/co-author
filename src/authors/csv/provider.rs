@@ -1,6 +1,6 @@
 use super::super::author::{Author, AuthorsProvider};
 use super::super::author_err::AuthorError;
-use super::csv_mapper;
+use super::mapper;
 use std::{error::Error, result::Result};
 
 use crate::conf;
@@ -41,7 +41,7 @@ impl AuthorsProvider for CSVReader {
 		self.src
 			.non_empty_lines()
 			.iter()
-			.filter_map(|line| csv_mapper::to_author(line.as_str()))
+			.filter_map(|line| mapper::to_author(line.as_str()))
 			.filter(|author| aliases.contains(&author.alias()))
 			.collect()
 	}
@@ -50,7 +50,7 @@ impl AuthorsProvider for CSVReader {
 		self.src
 			.non_empty_lines()
 			.iter()
-			.filter_map(|line| csv_mapper::to_author(line.as_str()))
+			.filter_map(|line| mapper::to_author(line.as_str()))
 			.collect()
 	}
 }

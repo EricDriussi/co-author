@@ -3,8 +3,8 @@ use std::error::Error;
 use crate::{
 	args::Args,
 	authors::{
-		author::{Author, AuthorsProvider},
-		csv_provider::provider::CSVReader,
+        author::{Author, AuthorsProvider},
+        csv::provider::CSVReader,
 	},
 	cli::Cli,
 	fs::wrapper::FsWrapper,

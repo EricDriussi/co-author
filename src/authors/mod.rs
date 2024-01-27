@@ -1,6 +1,6 @@
 pub mod author;
 mod author_err;
-pub mod csv_provider;
+pub mod csv;
 
 #[cfg(test)]
 mod test;

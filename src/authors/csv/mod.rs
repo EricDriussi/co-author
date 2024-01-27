@@ -1,7 +1,7 @@
-mod csv_mapper;
+mod mapper;
 pub mod provider;
 
 #[cfg(test)]
-mod csv_mapper_test;
+mod mapper_test;
 #[cfg(test)]
 mod provider_test;
