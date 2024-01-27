@@ -3,14 +3,14 @@ use std::error::Error;
 use crate::{
 	args::Args,
 	authors::{
-        author::{Author, AuthorsProvider},
-        csv::provider::CSVReader,
+		author::{Author, AuthorsProvider},
+		csv::provider::CSVReader,
 	},
-	cli::Cli,
+	cli::fancy_cli::FancyCli,
 	fs::wrapper::FsWrapper,
 };
 
-pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Box<dyn Error>> {
+pub fn handle_authors(args: &Args, cli: &mut FancyCli) -> Result<Vec<String>, Box<dyn Error>> {
 	let authors_prov = match &args.file {
 		Some(file) => CSVReader::from(&FsWrapper::new(), file)?,
 		None => CSVReader::from_cwd_fallback_home(&FsWrapper::new())?,
@@ -34,7 +34,7 @@ pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Bo
 		};
 	}
 
-	let aliases = cli.ask_for_aliases(authors_prov.all())?;
+	let aliases = cli.prompt_aliases(&authors_prov.all())?;
 	if args.sort {
 		Ok(sort(authors_prov.find(aliases).iter().map(Author::signature).collect()))
 	} else {
@@ -42,11 +42,11 @@ pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Bo
 	}
 }
 
-pub fn handle_commit_msg(args: &Args, cli: &mut impl Cli, prev: String) -> Result<String, Box<dyn Error>> {
+pub fn handle_commit_msg(args: &Args, cli: &mut FancyCli, prev: &str) -> Result<String, Box<dyn Error>> {
 	match (args.message.clone(), args.pre_populate) {
 		(Some(msg), _) => Ok(msg),
-		(None, false) => cli.ask_for_commit_message(),
-		(None, true) => cli.ask_for_commit_message_with_pre_populated(prev),
+		(None, false) => cli.prompt_commit_message(),
+		(None, true) => cli.prompt_pre_populated_commit_message(prev),
 	}
 }
 

@@ -1,6 +1,7 @@
 use args::Args;
 use clap::Parser;
-use cli::FancyCli;
+use cli::fancy_cli::FancyCli;
+use rustyline::DefaultEditor;
 use std::{env, error::Error, path::PathBuf, process};
 
 // TODO: improve tests
@@ -21,7 +22,7 @@ fn main() {
 fn run(args: &Args) -> Result<(), Box<dyn Error>> {
 	set_cwd_to_git_root()?;
 
-	let mut cli = FancyCli::new();
+	let mut cli = FancyCli::new(DefaultEditor::new()?);
 	let authors_signatures = handler::handle_authors(args, &mut cli)?;
 
 	// FIXME. Find a way to pass this to handle_commit_msg (clone/copy)
@@ -34,7 +35,7 @@ fn run(args: &Args) -> Result<(), Box<dyn Error>> {
 		}
 		return git_service.commit_with_editor(authors_signatures);
 	}
-	let msg = handler::handle_commit_msg(args, &mut cli, prev)?;
+	let msg = handler::handle_commit_msg(args, &mut cli, &prev)?;
 
 	return git_service.commit(msg.as_str(), authors_signatures);
 }
@@ -80,7 +81,13 @@ mod authors {
 	#[cfg(test)]
 	mod test;
 }
-mod cli;
+mod cli {
+	mod cli_err;
+	pub mod fancy_cli;
+	#[cfg(test)]
+	mod fancy_cli_test;
+	mod input_reader;
+}
 pub mod conf;
 mod git;
 mod handler;
