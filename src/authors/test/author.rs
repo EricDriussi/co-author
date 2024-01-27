@@ -2,7 +2,7 @@ use crate::authors::author::Author;
 use parameterized::parameterized;
 
 #[test]
-fn should_present_the_correct_signature() {
+fn should_present_a_co_author_compliant_signature() {
 	let name = "alice";
 	let email = "alice@wonderland.not";
 	let author = Author::from("a", name, email);
@@ -11,7 +11,7 @@ fn should_present_the_correct_signature() {
 }
 
 #[test]
-fn should_provide_an_alias_getter() {
+fn should_get_alias() {
 	let alias = "a";
 	let author = Author::from(alias, "alice", "alice@wonderland.not");
 
@@ -19,7 +19,7 @@ fn should_provide_an_alias_getter() {
 }
 
 #[test]
-fn should_provide_a_name_getter() {
+fn should_get_name() {
 	let name = "alice";
 	let author = Author::from("a", name, "alice@wonderland.not");
 

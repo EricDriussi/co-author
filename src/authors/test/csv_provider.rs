@@ -95,9 +95,9 @@ fn should_provide_all_authors_in_file() {
 				"b,username,something@gmail.com",
 			])))
 		});
-	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
+	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
-	let retrieved_authors = repo.all();
+	let retrieved_authors = provider.all();
 
 	assert_eq!(retrieved_authors.len(), 2);
 }
@@ -115,10 +115,9 @@ fn should_provide_only_author_matching_an_alias() {
 				"b,username,something@gmail.com",
 			])))
 		});
-	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
+	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
-	let alias = "a";
-	let retrieved_authors = repo.find(vec![alias.to_string()]);
+	let retrieved_authors = provider.find(vec!["a".to_string()]);
 
 	assert_eq!(retrieved_authors.len(), 1);
 }
@@ -137,10 +136,9 @@ fn should_provide_all_authors_matching_an_alias() {
 				"b,username2,something2@gmail.com",
 			])))
 		});
-	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
+	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
-	let alias = "b";
-	let retrieved_authors = repo.find(vec![alias.to_string()]);
+	let retrieved_authors = provider.find(vec!["b".to_string()]);
 
 	assert_eq!(retrieved_authors.len(), 2);
 }
@@ -157,9 +155,9 @@ fn should_provide_no_author_when_alias_doesnt_match() {
 				"a,Name Surname,someone@users.noreply.github.com",
 			])))
 		});
-	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
+	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
-	let retrieved_authors = repo.find(vec!["z".to_string()]);
+	let retrieved_authors = provider.find(vec!["z".to_string()]);
 
 	assert_eq!(retrieved_authors.len(), 0);
 }
