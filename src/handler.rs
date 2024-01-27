@@ -1,14 +1,6 @@
 use std::error::Error;
 
-use args::Args;
-use cli::Cli;
-pub mod authors;
-pub mod conf;
-pub mod fs;
-pub mod test_utils;
-
-pub mod args;
-pub mod cli;
+use crate::{args::Args, authors, cli::Cli};
 
 pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Box<dyn Error>> {
 	let authors_service = match &args.file {

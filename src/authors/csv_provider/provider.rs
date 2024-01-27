@@ -4,7 +4,8 @@ use super::csv_mapper;
 use std::{error::Error, result::Result};
 
 use crate::conf;
-use crate::fs::{FileLoader, Readable};
+use crate::fs::file::Readable;
+use crate::fs::wrapper::FileLoader;
 
 pub struct CSVReader {
 	src: Box<dyn Readable>,

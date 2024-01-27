@@ -1,13 +1,18 @@
 use std::io::{BufRead, BufReader, Error};
 use std::iter::MapWhile;
 
-use super::{Lines, OptionalReadable, Readable};
+type Lines = Vec<String>;
+
+pub trait Readable {
+	fn non_empty_lines(&self) -> Lines;
+	fn all_lines(&self) -> Lines;
+}
 
 pub struct File {
 	file: std::fs::File,
 }
 
-type FSLines<'a> = MapWhile<std::io::Lines<BufReader<&'a std::fs::File>>, fn(Result<String, Error>) -> Option<String>>;
+pub type OptionalReadable = Option<Box<dyn Readable>>;
 
 impl File {
 	pub fn from(path: String) -> OptionalReadable {
@@ -32,3 +37,5 @@ impl Readable for File {
 		self.valid_lines().collect()
 	}
 }
+
+type FSLines<'a> = MapWhile<std::io::Lines<BufReader<&'a std::fs::File>>, fn(Result<String, Error>) -> Option<String>>;

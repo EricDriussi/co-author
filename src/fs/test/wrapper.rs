@@ -1,4 +1,4 @@
-use crate::fs::{wrapper::FsWrapper, FileLoader};
+use crate::fs::wrapper::{FileLoader, FsWrapper};
 
 #[test]
 fn should_load_some_file_from_cwd() {

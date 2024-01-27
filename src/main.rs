@@ -1,8 +1,7 @@
-use std::{env, error::Error, path::PathBuf, process};
-
-mod git;
+use args::Args;
 use clap::Parser;
-use co_author::{args::Args, cli::FancyCli, handle_authors, handle_commit_msg};
+use cli::FancyCli;
+use std::{env, error::Error, path::PathBuf, process};
 
 // TODO: improve tests
 // TODO: review optional/result handling
@@ -23,7 +22,7 @@ fn run(args: &Args) -> Result<(), Box<dyn Error>> {
 	set_cwd_to_git_root()?;
 
 	let mut cli = FancyCli::new();
-	let authors_signatures = handle_authors(args, &mut cli)?;
+	let authors_signatures = handler::handle_authors(args, &mut cli)?;
 
 	// FIXME. Find a way to pass this to handle_commit_msg (clone/copy)
 	let git_service = git::libgit_setup()?;
@@ -35,7 +34,7 @@ fn run(args: &Args) -> Result<(), Box<dyn Error>> {
 		}
 		return git_service.commit_with_editor(authors_signatures);
 	}
-	let msg = handle_commit_msg(args, &mut cli, prev)?;
+	let msg = handler::handle_commit_msg(args, &mut cli, prev)?;
 
 	return git_service.commit(msg.as_str(), authors_signatures);
 }
@@ -68,4 +67,21 @@ fn get_project_root_dir() -> Option<PathBuf> {
 	}
 
 	None
+}
+
+mod args;
+mod authors;
+mod cli;
+pub mod conf;
+mod git;
+mod handler;
+pub mod test_utils;
+mod fs {
+	pub mod file;
+	#[cfg(test)]
+	mod test {
+		mod file;
+		mod wrapper;
+	}
+	pub mod wrapper;
 }

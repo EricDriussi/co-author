@@ -5,8 +5,9 @@ use std::{
 	process::{Command, Output, Stdio},
 };
 
-use co_author::conf;
 use git2::Config;
+
+use crate::conf;
 
 pub fn open() {
 	let editmsg = PathBuf::from(conf::editmsg());

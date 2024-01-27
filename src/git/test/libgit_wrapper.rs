@@ -1,4 +1,3 @@
-use co_author::test_utils::set_test_env;
 use git2::{Config, Repository, RepositoryInitOptions, Signature};
 use serial_test::serial;
 use std::{
@@ -6,9 +5,12 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use crate::git::{
-	commit_body::{CommitBody, GitWrapper},
-	libgit_wrapper::LibGitWrapper,
+use crate::{
+	git::{
+		commit_body::{CommitBody, GitWrapper},
+		libgit_wrapper::LibGitWrapper,
+	},
+	test_utils::set_test_env,
 };
 
 const REPO_PATH: &str = "/var/tmp/coa";

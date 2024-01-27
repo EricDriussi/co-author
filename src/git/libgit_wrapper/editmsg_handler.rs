@@ -3,10 +3,9 @@ use std::{
 	io::{BufRead, BufReader},
 };
 
-use co_author::conf;
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 
-use crate::git::commit_body::CommitBody;
+use crate::{conf, git::commit_body::CommitBody};
 
 const ERR_MSG: &str = "GIT ERROR";
 
@@ -137,7 +136,7 @@ fn format_path(file: StatusEntry) -> Option<String> {
 #[cfg(test)]
 mod test {
 
-	use co_author::test_utils::file_cleanup::AfterAssert;
+	use crate::test_utils::file_cleanup::AfterAssert;
 
 	use super::*;
 

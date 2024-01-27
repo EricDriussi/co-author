@@ -1,6 +1,7 @@
 use crate::authors::author::{Author, AuthorsProvider};
 use crate::conf;
-use crate::fs::{MockFileLoader, Readable};
+use crate::fs::file::Readable;
+use crate::fs::wrapper::MockFileLoader;
 
 use mockall::predicate::{self, eq};
 

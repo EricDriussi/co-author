@@ -1,8 +1,9 @@
 use std::{fs::OpenOptions, io::Write};
 
-use co_author::test_utils::file_cleanup::AfterAssert;
 use serial_test::serial;
 use std::os::unix::fs::OpenOptionsExt;
+
+use crate::test_utils::file_cleanup::AfterAssert;
 
 use super::*;
 

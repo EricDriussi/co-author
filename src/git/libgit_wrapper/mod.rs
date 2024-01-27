@@ -1,7 +1,8 @@
 use std::{error::Error, fs::OpenOptions, io::Write, path::PathBuf};
 
-use co_author::conf;
 use git2::{Repository, Signature};
+
+use crate::conf;
 
 use super::commit_body::{CommitBody, GitWrapper};
 
