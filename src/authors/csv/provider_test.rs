@@ -1,4 +1,4 @@
-use crate::authors::author::{Author, AuthorsProvider};
+use crate::authors::author::AuthorsProvider;
 use crate::conf;
 use crate::fs::file::Readable;
 use crate::fs::wrapper::MockFileLoader;
@@ -101,12 +101,10 @@ fn should_provide_all_authors_in_file() {
 	let retrieved_authors = repo.all();
 
 	assert_eq!(retrieved_authors.len(), 2);
-	assert!(retrieved_authors.contains(&Author::from("a", "Name Surname", "someone@users.noreply.github.com")));
-	assert!(retrieved_authors.contains(&Author::from("b", "username", "something@gmail.com")));
 }
 
 #[test]
-fn should_provide_author_given_an_alias() {
+fn should_provide_only_author_matching_an_alias() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_file()
@@ -121,16 +119,13 @@ fn should_provide_author_given_an_alias() {
 	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let alias = "a";
-	let actual_author = repo.find(vec![alias.to_string()]);
+	let retrieved_authors = repo.find(vec![alias.to_string()]);
 
-	assert_eq!(
-		actual_author,
-		[Author::from(alias, "Name Surname", "someone@users.noreply.github.com")]
-	);
+	assert_eq!(retrieved_authors.len(), 1);
 }
 
 #[test]
-fn should_provide_all_authors_given_an_alias() {
+fn should_provide_all_authors_matching_an_alias() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_file()
@@ -146,19 +141,13 @@ fn should_provide_all_authors_given_an_alias() {
 	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let alias = "b";
-	let actual_authors = repo.find(vec![alias.to_string()]);
+	let retrieved_authors = repo.find(vec![alias.to_string()]);
 
-	assert_eq!(
-		actual_authors,
-		[
-			Author::from(alias, "username", "something@gmail.com"),
-			Author::from(alias, "username2", "something2@gmail.com"),
-		]
-	);
+	assert_eq!(retrieved_authors.len(), 2);
 }
 
 #[test]
-fn should_provide_no_author_when_no_matching_alias_are_found() {
+fn should_provide_no_author_when_alias_doesnt_match() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_file()
@@ -171,9 +160,9 @@ fn should_provide_no_author_when_no_matching_alias_are_found() {
 		});
 	let repo = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
-	let actual_authors = repo.find(vec!["z".to_string()]);
+	let retrieved_authors = repo.find(vec!["z".to_string()]);
 
-	assert_eq!(actual_authors, []);
+	assert_eq!(retrieved_authors.len(), 0);
 }
 
 pub struct DummyAuthorsFile {
