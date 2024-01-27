@@ -1,34 +1,44 @@
 use std::error::Error;
 
-use crate::{args::Args, authors, cli::Cli};
+use crate::{
+	args::Args,
+	authors::{
+		author::{Author, AuthorsProvider},
+		csv_provider::provider::CSVReader,
+	},
+	cli::Cli,
+	fs::wrapper::FsWrapper,
+};
 
 pub fn handle_authors(args: &Args, cli: &mut impl Cli) -> Result<Vec<String>, Box<dyn Error>> {
-	let authors_service = match &args.file {
-		Some(file) => authors::from_file(file)?,
-		None => authors::default()?,
+	let authors_prov = match &args.file {
+		Some(file) => CSVReader::from(&FsWrapper::new(), file)?,
+		None => CSVReader::from_cwd_fallback_home(&FsWrapper::new())?,
 	};
 
 	if args.all {
 		return if args.sort {
-			Ok(sort(authors_service.all_signatures()))
+			Ok(sort(authors_prov.all().iter().map(Author::signature).collect()))
 		} else {
-			Ok(authors_service.all_signatures())
+			Ok(authors_prov.all().iter().map(Author::signature).collect())
 		};
 	}
 	if let Some(list) = &args.list {
 		let given_aliases = list.split(',').map(ToString::to_string).collect();
 		return if args.sort {
-			Ok(sort(authors_service.signatures_of(given_aliases)))
+			Ok(sort(
+				authors_prov.find(given_aliases).iter().map(Author::signature).collect(),
+			))
 		} else {
-			Ok(authors_service.signatures_of(given_aliases))
+			Ok(authors_prov.find(given_aliases).iter().map(Author::signature).collect())
 		};
 	}
 
-	let aliases = cli.ask_for_aliases(authors_service.all_authors())?;
+	let aliases = cli.ask_for_aliases(authors_prov.all())?;
 	if args.sort {
-		Ok(sort(authors_service.signatures_of(aliases)))
+		Ok(sort(authors_prov.find(aliases).iter().map(Author::signature).collect()))
 	} else {
-		Ok(authors_service.signatures_of(aliases))
+		Ok(authors_prov.find(aliases).iter().map(Author::signature).collect())
 	}
 }
 
