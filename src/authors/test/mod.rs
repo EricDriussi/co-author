@@ -1,3 +1,4 @@
+#[cfg(test)]
 mod author;
 #[cfg(test)]
 mod csv_mapper;

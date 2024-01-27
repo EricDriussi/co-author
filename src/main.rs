@@ -88,9 +88,6 @@ pub mod test_utils;
 mod fs {
 	pub mod file;
 	#[cfg(test)]
-	mod test {
-		mod file;
-		mod wrapper;
-	}
+	mod test;
 	pub mod wrapper;
 }
