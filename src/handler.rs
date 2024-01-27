@@ -1,3 +1,4 @@
+use eyre::Result;
 use std::error::Error;
 
 use crate::{
@@ -42,7 +43,7 @@ pub fn handle_authors(args: &Args, cli: &mut FancyCli) -> Result<Vec<String>, Bo
 	}
 }
 
-pub fn handle_commit_msg(args: &Args, cli: &mut FancyCli, prev: &str) -> Result<String, Box<dyn Error>> {
+pub fn handle_commit_msg(args: &Args, cli: &mut FancyCli, prev: &str) -> Result<String> {
 	match (args.message.clone(), args.pre_populate) {
 		(Some(msg), _) => Ok(msg),
 		(None, false) => cli.prompt_commit_message(),

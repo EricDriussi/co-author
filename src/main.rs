@@ -82,7 +82,6 @@ mod authors {
 	mod test;
 }
 mod cli {
-	mod cli_err;
 	pub mod fancy_cli;
 	#[cfg(test)]
 	mod fancy_cli_test;

@@ -1,9 +1,10 @@
 use colored::Colorize;
-use std::{error::Error, process};
+use eyre::{Context, Result};
+use std::process;
 
 use rustyline::error::ReadlineError::{self, Interrupted};
 
-use super::{cli_err::CliError, input_reader::InputReader};
+use super::input_reader::InputReader;
 use crate::authors::author::Author;
 
 pub struct FancyCli {
@@ -17,42 +18,41 @@ impl FancyCli {
 		}
 	}
 
-	pub fn prompt_commit_message(&mut self) -> Result<String, Box<dyn Error>> {
-		match Self::handle_error(self.prompt.readline("Enter your commit message:\n")) {
+	pub fn prompt_commit_message(&mut self) -> Result<String> {
+		match self.prompt.readline("Enter your commit message:\n") {
 			Ok(commit_message) => Ok(commit_message.trim().to_string()),
-			Err(e) => Err(e),
+			Err(e) => Self::handle_error(e),
 		}
 	}
 
-	pub fn prompt_aliases(&mut self, authors: &[Author]) -> Result<Vec<String>, Box<dyn Error>> {
+	pub fn prompt_aliases(&mut self, authors: &[Author]) -> Result<Vec<String>> {
 		let formatted_authors = Self::prettify_authors(authors);
-		let result = self
+		match self
 			.prompt
-			.readline((format!("\n{formatted_authors}\n\nEnter co-authors aliases separated by spaces:\n")).as_str());
-		match Self::handle_error(result) {
+			.readline((format!("\n{formatted_authors}\n\nEnter co-authors aliases separated by spaces:\n")).as_str())
+		{
 			Ok(aliases) => Ok(aliases.split_whitespace().map(ToString::to_string).collect()),
-			Err(e) => Err(e),
+			Err(e) => Self::handle_error(e),
 		}
 	}
 
-	pub fn prompt_pre_populated_commit_message(&mut self, prev_commit_msg: &str) -> Result<String, Box<dyn Error>> {
-		let result = self
+	pub fn prompt_pre_populated_commit_message(&mut self, prev_commit_msg: &str) -> Result<String> {
+		match self
 			.prompt
-			.readline_with_initial("Enter your commit message:\n", (prev_commit_msg, ""));
-		match Self::handle_error(result) {
+			.readline_with_initial("Enter your commit message:\n", (prev_commit_msg, ""))
+		{
 			Ok(commit_message) => Ok(commit_message.trim().to_string()),
-			Err(e) => Err(e),
+			Err(e) => Self::handle_error(e),
 		}
 	}
 
-	fn handle_error<T>(result: Result<T, ReadlineError>) -> Result<T, Box<dyn Error>> {
+	fn handle_error<T>(result: ReadlineError) -> Result<T> {
 		match result {
-			Ok(value) => Ok(value),
-			Err(Interrupted) => {
+			Interrupted => {
 				eprintln!("^C");
 				process::exit(1);
 			}
-			Err(_) => Err(CliError::with("Unexpected error")),
+			e => Err(e).wrap_err_with(|| "CLI failure "),
 		}
 	}
 
