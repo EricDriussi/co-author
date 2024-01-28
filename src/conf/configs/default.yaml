@@ -1,4 +1,4 @@
-authors_path: "$PLACEHOLDER/co-author/"
-authors_csv_name: "authors.csv"
+authors_dir: "co-author"
+authors_file: "authors.csv"
 hooks_path: ".git/hooks"
 editmsg: ".git/COMMIT_EDITMSG"

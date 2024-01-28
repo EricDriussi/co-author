@@ -6,22 +6,12 @@ const DEFAULT_CONFIG: &str = include_str!("configs/default.yaml");
 const TEST_CONFIG: &str = include_str!("configs/test.yaml");
 const CONFIG_ERR_MSG: &str = "Config not loaded properly";
 
-pub fn authors_csv_path() -> String {
-	let file_name = authors_csv_file();
-	let path_to_config_dir = get_config().get::<String>("authors_path").expect(CONFIG_ERR_MSG);
-	let full_file_path = format!("{path_to_config_dir}{file_name}");
-	let home_placeholder = "PLACEHOLDER";
-
-	if let Ok(env_home_var) = env::var("XDG_CONFIG_HOME") {
-		full_file_path.replace(&format!("${home_placeholder}"), &env_home_var)
-	} else {
-		let env_home_var = env::var("HOME").expect("Your $HOME is not set, can't locate default authors file path!");
-		full_file_path.replace(&format!("${home_placeholder}"), &format!("{env_home_var}/.config"))
-	}
+pub fn authors_dir() -> String {
+	get_config().get::<String>("authors_dir").expect(CONFIG_ERR_MSG)
 }
 
-pub fn authors_csv_file() -> String {
-	get_config().get::<String>("authors_csv_name").expect(CONFIG_ERR_MSG)
+pub fn authors_file() -> String {
+	get_config().get::<String>("authors_file").expect(CONFIG_ERR_MSG)
 }
 
 pub fn dummy_data() -> String {

@@ -30,7 +30,8 @@ cargo install co-author
 ## Usage
 
 Co-author will look for an `authors.csv` file in your current working directory,
-with `$XDG_CONFIG_HOME/co-author/` and `$HOME/.config/co-author/` as fallbacks.
+falling back to `$XDG_CONFIG_HOME/co-author/`, `$HOME/.config/co-author/`,
+`$HOME/.co-author/` and `$HOME` in that order.
 
 This file should follow the structure `alias,name,email`:
 
