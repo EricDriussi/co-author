@@ -20,7 +20,7 @@ impl CSVReader {
 		let file_in_home = file_loader.load_file(conf::authors_csv_path());
 		match file_in_home {
 			Some(file) => Ok(Self { src: file }),
-			None => Err(AuthorsError::NotFound("cwd or home".to_string()).into()),
+			None => Err(AuthorsError::NotFound("$PWD or $HOME".to_string()).into()),
 		}
 	}
 

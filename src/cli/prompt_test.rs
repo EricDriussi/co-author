@@ -1,16 +1,16 @@
 use crate::authors::author::Author;
 
-use super::{fancy_cli::FancyCli, input_reader::MockInputReader};
+use super::{input_reader::MockReader, prompt::Prompt};
 
 #[test]
 fn should_prompt_for_commit_message() {
-	let mut editor = MockInputReader::new();
-	editor
+	let mut reader = MockReader::new();
+	reader
 		.expect_readline()
-		.withf(|prompt| prompt.contains("Enter your commit message"))
+		.withf(|prompt_msg| prompt_msg.contains("Enter your commit message"))
 		.times(1)
 		.returning(|_| Ok("whatever".to_string()));
-	let mut cli = FancyCli::new(editor);
+	let mut cli = Prompt::new(reader);
 
 	let _ = cli.prompt_commit_message();
 	// Only interested in params passed to the mock (withf)
@@ -20,12 +20,12 @@ fn should_prompt_for_commit_message() {
 fn should_trim_commit_message() {
 	let trimmed_msg = "test commit message";
 	let padded_msg = format!(" {trimmed_msg}  ");
-	let mut editor = MockInputReader::new();
-	editor
+	let mut reader = MockReader::new();
+	reader
 		.expect_readline()
 		.times(1)
 		.returning(move |_| Ok(padded_msg.clone()));
-	let mut cli = FancyCli::new(editor);
+	let mut cli = Prompt::new(reader);
 
 	let result = cli.prompt_commit_message();
 
@@ -34,13 +34,13 @@ fn should_trim_commit_message() {
 
 #[test]
 fn should_prompt_for_aliases() {
-	let mut editor = MockInputReader::new();
-	editor
+	let mut reader = MockReader::new();
+	reader
 		.expect_readline()
-		.withf(|prompt| prompt.contains("Enter co-authors aliases"))
+		.withf(|prompt_msg| prompt_msg.contains("Enter co-authors aliases"))
 		.times(1)
 		.returning(|_| Ok("whatever".to_string()));
-	let mut cli = FancyCli::new(editor);
+	let mut cli = Prompt::new(reader);
 
 	let _ = cli.prompt_aliases(&[]);
 	// Only interested in params passed to the mock (withf)
@@ -51,13 +51,13 @@ fn should_pretty_print_authors_when_prompting_for_aliases() {
 	let alias = "a";
 	let name = "alice";
 	let author = Author::from(alias, name, "email");
-	let mut editor = MockInputReader::new();
-	editor
+	let mut reader = MockReader::new();
+	reader
 		.expect_readline()
-		.withf(move |prompt| prompt.contains(format!("⦔ {alias} -> {name}").as_str()))
+		.withf(move |prompt_msg| prompt_msg.contains(format!("⦔ {alias} -> {name}").as_str()))
 		.times(1)
 		.returning(move |_| Ok("whatever".to_string()));
-	let mut cli = FancyCli::new(editor);
+	let mut cli = Prompt::new(reader);
 
 	let _ = cli.prompt_aliases(&[author]);
 	// Only interested in params passed to the mock (withf())
@@ -66,12 +66,12 @@ fn should_pretty_print_authors_when_prompting_for_aliases() {
 #[test]
 fn should_space_split_aliases() {
 	let aliases = " a b cd   ";
-	let mut editor = MockInputReader::new();
-	editor
+	let mut reader = MockReader::new();
+	reader
 		.expect_readline()
 		.times(1)
 		.returning(move |_| Ok(aliases.to_string()));
-	let mut cli = FancyCli::new(editor);
+	let mut cli = Prompt::new(reader);
 
 	let result = cli.prompt_aliases(&[]);
 

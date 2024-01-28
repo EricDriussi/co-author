@@ -53,7 +53,7 @@ fn should_error_when_file_is_not_in_cwd_nor_home() {
 
 	assert!(matches!(
 	CSVReader::from_cwd_fallback_home(&mock_file_loader),
-	Err(e) if e.to_string().contains("No file at cwd or home")));
+	Err(e) if e.to_string().contains("No file at $PWD or $HOME")));
 }
 
 #[test]

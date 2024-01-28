@@ -17,10 +17,7 @@ pub type OptionalReadable = Option<Box<dyn Readable>>;
 impl File {
 	pub fn from(path: String) -> OptionalReadable {
 		let file = std::fs::File::open(path);
-		match file {
-			Ok(file) => Some(Box::new(Self { file })),
-			Err(_) => None,
-		}
+		Some(Box::new(Self { file: file.ok()? }))
 	}
 
 	fn valid_lines(&self) -> FSLines {

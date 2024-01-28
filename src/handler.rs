@@ -4,12 +4,12 @@ use crate::{
 		author::{Author, AuthorsProvider},
 		csv::provider::CSVReader,
 	},
-	cli::fancy_cli::FancyCli,
+	cli::prompt::Prompt,
 	fs::wrapper::FsWrapper,
 	Result,
 };
 
-pub fn handle_authors(args: &Args, cli: &mut FancyCli) -> Result<Vec<String>> {
+pub fn handle_authors(args: &Args, cli: &mut Prompt) -> Result<Vec<String>> {
 	let authors_prov = match &args.file {
 		Some(file) => CSVReader::from(&FsWrapper::new(), file)?,
 		None => CSVReader::from_cwd_fallback_home(&FsWrapper::new())?,
@@ -41,7 +41,7 @@ pub fn handle_authors(args: &Args, cli: &mut FancyCli) -> Result<Vec<String>> {
 	}
 }
 
-pub fn handle_commit_msg(args: &Args, cli: &mut FancyCli, prev: &str) -> Result<String> {
+pub fn handle_commit_msg(args: &Args, cli: &mut Prompt, prev: &str) -> Result<String> {
 	match (args.message.clone(), args.pre_populate) {
 		(Some(msg), _) => Ok(msg),
 		(None, false) => cli.prompt_commit_message(),

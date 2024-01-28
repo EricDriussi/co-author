@@ -1,6 +1,6 @@
 use args::Args;
 use clap::Parser;
-use cli::fancy_cli::FancyCli;
+use cli::prompt::Prompt;
 use std::{env, error::Error, path::PathBuf, process, result};
 
 // TODO: improve tests
@@ -25,7 +25,7 @@ pub type Result<T> = result::Result<T, Box<dyn Error>>;
 fn run(args: &Args) -> Result<()> {
 	set_cwd_to_git_root()?;
 
-	let mut cli = FancyCli::new(rustyline::DefaultEditor::new()?);
+	let mut cli = Prompt::new(rustyline::DefaultEditor::new()?);
 	let authors_signatures = handler::handle_authors(args, &mut cli)?;
 
 	// FIXME. Find a way to pass this to handle_commit_msg (clone/copy)
@@ -87,10 +87,10 @@ mod authors {
 }
 mod cli {
 	pub mod cli_err;
-	pub mod fancy_cli;
-	#[cfg(test)]
-	mod fancy_cli_test;
 	mod input_reader;
+	pub mod prompt;
+	#[cfg(test)]
+	mod prompt_test;
 }
 pub mod conf;
 mod git;
