@@ -1,18 +1,18 @@
 use super::super::author::{Author, AuthorsProvider};
-use super::super::author_err::AuthorError;
 use super::mapper;
-use std::{error::Error, result::Result};
 
+use crate::authors::authors_err::AuthorsError;
 use crate::conf;
 use crate::fs::file::Readable;
 use crate::fs::wrapper::FileLoader;
+use crate::Result;
 
 pub struct CSVReader {
 	src: Box<dyn Readable>,
 }
 
 impl CSVReader {
-	pub fn from_cwd_fallback_home(file_loader: &impl FileLoader) -> Result<Self, Box<dyn Error>> {
+	pub fn from_cwd_fallback_home(file_loader: &impl FileLoader) -> Result<Self> {
 		let file_in_cwd = file_loader.load_file(conf::authors_csv_file());
 		if let Some(file) = file_in_cwd {
 			return Ok(Self { src: file });
@@ -20,18 +20,15 @@ impl CSVReader {
 		let file_in_home = file_loader.load_file(conf::authors_csv_path());
 		match file_in_home {
 			Some(file) => Ok(Self { src: file }),
-			None => Err(AuthorError::with("No file found in cwd or home".to_string())),
+			None => Err(AuthorsError::NotFound("cwd or home".to_string()).into()),
 		}
 	}
 
-	pub fn from(file_loader: &impl FileLoader, authors_file: &str) -> Result<Self, Box<dyn Error>> {
+	pub fn from(file_loader: &impl FileLoader, authors_file: &str) -> Result<Self> {
 		let given_file = file_loader.load_file(authors_file.to_string());
 		match given_file {
 			Some(file) => Ok(Self { src: file }),
-			None => Err(AuthorError::with(format!(
-				"No file at path: {:?}",
-				authors_file.to_string()
-			))),
+			None => Err(AuthorsError::NotFound(authors_file.to_string()).into()),
 		}
 	}
 }

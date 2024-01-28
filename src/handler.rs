@@ -1,6 +1,3 @@
-use eyre::Result;
-use std::error::Error;
-
 use crate::{
 	args::Args,
 	authors::{
@@ -9,9 +6,10 @@ use crate::{
 	},
 	cli::fancy_cli::FancyCli,
 	fs::wrapper::FsWrapper,
+	Result,
 };
 
-pub fn handle_authors(args: &Args, cli: &mut FancyCli) -> Result<Vec<String>, Box<dyn Error>> {
+pub fn handle_authors(args: &Args, cli: &mut FancyCli) -> Result<Vec<String>> {
 	let authors_prov = match &args.file {
 		Some(file) => CSVReader::from(&FsWrapper::new(), file)?,
 		None => CSVReader::from_cwd_fallback_home(&FsWrapper::new())?,

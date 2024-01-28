@@ -53,7 +53,7 @@ fn should_error_when_file_is_not_in_cwd_nor_home() {
 
 	assert!(matches!(
 	CSVReader::from_cwd_fallback_home(&mock_file_loader),
-	Err(e) if e.to_string().contains("No file found in cwd or home")));
+	Err(e) if e.to_string().contains("No file at cwd or home")));
 }
 
 #[test]
@@ -79,7 +79,7 @@ fn should_not_build_from_given_file() {
 
 	assert!(matches!(
 	CSVReader::from(&mock_file_loader, IRRELEVANT_FILE_PATH),
-	Err(e) if e.to_string().contains("No file at path")));
+	Err(e) if e.to_string().contains(format!("No file at {IRRELEVANT_FILE_PATH}").as_str())));
 }
 
 #[test]

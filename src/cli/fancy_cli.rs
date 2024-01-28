@@ -1,11 +1,7 @@
-use colored::Colorize;
-use eyre::{Context, Result};
-use std::process;
-
-use rustyline::error::ReadlineError::{self, Interrupted};
-
 use super::input_reader::InputReader;
 use crate::authors::author::Author;
+use crate::Result;
+use colored::Colorize;
 
 pub struct FancyCli {
 	prompt: Box<dyn InputReader>,
@@ -19,41 +15,23 @@ impl FancyCli {
 	}
 
 	pub fn prompt_commit_message(&mut self) -> Result<String> {
-		match self.prompt.readline("Enter your commit message:\n") {
-			Ok(commit_message) => Ok(commit_message.trim().to_string()),
-			Err(e) => Self::handle_error(e),
-		}
+		Ok(self.prompt.readline("Enter your commit message:\n")?.trim().to_string())
 	}
 
 	pub fn prompt_aliases(&mut self, authors: &[Author]) -> Result<Vec<String>> {
 		let formatted_authors = Self::prettify_authors(authors);
-		match self
-			.prompt
-			.readline((format!("\n{formatted_authors}\n\nEnter co-authors aliases separated by spaces:\n")).as_str())
-		{
-			Ok(aliases) => Ok(aliases.split_whitespace().map(ToString::to_string).collect()),
-			Err(e) => Self::handle_error(e),
-		}
+		let aliases = self.prompt.readline(&format!(
+			"\n{formatted_authors}\n\nEnter co-authors aliases separated by spaces:\n"
+		))?;
+		Ok(aliases.split_whitespace().map(ToString::to_string).collect())
 	}
 
 	pub fn prompt_pre_populated_commit_message(&mut self, prev_commit_msg: &str) -> Result<String> {
-		match self
+		Ok(self
 			.prompt
-			.readline_with_initial("Enter your commit message:\n", (prev_commit_msg, ""))
-		{
-			Ok(commit_message) => Ok(commit_message.trim().to_string()),
-			Err(e) => Self::handle_error(e),
-		}
-	}
-
-	fn handle_error<T>(result: ReadlineError) -> Result<T> {
-		match result {
-			Interrupted => {
-				eprintln!("^C");
-				process::exit(1);
-			}
-			e => Err(e).wrap_err_with(|| "CLI failure "),
-		}
+			.readline_with_initial("Enter your commit message:\n", (prev_commit_msg, ""))?
+			.trim()
+			.to_string())
 	}
 
 	fn prettify_authors(authors: &[Author]) -> String {

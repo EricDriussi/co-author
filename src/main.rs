@@ -1,8 +1,7 @@
 use args::Args;
 use clap::Parser;
 use cli::fancy_cli::FancyCli;
-use rustyline::DefaultEditor;
-use std::{env, error::Error, path::PathBuf, process};
+use std::{env, error::Error, path::PathBuf, process, result};
 
 // TODO: improve tests
 // TODO: review optional/result handling
@@ -19,10 +18,14 @@ fn main() {
 	}
 }
 
-fn run(args: &Args) -> Result<(), Box<dyn Error>> {
+pub type Result<T> = result::Result<T, Box<dyn Error>>;
+// TODO: use custom error once git module and handler.rs are refactored
+// pub type Result<T> = result::Result<T, Error>;
+
+fn run(args: &Args) -> Result<()> {
 	set_cwd_to_git_root()?;
 
-	let mut cli = FancyCli::new(DefaultEditor::new()?);
+	let mut cli = FancyCli::new(rustyline::DefaultEditor::new()?);
 	let authors_signatures = handler::handle_authors(args, &mut cli)?;
 
 	// FIXME. Find a way to pass this to handle_commit_msg (clone/copy)
@@ -40,7 +43,7 @@ fn run(args: &Args) -> Result<(), Box<dyn Error>> {
 	return git_service.commit(msg.as_str(), authors_signatures);
 }
 
-fn set_cwd_to_git_root() -> Result<(), Box<dyn Error>> {
+fn set_cwd_to_git_root() -> Result<()> {
 	let project_root_dir = get_project_root_dir().ok_or("Not in a valid git repo")?;
 	env::set_current_dir(project_root_dir).map_err(|_| "Something went wrong".into())
 }
@@ -71,17 +74,19 @@ fn get_project_root_dir() -> Option<PathBuf> {
 }
 
 mod args;
+mod error;
 mod authors {
 	pub mod author;
-	mod author_err;
 	pub mod csv {
 		pub mod mapper;
 		pub mod provider;
 	}
+	pub mod authors_err;
 	#[cfg(test)]
 	mod test;
 }
 mod cli {
+	pub mod cli_err;
 	pub mod fancy_cli;
 	#[cfg(test)]
 	mod fancy_cli_test;
