@@ -1,6 +1,6 @@
 use crate::git::commit_body;
 use crate::git::commit_body::GitWrapper;
-use crate::git::GitService;
+use crate::git::service::GitService;
 use crate::test_utils::file_cleanup::AfterAssert;
 use serial_test::serial;
 use std::error::Error;
