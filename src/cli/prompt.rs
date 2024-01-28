@@ -3,15 +3,13 @@ use crate::authors::author::Author;
 use crate::Result;
 use colored::Colorize;
 
-pub struct Prompt {
-	reader: Box<dyn Reader>,
+pub struct Prompt<T: Reader> {
+	reader: T,
 }
 
-impl Prompt {
-	pub fn new(reader: impl Reader + 'static) -> Self {
-		Self {
-			reader: Box::new(reader),
-		}
+impl<T: Reader> Prompt<T> {
+	pub fn new(reader: T) -> Self {
+		Self { reader }
 	}
 
 	pub fn prompt_commit_message(&mut self) -> Result<String> {

@@ -87,7 +87,7 @@ mod authors {
 }
 mod cli {
 	pub mod cli_err;
-	mod input_reader;
+	pub mod input_reader;
 	pub mod prompt;
 	#[cfg(test)]
 	mod prompt_test;
