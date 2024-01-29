@@ -1,17 +1,17 @@
+use crate::fs::wrapper::MockFileLoader;
 use crate::git::commit_body;
 use crate::git::commit_body::GitWrapper;
+use crate::git::conf_provider::MockConfProvider;
+use crate::git::runner::MockRunner;
 use crate::git::service::GitService;
-use crate::test_utils::file_cleanup::AfterAssert;
 use serial_test::serial;
 use std::error::Error;
-
-use git2::Config;
 
 #[test]
 #[serial]
 fn should_commit() {
 	let spy = MockWrapper::new();
-	let service = GitService::new(spy);
+	let service = GitService::new(spy, MockRunner::new(), MockFileLoader::new(), MockConfProvider::new());
 	let commit_message = "something";
 	let aliases = vec![String::from("a")];
 
@@ -21,54 +21,15 @@ fn should_commit() {
 }
 
 #[test]
-#[serial]
-fn should_commit_using_git_editor() -> Result<(), Box<dyn std::error::Error>> {
-	let spy = MockWrapper::new();
-	let service = GitService::new(spy);
-	let aliases = vec![String::from("a")];
-
-	let editmsg = ".git/COMMIT_EDITMSG_TEST";
-	std::fs::write(editmsg, "himom")?;
-	// let _after = AfterAssert::cleanup_file(editmsg);
-	let mut config = Config::open_default()?;
-	config.set_str("core.editor", "echo")?;
-
-	let result = service.commit_with_editor(aliases);
-
-	assert!(result.is_ok());
-	// Cleanup
-	std::fs::remove_file(editmsg)?;
-	config.remove("core.editor")?;
-	Ok(())
-}
-
-#[test]
-#[serial]
-fn should_commit_using_env_editor() -> Result<(), Box<dyn std::error::Error>> {
-	let spy = MockWrapper::new();
-	let service = GitService::new(spy);
-	let aliases = vec![String::from("a")];
-
-	let editmsg = ".git/COMMIT_EDITMSG_TEST";
-	std::fs::write(editmsg, "himom")?;
-	let _after = AfterAssert::cleanup_file(editmsg);
-	let mut config = Config::open_default()?;
-	config.set_str("core.editor", "NOT_REAL")?;
-	std::env::set_var("EDITOR", "echo");
-
-	let result = service.commit_with_editor(aliases);
-
-	assert!(result.is_ok());
-	// Cleanup
-	config.remove("core.editor")?;
-	Ok(())
-}
-
-#[test]
 fn should_return_last_commit_message_if_present() {
 	let last_commit = "msg";
 	let wrapper = MockWrapper::with_last_commit(last_commit.to_string());
-	let service = GitService::new(wrapper);
+	let service = GitService::new(
+		wrapper,
+		MockRunner::new(),
+		MockFileLoader::new(),
+		MockConfProvider::new(),
+	);
 
 	let last_msg = service.last_commit_message();
 
@@ -78,7 +39,12 @@ fn should_return_last_commit_message_if_present() {
 #[test]
 fn should_return_empty_string_if_last_commit_is_not_present() {
 	let wrapper = MockWrapper::with_last_commit_err();
-	let service = GitService::new(wrapper);
+	let service = GitService::new(
+		wrapper,
+		MockRunner::new(),
+		MockFileLoader::new(),
+		MockConfProvider::new(),
+	);
 
 	let last_msg_empty = service.last_commit_message();
 

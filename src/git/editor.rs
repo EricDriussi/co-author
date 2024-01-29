@@ -1,49 +1,49 @@
-use std::{
-	env,
-	io::{self},
-	path::{Path, PathBuf},
-	process::{Command, Output, Stdio},
-};
+use std::env;
 
-use git2::Config;
+use crate::Result;
+use crate::{conf, fs::wrapper::FileLoader};
 
-use crate::conf;
+use super::conf_provider::ConfProvider;
+use super::git_err::GitError;
+use super::runner::Runner;
 
-pub fn open() {
-	let editmsg = PathBuf::from(conf::editmsg());
-	match Config::open_default() {
-		Ok(config) => match config.get_string("core.editor") {
-			Ok(editor) => match open_editor(&editor, editmsg.as_path()) {
-				Ok(_) => (),
-				Err(_) => return env_fallback(editmsg.as_path()),
-			},
-			Err(_) => return env_fallback(editmsg.as_path()),
-		},
-		Err(_) => return env_fallback(editmsg.as_path()),
+pub struct TextEditor<R: Runner, F: FileLoader, C: ConfProvider> {
+	runner: R,
+	file_loader: F,
+	conf_provider: C,
+}
+
+impl<R: Runner, F: FileLoader, C: ConfProvider> TextEditor<R, F, C> {
+	pub fn new(runner: R, file_loader: F, conf_provider: C) -> Self {
+		Self {
+			runner,
+			file_loader,
+			conf_provider,
+		}
 	}
-}
 
-fn open_editor(editor: &str, path: &Path) -> io::Result<Output> {
-	return Command::new(editor)
-		.arg(path)
-		.stdin(Stdio::inherit())
-		.stdout(Stdio::inherit())
-		.stderr(Stdio::inherit())
-		.output();
-}
+	pub fn open_editmsg(&self) -> Result<()> {
+		let editmsg = self
+			.file_loader
+			.load_creating(conf::editmsg())
+			.ok_or(GitError::Editor)?;
 
-fn env_fallback(path: &Path) {
-	match env::var("EDITOR") {
-		Ok(editor) => match open_editor(&editor, path) {
-			Ok(_) => (),
-			Err(_) => vim_fallback(path),
-		},
-		Err(_) => vim_fallback(path),
+		match self.conf_provider.get_editor() {
+			None => self.env_fallback(editmsg.path()),
+			Some(git_editor) => self.runner.open_editor(&git_editor, editmsg.path()),
+		}
 	}
-}
 
-fn vim_fallback(path: &Path) {
-	open_editor("vim", path)
-		.or_else(|_| open_editor("vi", path))
-		.expect("No editor available!");
+	fn env_fallback(&self, path: &str) -> Result<()> {
+		match env::var("EDITOR") {
+			Err(_) => self.vim_fallback(path),
+			Ok(editor) => self.runner.open_editor(&editor, path),
+		}
+	}
+
+	fn vim_fallback(&self, path: &str) -> Result<()> {
+		self.runner
+			.open_editor("vim", path)
+			.or_else(|_| self.runner.open_editor("vi", path))
+	}
 }

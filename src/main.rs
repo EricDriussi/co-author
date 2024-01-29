@@ -1,7 +1,6 @@
 use args::Args;
 use clap::Parser;
 use cli::prompt::Prompt;
-use git::{libgit_wrapper::LibGitWrapper, service::GitService};
 use std::{env, error::Error, path::PathBuf, process, result};
 
 // TODO: improve tests
@@ -30,13 +29,7 @@ fn run(args: &Args) -> Result<()> {
 	let authors_signatures = handler::handle_authors(args, &mut cli)?;
 
 	// FIXME. Find a way to pass this to handle_commit_msg (clone/copy)
-	let git_service = {
-		let cwd = env::current_dir().map_err(|_| "Could not get current directory".to_string())?;
-		match LibGitWrapper::from(&cwd) {
-			Ok(repo) => Ok(GitService::new(repo)),
-			Err(e) => Err(e),
-		}
-	}?;
+	let git_service = git::libgit_setup()?;
 	let prev = git_service.last_commit_message();
 
 	if args.editor {

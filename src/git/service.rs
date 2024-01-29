@@ -1,21 +1,27 @@
 use std::error::Error;
 
+use crate::fs::wrapper::FileLoader;
+
 use super::{
 	commit_body::{CommitBody, GitWrapper},
-	editor,
+	conf_provider::ConfProvider,
+	editor::TextEditor,
 	hook_runner::HookRunner,
+	runner::Runner,
 };
 
-pub struct GitService<T: GitWrapper> {
+pub struct GitService<T: GitWrapper, R: Runner, F: FileLoader, C: ConfProvider> {
 	git_wrapper: T,
 	hook_runner: HookRunner,
+	text_editor: TextEditor<R, F, C>,
 }
 
-impl<T: GitWrapper> GitService<T> {
-	pub fn new(repo: T) -> GitService<T> {
-		GitService {
+impl<T: GitWrapper, R: Runner, F: FileLoader, C: ConfProvider> GitService<T, R, F, C> {
+	pub fn new(repo: T, runner: R, file_loader: F, conf_provider: C) -> Self {
+		Self {
 			hook_runner: HookRunner::new(),
 			git_wrapper: repo,
+			text_editor: TextEditor::new(runner, file_loader, conf_provider),
 		}
 	}
 
@@ -34,7 +40,7 @@ impl<T: GitWrapper> GitService<T> {
 		self.hook_runner.pre_commit()?;
 		self.git_wrapper.write_to_editmsg(&CommitBody::new("", authors))?;
 		self.git_wrapper.add_status_to_editmsg()?;
-		editor::open();
+		self.text_editor.open_editmsg()?;
 		self.hook_runner.commit_msg()?;
 		self.git_wrapper.commit()
 	}
@@ -43,7 +49,7 @@ impl<T: GitWrapper> GitService<T> {
 		self.hook_runner.pre_commit()?;
 		self.git_wrapper.write_to_editmsg(&CommitBody::new(message, authors))?;
 		self.git_wrapper.add_status_to_editmsg()?;
-		editor::open();
+		self.text_editor.open_editmsg()?;
 		self.hook_runner.commit_msg()?;
 		self.git_wrapper.commit()
 	}
