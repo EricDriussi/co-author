@@ -10,6 +10,7 @@ use mockall::{automock, predicate::*};
 #[cfg_attr(test, automock)]
 pub trait FileLoader {
 	fn load_file(&self, file_path: String) -> OptionalReadable;
+	fn load_creating(&self, file_path: String) -> OptionalReadable;
 	fn load_file_with_fallback(&self, file_path: String) -> OptionalReadable;
 }
 
@@ -24,6 +25,10 @@ impl FsWrapper {
 impl FileLoader for FsWrapper {
 	fn load_file(&self, file_path: String) -> OptionalReadable {
 		File::from(file_path)
+	}
+
+	fn load_creating(&self, file_path: String) -> OptionalReadable {
+		File::open_or_create(file_path)
 	}
 
 	fn load_file_with_fallback(&self, file_path: String) -> OptionalReadable {

@@ -164,4 +164,8 @@ impl Readable for DummyAuthorsFile {
 	fn all_lines(&self) -> Vec<String> {
 		self.content.clone()
 	}
+
+	fn path(&self) -> &str {
+		"dummy/path"
+	}
 }

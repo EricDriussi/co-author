@@ -31,3 +31,13 @@ fn should_present_all_lines() {
 
 	assert_eq!(non_empyt_lines.len(), 5);
 }
+
+#[test]
+fn should_keep_track_of_path() {
+	let path = "src/fs/test/test_file.txt".to_string();
+	let file = File::from(path.clone()).expect("Could not open test file");
+
+	let found_path = file.path();
+
+	assert_eq!(found_path, path);
+}
