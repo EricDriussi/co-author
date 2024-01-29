@@ -52,20 +52,15 @@ fn should_error_when_no_editmsg_is_found() {
 #[test]
 fn should_open_with_git_conf_editor() {
 	let a_user_editor = "an_editor";
-	let mut mock_runner = MockRunner::new();
-	mock_runner
-		.expect_open_editor()
-		.with(eq(a_user_editor), always())
-		.returning(|_, _| Ok(()));
 	let mut mock_conf_provider = MockConfProvider::new();
 	mock_conf_provider
 		.expect_get_editor()
 		.returning(|| Some(a_user_editor.to_string()));
-	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_creating()
-		.returning(move |_| Some(Box::new(DummyReadableFile::empty())));
-	let editor = TextEditor::new(mock_runner, mock_file_loader, mock_conf_provider);
+	let editor = TextEditor::new(
+		successful_runner_for(a_user_editor),
+		successful_mock_file_loader(),
+		mock_conf_provider,
+	);
 
 	let result = editor.open_editmsg();
 
@@ -77,18 +72,11 @@ fn should_open_with_git_conf_editor() {
 fn should_open_with_env_editor() {
 	let a_user_editor = "an_editor";
 	env::set_var("EDITOR", a_user_editor);
-	let mut mock_runner = MockRunner::new();
-	mock_runner
-		.expect_open_editor()
-		.with(eq(a_user_editor), always())
-		.returning(|_, _| Ok(()));
-	let mut mock_conf_provider = MockConfProvider::new();
-	mock_conf_provider.expect_get_editor().returning(|| None);
-	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_creating()
-		.returning(move |_| Some(Box::new(DummyReadableFile::empty())));
-	let editor = TextEditor::new(mock_runner, mock_file_loader, mock_conf_provider);
+	let editor = TextEditor::new(
+		successful_runner_for(a_user_editor),
+		successful_mock_file_loader(),
+		mock_conf_provider_with_no_editor(),
+	);
 
 	let result = editor.open_editmsg();
 
@@ -99,18 +87,11 @@ fn should_open_with_env_editor() {
 #[serial]
 fn should_open_with_vim_editor() {
 	env::remove_var("EDITOR");
-	let mut mock_runner = MockRunner::new();
-	mock_runner
-		.expect_open_editor()
-		.with(eq("vim"), always())
-		.returning(|_, _| Ok(()));
-	let mut mock_conf_provider = MockConfProvider::new();
-	mock_conf_provider.expect_get_editor().returning(|| None);
-	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_creating()
-		.returning(move |_| Some(Box::new(DummyReadableFile::empty())));
-	let editor = TextEditor::new(mock_runner, mock_file_loader, mock_conf_provider);
+	let editor = TextEditor::new(
+		successful_runner_for("vim"),
+		successful_mock_file_loader(),
+		mock_conf_provider_with_no_editor(),
+	);
 
 	let result = editor.open_editmsg();
 
@@ -130,13 +111,11 @@ fn should_open_with_vi_editor() {
 		.expect_open_editor()
 		.with(eq("vi"), always())
 		.returning(|_, _| Ok(()));
-	let mut mock_conf_provider = MockConfProvider::new();
-	mock_conf_provider.expect_get_editor().returning(|| None);
-	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_creating()
-		.returning(move |_| Some(Box::new(DummyReadableFile::empty())));
-	let editor = TextEditor::new(mock_runner, mock_file_loader, mock_conf_provider);
+	let editor = TextEditor::new(
+		mock_runner,
+		successful_mock_file_loader(),
+		mock_conf_provider_with_no_editor(),
+	);
 
 	let result = editor.open_editmsg();
 
@@ -156,17 +135,38 @@ fn should_error_when_no_editor_is_available() {
 		.expect_open_editor()
 		.with(eq("vi"), always())
 		.returning(|_, _| Err(Box::new(GitError::Editor)));
-	let mut mock_conf_provider = MockConfProvider::new();
-	mock_conf_provider.expect_get_editor().returning(|| None);
-	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_creating()
-		.returning(move |_| Some(Box::new(DummyReadableFile::empty())));
-	let editor = TextEditor::new(mock_runner, mock_file_loader, mock_conf_provider);
+	let editor = TextEditor::new(
+		mock_runner,
+		successful_mock_file_loader(),
+		mock_conf_provider_with_no_editor(),
+	);
 
 	let result = editor.open_editmsg();
 
 	assert!(matches!(result, Err(e) if e.to_string().contains("Editor")));
+}
+
+fn successful_mock_file_loader() -> MockFileLoader {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_creating()
+		.returning(move |_| Some(Box::new(DummyReadableFile::empty())));
+	mock_file_loader
+}
+
+fn successful_runner_for(editor: &str) -> MockRunner {
+	let mut mock_runner = MockRunner::new();
+	mock_runner
+		.expect_open_editor()
+		.with(eq(editor.to_string()), always())
+		.returning(|_, _| Ok(()));
+	mock_runner
+}
+
+fn mock_conf_provider_with_no_editor() -> MockConfProvider {
+	let mut mock_conf_provider = MockConfProvider::new();
+	mock_conf_provider.expect_get_editor().returning(|| None);
+	mock_conf_provider
 }
 
 // TODO: dup code, extract
