@@ -12,20 +12,18 @@ pub trait Runner {
 }
 
 pub struct CommandRunner {
-	shell: String,
+	shell: &'static str,
 }
 
 impl CommandRunner {
 	pub fn new() -> Self {
-		Self {
-			shell: "sh".to_string(),
-		}
+		Self { shell: "sh" }
 	}
 }
 
 impl Runner for CommandRunner {
 	fn run_hook(&self, hook: &str) -> Result<()> {
-		if Command::new(self.shell.clone())
+		if Command::new(self.shell)
 			.arg(hook)
 			.status()
 			.map_err(|_| GitError::Hook)?
