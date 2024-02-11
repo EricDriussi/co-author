@@ -1,3 +1,5 @@
+#[cfg(test)]
+use mockall::{automock, predicate::*};
 use std::{error::Error, fmt::Display};
 
 pub struct CommitBody {
@@ -24,6 +26,7 @@ impl Display for CommitBody {
 	}
 }
 
+#[cfg_attr(test, automock)]
 pub trait GitWrapper {
 	fn commit(&self) -> Result<(), Box<dyn Error>>;
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>>;

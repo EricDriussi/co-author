@@ -1,95 +1,97 @@
-// use crate::fs::wrapper::MockFileLoader;
-// use crate::git::commit_body;
-// use crate::git::commit_body::GitWrapper;
-// use crate::git::conf_provider::MockConfProvider;
-// use crate::git::runner::MockRunner;
-// use crate::git::service::GitService;
-// use serial_test::serial;
-// use std::error::Error;
+use crate::git::{commit_body::MockGitWrapper, editor::MockEditmsgEditor, runner::MockRunner, service::GitService};
 
-// #[test]
-// #[serial]
-// fn should_commit() {
-// 	let spy = MockWrapper::new();
-// 	let service = GitService::new(spy, MockRunner::new(), MockFileLoader::new(), MockConfProvider::new());
-// 	let commit_message = "something";
-// 	let aliases = vec![String::from("a")];
+#[test]
+fn should_return_last_commit_message_when_present() {
+	let msg = "a message";
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	mock_git_wrapper
+		.expect_prev_commit_msg()
+		.returning(|| Ok(msg.to_string()));
+	let service = GitService::new(mock_git_wrapper, MockRunner::new(), MockEditmsgEditor::new());
 
-// 	let result = service.commit(commit_message, aliases);
+	let result = service.last_commit_message();
 
-// 	assert!(result.is_ok());
-// }
+	assert_eq!(result, msg);
+}
 
-// #[test]
-// fn should_return_last_commit_message_if_present() {
-// 	let last_commit = "msg";
-// 	let wrapper = MockWrapper::with_last_commit(last_commit.to_string());
-// 	let service = GitService::new(
-// 		wrapper,
-// 		MockRunner::new(),
-// 		MockFileLoader::new(),
-// 		MockConfProvider::new(),
-// 	);
+#[test]
+fn should_return_empty_string_when_last_commit_message_is_not_present() {
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	mock_git_wrapper
+		.expect_prev_commit_msg()
+		.returning(|| Err("ERR".to_string().into()));
+	let service = GitService::new(mock_git_wrapper, MockRunner::new(), MockEditmsgEditor::new());
 
-// 	let last_msg = service.last_commit_message();
+	let result = service.last_commit_message();
 
-// 	assert_eq!(last_msg, last_commit);
-// }
+	assert_eq!(result, "");
+}
 
-// #[test]
-// fn should_return_empty_string_if_last_commit_is_not_present() {
-// 	let wrapper = MockWrapper::with_last_commit_err();
-// 	let service = GitService::new(
-// 		wrapper,
-// 		MockRunner::new(),
-// 		MockFileLoader::new(),
-// 		MockConfProvider::new(),
-// 	);
+#[test]
+fn should_commit() {
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_runner = MockRunner::new();
+	mock_runner
+		.expect_run()
+		.withf(|_, hook| hook.contains("pre-commit"))
+		.returning(|_, _| Ok(()));
+	mock_git_wrapper.expect_write_to_editmsg().returning(|_| Ok(()));
+	mock_runner
+		.expect_run()
+		.withf(|_, hook| hook.contains("commit-msg"))
+		.returning(|_, _| Ok(()));
+	mock_git_wrapper.expect_commit().returning(|| Ok(()));
+	let service = GitService::new(mock_git_wrapper, mock_runner, MockEditmsgEditor::new());
 
-// 	let last_msg_empty = service.last_commit_message();
+	let result = service.commit("a message", vec!["an author".to_string()]);
 
-// 	assert_eq!(last_msg_empty, "");
-// }
+	assert!(result.is_ok());
+}
 
-// struct MockWrapper {
-// 	last_commit: Result<String, Box<dyn Error>>,
-// }
+#[test]
+fn should_commit_with_editor() {
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_runner = MockRunner::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+	mock_runner
+		.expect_run()
+		.withf(|_, hook| hook.contains("pre-commit"))
+		.returning(|_, _| Ok(()));
+	mock_git_wrapper.expect_write_to_editmsg().returning(|_| Ok(()));
+	mock_git_wrapper.expect_add_status_to_editmsg().returning(|| Ok(()));
+	mock_editmsg_editor.expect_open().returning(|| Ok(()));
+	mock_runner
+		.expect_run()
+		.withf(|_, hook| hook.contains("commit-msg"))
+		.returning(|_, _| Ok(()));
+	mock_git_wrapper.expect_commit().returning(|| Ok(()));
+	let service = GitService::new(mock_git_wrapper, mock_runner, mock_editmsg_editor);
 
-// impl MockWrapper {
-// 	fn new() -> Self {
-// 		Self {
-// 			last_commit: Ok(String::new()),
-// 		}
-// 	}
+	let result = service.commit_with_editor(vec!["an author".to_string()]);
 
-// 	fn with_last_commit(msg: String) -> Self {
-// 		Self { last_commit: Ok(msg) }
-// 	}
+	assert!(result.is_ok());
+}
 
-// 	fn with_last_commit_err() -> Self {
-// 		Self {
-// 			last_commit: Err("err".into()),
-// 		}
-// 	}
-// }
+#[test]
+fn should_commit_with_pre_populated_editor() {
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_runner = MockRunner::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+	mock_runner
+		.expect_run()
+		.withf(|_, hook| hook.contains("pre-commit"))
+		.returning(|_, _| Ok(()));
+	mock_git_wrapper.expect_write_to_editmsg().returning(|_| Ok(()));
+	mock_git_wrapper.expect_add_status_to_editmsg().returning(|| Ok(()));
+	mock_editmsg_editor.expect_open().returning(|| Ok(()));
+	mock_runner
+		.expect_run()
+		.withf(|_, hook| hook.contains("commit-msg"))
+		.returning(|_, _| Ok(()));
+	mock_git_wrapper.expect_commit().returning(|| Ok(()));
+	let service = GitService::new(mock_git_wrapper, mock_runner, mock_editmsg_editor);
 
-// impl GitWrapper for MockWrapper {
-// 	fn commit(&self) -> Result<(), Box<dyn Error>> {
-// 		Ok(())
-// 	}
+	let result = service.commit_with_pre_populated_editor("a message", vec!["an author".to_string()]);
 
-// 	fn write_to_editmsg(&self, _: &commit_body::CommitBody) -> Result<(), Box<dyn Error>> {
-// 		Ok(())
-// 	}
-
-// 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
-// 		Ok(())
-// 	}
-
-// 	fn prev_commit_msg(&self) -> Result<String, Box<dyn Error>> {
-// 		match &self.last_commit {
-// 			Ok(msg) => Ok(msg.into()),
-// 			Err(_) => Err("".into()),
-// 		}
-// 	}
-// }
+	assert!(result.is_ok());
+}

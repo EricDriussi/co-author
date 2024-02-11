@@ -7,6 +7,9 @@ use super::conf_provider::ConfProvider;
 use super::git_err::GitError;
 use super::runner::Runner;
 
+#[cfg(test)]
+use mockall::{automock, predicate::*};
+#[cfg_attr(test, automock)]
 pub trait EditmsgEditor {
 	fn open(&self) -> Result<()>;
 }
@@ -24,10 +27,12 @@ impl<R: Runner, F: FileLoader, C: ConfProvider> EditmsgEditor for Editor<R, F, C
 			.load_creating(conf::editmsg())
 			.ok_or(GitError::Editor)?;
 
-		match self.conf_provider.get_editor() {
+		let editing_operation_result = match self.conf_provider.get_editor() {
 			None => self.env_fallback(editmsg.path()),
-			Some(git_editor) => self.runner.open_editor(&git_editor, editmsg.path()),
-		}
+			Some(git_editor) => self.runner.spawn(&git_editor, editmsg.path()),
+		};
+
+		Ok(editing_operation_result.map_err(|_| GitError::Editor)?)
 	}
 }
 
@@ -43,13 +48,13 @@ impl<R: Runner, F: FileLoader, C: ConfProvider> Editor<R, F, C> {
 	fn env_fallback(&self, path: &str) -> Result<()> {
 		match env::var("EDITOR") {
 			Err(_) => self.vim_fallback(path),
-			Ok(editor) => self.runner.open_editor(&editor, path),
+			Ok(editor) => self.runner.spawn(&editor, path),
 		}
 	}
 
 	fn vim_fallback(&self, path: &str) -> Result<()> {
 		self.runner
-			.open_editor("vim", path)
-			.or_else(|_| self.runner.open_editor("vi", path))
+			.spawn("vim", path)
+			.or_else(|_| self.runner.spawn("vi", path))
 	}
 }

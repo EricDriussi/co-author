@@ -9,7 +9,6 @@ use crate::{
 	git::{
 		conf_provider::MockConfProvider,
 		editor::{EditmsgEditor, Editor},
-		git_err::GitError,
 		runner::MockRunner,
 	},
 };
@@ -17,7 +16,7 @@ use crate::{
 #[test]
 fn should_get_editmsg_from_conf() {
 	let mut mock_runner = MockRunner::new();
-	mock_runner.expect_open_editor().returning(|_, _| Ok(()));
+	mock_runner.expect_spawn().returning(|_, _| Ok(()));
 	let mut mock_conf_provider = MockConfProvider::new();
 	mock_conf_provider
 		.expect_get_editor()
@@ -37,7 +36,7 @@ fn should_get_editmsg_from_conf() {
 #[test]
 fn should_error_when_no_editmsg_is_found() {
 	let mut mock_runner = MockRunner::new();
-	mock_runner.expect_open_editor().returning(|_, _| Ok(()));
+	mock_runner.expect_spawn().returning(|_, _| Ok(()));
 	let mut mock_conf_provider = MockConfProvider::new();
 	mock_conf_provider
 		.expect_get_editor()
@@ -109,11 +108,11 @@ fn should_open_with_vi_editor() {
 	env::remove_var("EDITOR");
 	let mut mock_runner = MockRunner::new();
 	mock_runner
-		.expect_open_editor()
+		.expect_spawn()
 		.with(eq("vim"), always())
-		.returning(|_, _| Err(Box::new(GitError::Editor)));
+		.returning(|_, _| Err("ERROR".into()));
 	mock_runner
-		.expect_open_editor()
+		.expect_spawn()
 		.with(eq("vi"), always())
 		.returning(|_, _| Ok(()));
 	let editor = Editor::new(
@@ -133,13 +132,13 @@ fn should_error_when_no_editor_is_available() {
 	env::remove_var("EDITOR");
 	let mut mock_runner = MockRunner::new();
 	mock_runner
-		.expect_open_editor()
+		.expect_spawn()
 		.with(eq("vim"), always())
-		.returning(|_, _| Err(Box::new(GitError::Editor)));
+		.returning(|_, _| Err("ERROR".into()));
 	mock_runner
-		.expect_open_editor()
+		.expect_spawn()
 		.with(eq("vi"), always())
-		.returning(|_, _| Err(Box::new(GitError::Editor)));
+		.returning(|_, _| Err("ERROR".into()));
 	let editor = Editor::new(
 		mock_runner,
 		successful_mock_file_loader(),
@@ -162,7 +161,7 @@ fn successful_mock_file_loader() -> MockFileLoader {
 fn successful_runner_for(editor: &str) -> MockRunner {
 	let mut mock_runner = MockRunner::new();
 	mock_runner
-		.expect_open_editor()
+		.expect_spawn()
 		.with(eq(editor.to_string()), always())
 		.returning(|_, _| Ok(()));
 	mock_runner
