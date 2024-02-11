@@ -29,7 +29,7 @@ fn run(args: &Args) -> Result<()> {
 	let authors_signatures = handler::handle_authors(args, &mut cli)?;
 
 	// FIXME. Find a way to pass this to handle_commit_msg (clone/copy)
-	let git_service = git::libgit_setup()?;
+	let git_service = git::init_git_dependency_tree()?;
 	let prev = git_service.last_commit_message();
 
 	if args.editor {

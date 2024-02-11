@@ -7,22 +7,18 @@ use super::conf_provider::ConfProvider;
 use super::git_err::GitError;
 use super::runner::Runner;
 
-pub struct TextEditor<R: Runner, F: FileLoader, C: ConfProvider> {
+pub trait EditmsgEditor {
+	fn open(&self) -> Result<()>;
+}
+
+pub struct Editor<R: Runner, F: FileLoader, C: ConfProvider> {
 	runner: R,
 	file_loader: F,
 	conf_provider: C,
 }
 
-impl<R: Runner, F: FileLoader, C: ConfProvider> TextEditor<R, F, C> {
-	pub fn new(runner: R, file_loader: F, conf_provider: C) -> Self {
-		Self {
-			runner,
-			file_loader,
-			conf_provider,
-		}
-	}
-
-	pub fn open_editmsg(&self) -> Result<()> {
+impl<R: Runner, F: FileLoader, C: ConfProvider> EditmsgEditor for Editor<R, F, C> {
+	fn open(&self) -> Result<()> {
 		let editmsg = self
 			.file_loader
 			.load_creating(conf::editmsg())
@@ -31,6 +27,16 @@ impl<R: Runner, F: FileLoader, C: ConfProvider> TextEditor<R, F, C> {
 		match self.conf_provider.get_editor() {
 			None => self.env_fallback(editmsg.path()),
 			Some(git_editor) => self.runner.open_editor(&git_editor, editmsg.path()),
+		}
+	}
+}
+
+impl<R: Runner, F: FileLoader, C: ConfProvider> Editor<R, F, C> {
+	pub fn new(runner: R, file_loader: F, conf_provider: C) -> Self {
+		Self {
+			runner,
+			file_loader,
+			conf_provider,
 		}
 	}
 

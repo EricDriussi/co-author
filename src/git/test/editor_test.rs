@@ -6,7 +6,12 @@ use serial_test::serial;
 use crate::{
 	conf,
 	fs::{file::Readable, wrapper::MockFileLoader},
-	git::{conf_provider::MockConfProvider, editor::TextEditor, git_err::GitError, runner::MockRunner},
+	git::{
+		conf_provider::MockConfProvider,
+		editor::{EditmsgEditor, Editor},
+		git_err::GitError,
+		runner::MockRunner,
+	},
 };
 
 #[test]
@@ -22,9 +27,9 @@ fn should_get_editmsg_from_conf() {
 		.expect_load_creating()
 		.with(eq(conf::editmsg().clone()))
 		.returning(move |_| Some(Box::new(DummyReadableFile::empty())));
-	let editor = TextEditor::new(mock_runner, mock_file_loader, mock_conf_provider);
+	let editor = Editor::new(mock_runner, mock_file_loader, mock_conf_provider);
 
-	let result = editor.open_editmsg();
+	let result = editor.open();
 
 	assert!(result.is_ok());
 }
@@ -42,9 +47,9 @@ fn should_error_when_no_editmsg_is_found() {
 		.expect_load_creating()
 		.with(eq(conf::editmsg().clone()))
 		.returning(move |_| None);
-	let editor = TextEditor::new(mock_runner, mock_file_loader, mock_conf_provider);
+	let editor = Editor::new(mock_runner, mock_file_loader, mock_conf_provider);
 
-	let result = editor.open_editmsg();
+	let result = editor.open();
 
 	assert!(matches!(result, Err(e) if e.to_string().contains("Editor")));
 }
@@ -56,13 +61,13 @@ fn should_open_with_git_conf_editor() {
 	mock_conf_provider
 		.expect_get_editor()
 		.returning(|| Some(a_user_editor.to_string()));
-	let editor = TextEditor::new(
+	let editor = Editor::new(
 		successful_runner_for(a_user_editor),
 		successful_mock_file_loader(),
 		mock_conf_provider,
 	);
 
-	let result = editor.open_editmsg();
+	let result = editor.open();
 
 	assert!(result.is_ok());
 }
@@ -72,13 +77,13 @@ fn should_open_with_git_conf_editor() {
 fn should_open_with_env_editor() {
 	let a_user_editor = "an_editor";
 	env::set_var("EDITOR", a_user_editor);
-	let editor = TextEditor::new(
+	let editor = Editor::new(
 		successful_runner_for(a_user_editor),
 		successful_mock_file_loader(),
 		mock_conf_provider_with_no_editor(),
 	);
 
-	let result = editor.open_editmsg();
+	let result = editor.open();
 
 	assert!(result.is_ok());
 }
@@ -87,13 +92,13 @@ fn should_open_with_env_editor() {
 #[serial]
 fn should_open_with_vim_editor() {
 	env::remove_var("EDITOR");
-	let editor = TextEditor::new(
+	let editor = Editor::new(
 		successful_runner_for("vim"),
 		successful_mock_file_loader(),
 		mock_conf_provider_with_no_editor(),
 	);
 
-	let result = editor.open_editmsg();
+	let result = editor.open();
 
 	assert!(result.is_ok());
 }
@@ -111,13 +116,13 @@ fn should_open_with_vi_editor() {
 		.expect_open_editor()
 		.with(eq("vi"), always())
 		.returning(|_, _| Ok(()));
-	let editor = TextEditor::new(
+	let editor = Editor::new(
 		mock_runner,
 		successful_mock_file_loader(),
 		mock_conf_provider_with_no_editor(),
 	);
 
-	let result = editor.open_editmsg();
+	let result = editor.open();
 
 	assert!(result.is_ok());
 }
@@ -135,13 +140,13 @@ fn should_error_when_no_editor_is_available() {
 		.expect_open_editor()
 		.with(eq("vi"), always())
 		.returning(|_, _| Err(Box::new(GitError::Editor)));
-	let editor = TextEditor::new(
+	let editor = Editor::new(
 		mock_runner,
 		successful_mock_file_loader(),
 		mock_conf_provider_with_no_editor(),
 	);
 
-	let result = editor.open_editmsg();
+	let result = editor.open();
 
 	assert!(matches!(result, Err(e) if e.to_string().contains("Editor")));
 }
