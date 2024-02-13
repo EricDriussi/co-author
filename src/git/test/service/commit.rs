@@ -142,5 +142,5 @@ fn should_report_commit_error(
 
 	let result = service.commit("a message", vec!["an author".to_string()]);
 
-	assert!(matches!(result, Err(e) if e.to_string().contains(&err_msg)));
+	assert!(matches!(result, Err(e) if e.to_string().contains(err_msg)));
 }

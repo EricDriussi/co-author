@@ -30,31 +30,31 @@ impl<W: GitWrapper, R: Runner, E: EditmsgEditor> GitService<W, R, E> {
 	}
 
 	pub fn commit(&self, message: &str, authors: Vec<String>) -> Result<()> {
-		self.run_hook(Hook::PreCommit)?;
+		self.run_hook(&Hook::PreCommit)?;
 		self.git_wrapper.write_to_editmsg(&CommitBody::new(message, authors))?;
-		self.run_hook(Hook::CommitMsg)?;
+		self.run_hook(&Hook::CommitMsg)?;
 		self.git_wrapper.commit()
 	}
 
 	pub fn commit_with_editor(&self, authors: Vec<String>) -> Result<()> {
-		self.run_hook(Hook::PreCommit)?;
+		self.run_hook(&Hook::PreCommit)?;
 		self.git_wrapper.write_to_editmsg(&CommitBody::new("", authors))?;
 		self.git_wrapper.add_status_to_editmsg()?;
 		self.editmsg_editor.open()?;
-		self.run_hook(Hook::CommitMsg)?;
+		self.run_hook(&Hook::CommitMsg)?;
 		self.git_wrapper.commit()
 	}
 
 	pub fn commit_with_pre_populated_editor(&self, message: &str, authors: Vec<String>) -> Result<()> {
-		self.run_hook(Hook::PreCommit)?;
+		self.run_hook(&Hook::PreCommit)?;
 		self.git_wrapper.write_to_editmsg(&CommitBody::new(message, authors))?;
 		self.git_wrapper.add_status_to_editmsg()?;
 		self.editmsg_editor.open()?;
-		self.run_hook(Hook::CommitMsg)?;
+		self.run_hook(&Hook::CommitMsg)?;
 		self.git_wrapper.commit()
 	}
 
-	fn run_hook(&self, hook: Hook) -> Result<()> {
+	fn run_hook(&self, hook: &Hook) -> Result<()> {
 		let hook_name = match hook {
 			Hook::PreCommit => "pre-commit",
 			Hook::CommitMsg => "commit-msg",

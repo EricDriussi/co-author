@@ -4,6 +4,7 @@ use std::{error::Error, fmt::Display};
 
 #[derive(Debug, PartialEq)]
 pub struct CommitBody {
+	// TODO: review git docs to choose correct naming
 	message: String,
 	signatures: Vec<String>,
 }
