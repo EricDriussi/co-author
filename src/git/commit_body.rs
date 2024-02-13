@@ -2,6 +2,7 @@
 use mockall::{automock, predicate::*};
 use std::{error::Error, fmt::Display};
 
+#[derive(Debug, PartialEq)]
 pub struct CommitBody {
 	message: String,
 	signatures: Vec<String>,
