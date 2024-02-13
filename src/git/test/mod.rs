@@ -5,5 +5,6 @@ mod service {
 	mod commit;
 	mod commit_with_editor;
 	mod commit_with_pre_populated_editor;
+	mod fixtures;
 	mod last_commit_msg;
 }
