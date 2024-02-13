@@ -30,35 +30,46 @@ impl<W: GitWrapper, R: Runner, E: EditmsgEditor> GitService<W, R, E> {
 	}
 
 	pub fn commit(&self, message: &str, authors: Vec<String>) -> Result<()> {
-		self.run_hook("pre-commit")?;
+		self.run_hook(Hook::PreCommit)?;
 		self.git_wrapper.write_to_editmsg(&CommitBody::new(message, authors))?;
-		self.run_hook("commit-msg")?;
+		self.run_hook(Hook::CommitMsg)?;
 		self.git_wrapper.commit()
 	}
 
 	pub fn commit_with_editor(&self, authors: Vec<String>) -> Result<()> {
-		self.run_hook("pre-commit")?;
+		self.run_hook(Hook::PreCommit)?;
 		self.git_wrapper.write_to_editmsg(&CommitBody::new("", authors))?;
 		self.git_wrapper.add_status_to_editmsg()?;
 		self.editmsg_editor.open()?;
-		self.run_hook("commit-msg")?;
+		self.run_hook(Hook::CommitMsg)?;
 		self.git_wrapper.commit()
 	}
 
 	pub fn commit_with_pre_populated_editor(&self, message: &str, authors: Vec<String>) -> Result<()> {
-		self.run_hook("pre-commit")?;
+		self.run_hook(Hook::PreCommit)?;
 		self.git_wrapper.write_to_editmsg(&CommitBody::new(message, authors))?;
 		self.git_wrapper.add_status_to_editmsg()?;
 		self.editmsg_editor.open()?;
-		self.run_hook("commit-msg")?;
+		self.run_hook(Hook::CommitMsg)?;
 		self.git_wrapper.commit()
 	}
 
-	fn run_hook(&self, hook: &str) -> Result<()> {
-		let hook_path = format!("{}/{hook}", conf::hooks_path());
+	fn run_hook(&self, hook: Hook) -> Result<()> {
+		let hook_name = match hook {
+			Hook::PreCommit => "pre-commit",
+			Hook::CommitMsg => "commit-msg",
+		};
+
+		let hook_path = format!("{}/{}", conf::hooks_path(), hook_name);
+
 		Ok(self
 			.runner
 			.run(self.hook_shell, hook_path.as_str())
-			.map_err(|_| GitError::Hook(hook.to_string()))?)
+			.map_err(|_| GitError::Hook(hook_name.to_string()))?)
 	}
+}
+
+enum Hook {
+	PreCommit,
+	CommitMsg,
 }
