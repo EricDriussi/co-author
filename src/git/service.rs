@@ -43,21 +43,30 @@ impl<W: GitWrapper, R: Runner, E: EditmsgEditor> GitService<W, R, E> {
 	pub fn commit(&self, commit_mode: CommitMode) -> Result<()> {
 		match commit_mode {
 			CommitMode::WithoutEditor { message, authors } => {
-				self.run_hook(&Hook::PreCommit)?;
-				self.git_wrapper.write_to_editmsg(&CommitBody::new(message, authors))?;
-				self.run_hook(&Hook::CommitMsg)?;
-				self.git_wrapper.commit()
+				self.pre(&CommitBody::new(message, authors))?;
+				self.run_commit()
 			}
 			CommitMode::WithEditor { message, authors } => {
-				self.run_hook(&Hook::PreCommit)?;
-				self.git_wrapper
-					.write_to_editmsg(&CommitBody::new(message.unwrap_or(""), authors))?;
-				self.git_wrapper.add_status_to_editmsg()?;
-				self.editmsg_editor.open()?;
-				self.run_hook(&Hook::CommitMsg)?;
-				self.git_wrapper.commit()
+				self.pre(&CommitBody::new(message.unwrap_or_default(), authors))?;
+				self.editor()?;
+				self.run_commit()
 			}
 		}
+	}
+
+	fn pre(&self, body: &CommitBody) -> Result<()> {
+		self.run_hook(&Hook::PreCommit)?;
+		self.git_wrapper.write_to_editmsg(body)
+	}
+
+	fn editor(&self) -> Result<()> {
+		self.git_wrapper.add_status_to_editmsg()?;
+		self.editmsg_editor.open()
+	}
+
+	fn run_commit(&self) -> Result<()> {
+		self.run_hook(&Hook::CommitMsg)?;
+		self.git_wrapper.commit()
 	}
 
 	fn run_hook(&self, hook: &Hook) -> Result<()> {
