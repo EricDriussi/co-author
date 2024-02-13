@@ -2,9 +2,8 @@ mod editor_test;
 mod git;
 mod libgit_wrapper;
 mod service {
-	mod commit;
-	mod commit_with_editor;
-	mod commit_with_pre_populated_editor;
+	mod commit_editor;
+	mod commit_no_editor;
 	mod fixtures;
 	mod last_commit_msg;
 }

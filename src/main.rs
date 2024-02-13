@@ -1,6 +1,7 @@
 use args::Args;
 use clap::Parser;
 use cli::prompt::Prompt;
+use git::service::CommitMode;
 use std::{env, error::Error, path::PathBuf, process, result};
 
 // TODO: improve tests
@@ -34,13 +35,22 @@ fn run(args: &Args) -> Result<()> {
 
 	if args.editor {
 		if args.pre_populate {
-			return git_service.commit_with_pre_populated_editor(prev.as_str(), authors_signatures);
+			return git_service.commit(CommitMode::WithEditor {
+				message: Some(prev.as_str()),
+				authors: authors_signatures,
+			});
 		}
-		return git_service.commit_with_editor(authors_signatures);
+		return git_service.commit(CommitMode::WithEditor {
+			message: None,
+			authors: authors_signatures,
+		});
 	}
 	let msg = handler::handle_commit_msg(args, &mut cli, &prev)?;
 
-	return git_service.commit(msg.as_str(), authors_signatures);
+	return git_service.commit(CommitMode::WithoutEditor {
+		message: msg.as_str(),
+		authors: authors_signatures,
+	});
 }
 
 fn set_cwd_to_git_root() -> Result<()> {

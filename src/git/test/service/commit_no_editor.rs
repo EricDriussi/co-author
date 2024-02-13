@@ -2,7 +2,7 @@ use crate::git::{
 	commit_body::MockGitWrapper,
 	editor::MockEditmsgEditor,
 	runner::MockRunner,
-	service::GitService,
+	service::{CommitMode, GitService},
 	test::service::fixtures::{mock_editmsg_editor, mock_git_wrapper, mock_runner, COMMIT_MSG_HOOK, PRE_COMMIT_HOOK},
 };
 use mockall::Sequence;
@@ -19,7 +19,10 @@ fn should_succeed(
 	mock_git_wrapper.expect_commit().returning(|| Ok(()));
 	let service = GitService::new(mock_git_wrapper, mock_runner, mock_editmsg_editor);
 
-	let result = service.commit("a message", vec!["an author".to_string()]);
+	let result = service.commit(CommitMode::WithoutEditor {
+		message: "a message",
+		authors: vec!["an author".to_string()],
+	});
 
 	assert!(result.is_ok());
 }
@@ -36,7 +39,10 @@ fn should_not_add_status_to_editmsg(
 	mock_git_wrapper.expect_add_status_to_editmsg().times(0);
 	let service = GitService::new(mock_git_wrapper, mock_runner, mock_editmsg_editor);
 
-	let result = service.commit("a message", vec!["an author".to_string()]);
+	let result = service.commit(CommitMode::WithoutEditor {
+		message: "a message",
+		authors: vec!["an author".to_string()],
+	});
 
 	assert!(result.is_ok());
 }
@@ -53,7 +59,10 @@ fn should_not_open_editor(
 	mock_editmsg_editor.expect_open().times(0);
 	let service = GitService::new(mock_git_wrapper, mock_runner, mock_editmsg_editor);
 
-	let result = service.commit("a message", vec!["an author".to_string()]);
+	let result = service.commit(CommitMode::WithoutEditor {
+		message: "a message",
+		authors: vec!["an author".to_string()],
+	});
 
 	assert!(result.is_ok());
 }
@@ -89,7 +98,10 @@ fn should_perform_actions_in_order(
 		.in_sequence(&mut seq);
 	let service = GitService::new(mock_git_wrapper, mock_runner, mock_editmsg_editor);
 
-	let result = service.commit("a message", vec!["an author".to_string()]);
+	let result = service.commit(CommitMode::WithoutEditor {
+		message: "a message",
+		authors: vec!["an author".to_string()],
+	});
 
 	assert!(result.is_ok());
 }
@@ -105,7 +117,10 @@ fn should_stop_and_report_hook_error(
 	mock_git_wrapper.expect_commit().times(0);
 	let service = GitService::new(mock_git_wrapper, mock_runner, mock_editmsg_editor);
 
-	let result = service.commit("a message", vec!["an author".to_string()]);
+	let result = service.commit(CommitMode::WithoutEditor {
+		message: "a message",
+		authors: vec!["an author".to_string()],
+	});
 
 	assert!(matches!(result, Err(e) if e.to_string().contains("Hook")));
 }
@@ -123,7 +138,10 @@ fn should_stop_when_write_to_editmsg_fails(
 	mock_git_wrapper.expect_commit().times(0);
 	let service = GitService::new(mock_git_wrapper, mock_runner, mock_editmsg_editor);
 
-	let result = service.commit("a message", vec!["an author".to_string()]);
+	let result = service.commit(CommitMode::WithoutEditor {
+		message: "a message",
+		authors: vec!["an author".to_string()],
+	});
 
 	assert!(result.is_err());
 }
@@ -140,7 +158,10 @@ fn should_report_commit_error(
 	mock_git_wrapper.expect_commit().returning(move || Err(err_msg.into()));
 	let service = GitService::new(mock_git_wrapper, mock_runner, mock_editmsg_editor);
 
-	let result = service.commit("a message", vec!["an author".to_string()]);
+	let result = service.commit(CommitMode::WithoutEditor {
+		message: "a message",
+		authors: vec!["an author".to_string()],
+	});
 
 	assert!(matches!(result, Err(e) if e.to_string().contains(err_msg)));
 }
