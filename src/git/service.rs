@@ -1,18 +1,15 @@
-use crate::conf;
 use crate::Result;
 
+use super::hook::HookRunner;
 use super::{
 	commit_body::{CommitBody, GitWrapper},
 	editor::EditmsgEditor,
-	git_err::GitError,
-	runner::Runner,
 };
 
-pub struct GitService<W: GitWrapper, R: Runner, E: EditmsgEditor> {
+pub struct GitService<W: GitWrapper, H: HookRunner, E: EditmsgEditor> {
 	git_wrapper: W,
-	runner: R,
+	hook_runner: H,
 	editmsg_editor: E,
-	hook_shell: &'static str,
 }
 
 pub enum CommitMode<'a> {
@@ -26,13 +23,12 @@ pub enum CommitMode<'a> {
 	},
 }
 
-impl<W: GitWrapper, R: Runner, E: EditmsgEditor> GitService<W, R, E> {
-	pub fn new(git_wrapper: W, runner: R, editmsg_editor: E) -> Self {
+impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
+	pub fn new(git_wrapper: W, runner: H, editmsg_editor: E) -> Self {
 		Self {
 			git_wrapper,
-			runner,
+			hook_runner: runner,
 			editmsg_editor,
-			hook_shell: "sh",
 		}
 	}
 
@@ -55,7 +51,7 @@ impl<W: GitWrapper, R: Runner, E: EditmsgEditor> GitService<W, R, E> {
 	}
 
 	fn pre(&self, body: &CommitBody) -> Result<()> {
-		self.run_hook(&Hook::PreCommit)?;
+		self.hook_runner.run_pre_commit()?;
 		self.git_wrapper.write_to_editmsg(body)
 	}
 
@@ -65,27 +61,7 @@ impl<W: GitWrapper, R: Runner, E: EditmsgEditor> GitService<W, R, E> {
 	}
 
 	fn run_commit(&self) -> Result<()> {
-		self.run_hook(&Hook::CommitMsg)?;
+		self.hook_runner.run_commit_msg()?;
 		self.git_wrapper.commit()
 	}
-
-	fn run_hook(&self, hook: &Hook) -> Result<()> {
-		let hook_name = match hook {
-			Hook::PreCommit => "pre-commit",
-			Hook::CommitMsg => "commit-msg",
-		};
-
-		let hook_path = format!("{}/{}", conf::hooks_path(), hook_name);
-
-		Ok(self
-			.runner
-			.run(self.hook_shell, hook_path.as_str())
-			.map_err(|_| GitError::Hook(hook_name.to_string()))?)
-	}
-}
-
-// TODO: should this be a struct like Editor?
-enum Hook {
-	PreCommit,
-	CommitMsg,
 }

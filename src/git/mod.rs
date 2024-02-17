@@ -5,25 +5,27 @@ use service::GitService;
 
 use crate::fs::wrapper::FsWrapper;
 
-use self::{conf_provider::GitConfProvider, editor::Editor, runner::CommandRunner};
+use self::{conf_provider::GitConfProvider, editor::Editor, hook::Hook, runner::CommandRunner};
 
 pub mod commit_body;
 mod conf_provider;
 mod editor;
 mod git_err;
+mod hook;
 pub mod libgit_wrapper;
 mod runner;
 pub mod service;
 
 type TextEditor = Editor<CommandRunner, FsWrapper, GitConfProvider>;
-type Service = GitService<LibGitWrapper, CommandRunner, TextEditor>;
+type GitHook = Hook<CommandRunner>;
+type Service = GitService<LibGitWrapper, GitHook, TextEditor>;
 
 pub fn init_git_dependency_tree() -> Result<Service, String> {
 	let cwd = env::current_dir().map_err(|_| "Could not get current directory".to_string())?;
 	match LibGitWrapper::from(&cwd) {
 		Ok(wrapper) => Ok(GitService::new(
 			wrapper,
-			CommandRunner::new(),
+			Hook::new(CommandRunner::new()),
 			Editor::new(CommandRunner::new(), FsWrapper::new(), GitConfProvider::new()),
 		)),
 		Err(e) => Err(e),

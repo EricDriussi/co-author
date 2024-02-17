@@ -1,12 +1,14 @@
-use crate::git::{commit_body::MockGitWrapper, editor::MockEditmsgEditor, runner::MockRunner};
+use crate::git::{commit_body::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner, runner::MockRunner};
 use rstest::*;
-
-pub const PRE_COMMIT_HOOK: &str = "pre-commit";
-pub const COMMIT_MSG_HOOK: &str = "commit-msg";
 
 #[fixture]
 pub fn mock_runner() -> MockRunner {
 	MockRunner::new()
+}
+
+#[fixture]
+pub fn mock_hook_runner() -> MockHookRunner {
+	MockHookRunner::new()
 }
 
 #[fixture]
