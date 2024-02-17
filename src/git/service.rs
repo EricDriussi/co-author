@@ -16,12 +16,12 @@ pub struct GitService<W: GitWrapper, R: Runner, E: EditmsgEditor> {
 }
 
 pub enum CommitMode<'a> {
-	WithoutEditor {
-		message: &'a str,
-		authors: Vec<String>,
-	},
 	WithEditor {
 		message: Option<&'a str>,
+		authors: Vec<String>,
+	},
+	WithoutEditor {
+		message: &'a str,
 		authors: Vec<String>,
 	},
 }
@@ -84,6 +84,7 @@ impl<W: GitWrapper, R: Runner, E: EditmsgEditor> GitService<W, R, E> {
 	}
 }
 
+// TODO: should this be a struct like Editor?
 enum Hook {
 	PreCommit,
 	CommitMsg,
