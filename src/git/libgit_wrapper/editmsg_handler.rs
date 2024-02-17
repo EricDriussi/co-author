@@ -5,7 +5,7 @@ use std::{
 
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 
-use crate::{conf, git::commit_body::CommitBody};
+use crate::{common::conf, git::commit_body::CommitBody};
 
 const ERR_MSG: &str = "GIT ERROR";
 

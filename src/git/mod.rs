@@ -3,9 +3,9 @@ use std::env;
 use libgit_wrapper::LibGitWrapper;
 use service::GitService;
 
-use crate::fs::wrapper::FsWrapper;
-
-use self::{conf_provider::GitConfProvider, editor::Editor, hook::Hook, runner::CommandRunner};
+use self::{conf_provider::GitConfProvider, editor::Editor, hook::Hook};
+use crate::common::fs::wrapper::FsWrapper;
+use crate::common::runner::CommandRunner;
 
 pub mod commit_body;
 mod conf_provider;
@@ -13,7 +13,6 @@ mod editor;
 mod git_err;
 mod hook;
 pub mod libgit_wrapper;
-mod runner;
 pub mod service;
 
 type TextEditor = Editor<CommandRunner, FsWrapper, GitConfProvider>;

@@ -1,8 +1,8 @@
-use crate::fs::file::File;
+use crate::common::fs::file::File;
 
 #[test]
 fn should_build_from_path_when_file_is_present() {
-	let file = File::from("src/fs/test/test_file.txt".to_string());
+	let file = File::from("src/common/fs/test/test_file.txt".to_string());
 
 	assert!(file.is_some());
 }
@@ -16,7 +16,7 @@ fn should_not_build_from_path_when_file_is_absent() {
 
 #[test]
 fn should_present_non_empty_lines() {
-	let file = File::from("src/fs/test/test_file.txt".to_string()).expect("Could not open test file");
+	let file = File::from("src/common/fs/test/test_file.txt".to_string()).expect("Could not open test file");
 
 	let non_empyt_lines = file.non_empty_lines();
 
@@ -25,7 +25,7 @@ fn should_present_non_empty_lines() {
 
 #[test]
 fn should_present_all_lines() {
-	let file = File::from("src/fs/test/test_file.txt".to_string()).expect("Could not open test file");
+	let file = File::from("src/common/fs/test/test_file.txt".to_string()).expect("Could not open test file");
 
 	let non_empyt_lines = file.all_lines();
 
@@ -34,7 +34,7 @@ fn should_present_all_lines() {
 
 #[test]
 fn should_keep_track_of_path() {
-	let path = "src/fs/test/test_file.txt".to_string();
+	let path = "src/common/fs/test/test_file.txt".to_string();
 	let file = File::from(path.clone()).expect("Could not open test file");
 
 	let found_path = file.path();

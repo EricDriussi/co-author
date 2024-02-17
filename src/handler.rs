@@ -5,7 +5,7 @@ use crate::{
 		csv::provider::CSVReader,
 	},
 	cli::{input_reader::Reader, prompt::Prompt},
-	fs::wrapper::FsWrapper,
+	common::fs::wrapper::FsWrapper,
 	Result,
 };
 

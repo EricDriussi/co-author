@@ -1,6 +1,6 @@
 use std::env;
 
-use crate::conf;
+use crate::common::conf;
 
 use super::file::{File, OptionalReadable};
 

@@ -1,9 +1,12 @@
-use crate::{conf, Result};
+use crate::{
+	common::{conf, runner::Runner},
+	Result,
+};
 
 #[cfg(test)]
 use mockall::{automock, predicate::*};
 
-use super::{git_err::GitError, runner::Runner};
+use super::git_err::GitError;
 #[cfg_attr(test, automock)]
 pub trait HookRunner {
 	fn run_pre_commit(&self) -> Result<()>;

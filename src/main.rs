@@ -83,6 +83,7 @@ fn get_project_root_dir() -> Option<PathBuf> {
 	None
 }
 
+// TODO: do something with this mess, check what needs to be public
 mod args;
 mod error;
 mod authors {
@@ -102,13 +103,16 @@ mod cli {
 	#[cfg(test)]
 	mod prompt_test;
 }
-pub mod conf;
 mod git;
 mod handler;
 pub mod test_utils;
-mod fs {
-	pub mod file;
-	#[cfg(test)]
-	mod test;
-	pub mod wrapper;
+mod common {
+	pub mod conf;
+	pub mod runner;
+	pub mod fs {
+		pub mod file;
+		#[cfg(test)]
+		mod test;
+		pub mod wrapper;
+	}
 }

@@ -2,8 +2,8 @@ use std::env;
 
 use config::{Config, Environment, File, FileFormat};
 
-const DEFAULT_CONFIG: &str = include_str!("configs/default.yaml");
-const TEST_CONFIG: &str = include_str!("configs/test.yaml");
+const DEFAULT_CONFIG: &str = include_str!("default.yaml");
+const TEST_CONFIG: &str = include_str!("test.yaml");
 const CONFIG_ERR_MSG: &str = "Config not loaded properly";
 
 pub fn authors_dir() -> String {
@@ -12,10 +12,6 @@ pub fn authors_dir() -> String {
 
 pub fn authors_file() -> String {
 	get_config().get::<String>("authors_file").expect(CONFIG_ERR_MSG)
-}
-
-pub fn dummy_data() -> String {
-	get_config().get::<String>("dummy_data").expect(CONFIG_ERR_MSG)
 }
 
 pub fn hooks_path() -> String {
@@ -47,3 +43,6 @@ fn get_config() -> Config {
 			.expect(CONFIG_ERR_MSG),
 	}
 }
+
+#[cfg(test)]
+mod test;

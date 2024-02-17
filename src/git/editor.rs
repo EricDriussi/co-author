@@ -1,11 +1,12 @@
 use std::env;
 
-use crate::Result;
-use crate::{conf, fs::wrapper::FileLoader};
+use crate::{
+	common::{conf, fs::wrapper::FileLoader, runner::Runner},
+	Result,
+};
 
 use super::conf_provider::ConfProvider;
 use super::git_err::GitError;
-use super::runner::Runner;
 
 #[cfg(test)]
 use mockall::{automock, predicate::*};

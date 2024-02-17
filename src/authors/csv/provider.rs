@@ -2,9 +2,9 @@ use super::super::author::{Author, AuthorsProvider};
 use super::mapper;
 
 use crate::authors::authors_err::AuthorsError;
-use crate::conf;
-use crate::fs::file::Readable;
-use crate::fs::wrapper::FileLoader;
+use crate::common::conf;
+use crate::common::fs::file::Readable;
+use crate::common::fs::wrapper::FileLoader;
 use crate::Result;
 
 pub struct CSVReader {

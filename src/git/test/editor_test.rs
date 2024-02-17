@@ -4,12 +4,14 @@ use mockall::predicate::{always, eq};
 use serial_test::serial;
 
 use crate::{
-	conf,
-	fs::{file::Readable, wrapper::MockFileLoader},
+	common::{
+		conf,
+		fs::{file::Readable, wrapper::MockFileLoader},
+		runner::MockRunner,
+	},
 	git::{
 		conf_provider::MockConfProvider,
 		editor::{EditmsgEditor, Editor},
-		runner::MockRunner,
 	},
 };
 

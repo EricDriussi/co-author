@@ -1,8 +1,7 @@
-use crate::authors::author::AuthorsProvider;
 use crate::authors::csv::provider::CSVReader;
-use crate::conf;
-use crate::fs::file::Readable;
-use crate::fs::wrapper::MockFileLoader;
+use crate::common::conf;
+use crate::common::fs::file::Readable;
+use crate::{authors::author::AuthorsProvider, common::fs::wrapper::MockFileLoader};
 
 use mockall::predicate::{self, eq};
 

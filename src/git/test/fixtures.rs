@@ -1,4 +1,5 @@
-use crate::git::{commit_body::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner, runner::MockRunner};
+use crate::common::runner::MockRunner;
+use crate::git::{commit_body::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner};
 use rstest::*;
 
 #[fixture]

@@ -1,9 +1,11 @@
-use crate::git::{
-	hook::{Hook, HookRunner},
-	runner::MockRunner,
-	test::fixtures::mock_runner,
-};
 use crate::Result;
+use crate::{
+	common::runner::MockRunner,
+	git::{
+		hook::{Hook, HookRunner},
+		test::fixtures::mock_runner,
+	},
+};
 use mockall::predicate::{always, eq};
 use rstest::*;
 

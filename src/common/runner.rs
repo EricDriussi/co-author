@@ -3,7 +3,6 @@ use crate::Result;
 use mockall::{automock, predicate::*};
 use std::process::Command;
 
-// TODO: move out of git module
 #[cfg_attr(test, automock)]
 pub trait Runner {
 	fn run(&self, cmd: &str, arg: &str) -> Result<()>;

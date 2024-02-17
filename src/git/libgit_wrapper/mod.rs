@@ -2,7 +2,7 @@ use std::{error::Error, fs::OpenOptions, io::Write, path::PathBuf};
 
 use git2::{Repository, Signature};
 
-use crate::conf;
+use crate::common::conf;
 
 use super::commit_body::{CommitBody, GitWrapper};
 
