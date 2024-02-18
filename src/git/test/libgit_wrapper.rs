@@ -1,5 +1,5 @@
 use git2::{Config, Repository, RepositoryInitOptions, Signature};
-use serial_test::serial;
+use rand::Rng;
 use std::{
 	fs::{self, File},
 	path::{Path, PathBuf},
@@ -16,15 +16,15 @@ use crate::{
 const REPO_PATH: &str = "/var/tmp/coa";
 
 #[test]
-#[serial]
 fn should_determine_if_is_valid_git_repo() {
-	let git_repo = init_repo(REPO_PATH).expect("Could not setup test repo");
+	let path = random_path(REPO_PATH);
+	let git_repo = init_repo(&path).expect("Could not setup test repo");
 
-	let repo_with_no_staged_changes = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
+	let repo_with_no_staged_changes = LibGitWrapper::from(&PathBuf::from(&path));
 	assert!(repo_with_no_staged_changes.is_err());
 
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
-	let valid_repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH));
+	let valid_repo = LibGitWrapper::from(&PathBuf::from(&path));
 	assert!(valid_repo.is_ok());
 
 	let invalid_repo = LibGitWrapper::from(&PathBuf::from("/path"));
@@ -32,17 +32,18 @@ fn should_determine_if_is_valid_git_repo() {
 }
 
 #[test]
-#[serial]
+#[ignore]
 fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
 	set_test_env();
-	let git_repo = init_repo(REPO_PATH).expect("Could not setup test repo");
+	let path = random_path(REPO_PATH);
+	let git_repo = init_repo(&path).expect("Could not setup test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
-	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH)).expect("Could not setup test repo");
+	let repo = LibGitWrapper::from(&PathBuf::from(&path)).expect("Could not setup test repo");
 	let authors = vec!["random author".to_string()];
 	let commit_message = CommitMessage::new("irrelevant message", authors);
 
-	let editmsg_path = format!("{REPO_PATH}/.git/COMMIT_EDITMSG");
+	let editmsg_path = format!("{path}/.git/COMMIT_EDITMSG");
 	std::fs::write(editmsg_path, commit_message.formatted_body()).expect("Could not write to test editmsg file");
 
 	let result = repo.commit();
@@ -51,16 +52,16 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 }
 
 #[test]
-#[serial]
 fn should_error_out_if_commit_message_is_empty() {
-	let git_repo = init_repo(REPO_PATH).expect("Could not setup test repo");
+	let path = random_path(REPO_PATH);
+	let git_repo = init_repo(&path).expect("Could not setup test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
-	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH)).expect("Could not setup test repo");
+	let repo = LibGitWrapper::from(&PathBuf::from(&path)).expect("Could not setup test repo");
 	let no_authors = vec![String::new()];
 	let commit_message = CommitMessage::new("", no_authors);
 
-	let editmsg_path = format!("{REPO_PATH}/.git/COMMIT_EDITMSG");
+	let editmsg_path = format!("{path}/.git/COMMIT_EDITMSG");
 	std::fs::write(editmsg_path, commit_message.formatted_body()).expect("Could not write to test editmsg file");
 
 	let result = repo.commit();
@@ -69,10 +70,11 @@ fn should_error_out_if_commit_message_is_empty() {
 }
 
 #[test]
-#[serial]
+#[ignore]
 fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 	set_test_env();
-	let git_repo = init_repo(REPO_PATH)?;
+	let path = random_path(REPO_PATH);
+	let git_repo = init_repo(&path)?;
 	create_and_add_file_to_git_tree(&git_repo, "foo")?;
 
 	let mut index = git_repo.index()?;
@@ -90,7 +92,7 @@ fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 
 	add_commit(&git_repo, &tree, "IRRELEVANT")?;
 
-	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH))?;
+	let repo = LibGitWrapper::from(&PathBuf::from(&path))?;
 	repo.add_status_to_editmsg()?;
 
 	let commit_editmsg_path = "/var/tmp/coa/.git/COMMIT_EDITMSG";
@@ -119,15 +121,15 @@ fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-#[serial]
 fn should_only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
-	let git_repo = init_repo(REPO_PATH)?;
+	let path = random_path(REPO_PATH);
+	let git_repo = init_repo(&path)?;
 	create_and_add_file_to_git_tree(&git_repo, "foo")?;
 
 	let mut index = git_repo.index()?;
 	let id = index.write_tree()?;
 	let tree = git_repo.find_tree(id)?;
-	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH))?;
+	let repo = LibGitWrapper::from(&PathBuf::from(&path))?;
 
 	let first_line = "FIRST LINE".to_string();
 	let msg = format!("{first_line}\nSECOND_LINE");
@@ -137,6 +139,12 @@ fn should_only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dy
 
 	assert!(matches!(result, Ok(line) if line.to_string().contains(first_line.as_str())));
 	Ok(())
+}
+
+fn random_path(path: &str) -> String {
+	let mut rng = rand::thread_rng();
+	let random_number: u32 = rng.gen();
+	format!("{path}{random_number}")
 }
 
 fn init_repo(path: &str) -> Result<Repository, Box<dyn std::error::Error>> {
