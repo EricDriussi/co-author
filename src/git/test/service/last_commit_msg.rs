@@ -1,4 +1,4 @@
-use crate::git::{commit_body::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner, service::GitService};
+use crate::git::{commit_message::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner, service::GitService};
 
 #[test]
 fn should_return_message_when_present() {

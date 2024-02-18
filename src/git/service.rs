@@ -2,7 +2,7 @@ use crate::Result;
 
 use super::hook::HookRunner;
 use super::{
-	commit_body::{CommitBody, GitWrapper},
+	commit_message::{CommitMessage, GitWrapper},
 	editor::EditmsgEditor,
 };
 
@@ -39,18 +39,18 @@ impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
 	pub fn commit(&self, commit_mode: CommitMode) -> Result<()> {
 		match commit_mode {
 			CommitMode::WithoutEditor { message, authors } => {
-				self.pre(&CommitBody::new(message, authors))?;
+				self.pre(&CommitMessage::new(message, authors))?;
 				self.run_commit()
 			}
 			CommitMode::WithEditor { message, authors } => {
-				self.pre(&CommitBody::new(message.unwrap_or_default(), authors))?;
+				self.pre(&CommitMessage::new(message.unwrap_or_default(), authors))?;
 				self.editor()?;
 				self.run_commit()
 			}
 		}
 	}
 
-	fn pre(&self, body: &CommitBody) -> Result<()> {
+	fn pre(&self, body: &CommitMessage) -> Result<()> {
 		self.hook_runner.run_pre_commit()?;
 		self.git_wrapper.write_to_editmsg(body)
 	}

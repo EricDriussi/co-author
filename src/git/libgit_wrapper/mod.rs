@@ -1,10 +1,7 @@
-use std::{error::Error, fs::OpenOptions, io::Write, path::PathBuf};
-
-use git2::{Repository, Signature};
-
+use super::commit_message::{CommitMessage, GitWrapper};
 use crate::common::conf;
-
-use super::commit_body::{CommitBody, GitWrapper};
+use git2::{Repository, Signature};
+use std::{error::Error, fs::OpenOptions, io::Write, path::PathBuf};
 
 pub mod editmsg_handler;
 
@@ -26,8 +23,8 @@ impl GitWrapper for LibGitWrapper {
 		Ok(())
 	}
 
-	fn write_to_editmsg(&self, commit_body: &CommitBody) -> Result<(), Box<dyn Error>> {
-		editmsg_handler::write_commit_to_file(commit_body)
+	fn write_to_editmsg(&self, commit_message: &CommitMessage) -> Result<(), Box<dyn Error>> {
+		editmsg_handler::write_commit_to_file(commit_message)
 	}
 
 	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {

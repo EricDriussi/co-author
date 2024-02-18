@@ -7,7 +7,7 @@ use self::{conf_provider::GitConfProvider, editor::Editor, hook::Hook};
 use crate::common::fs::wrapper::FsWrapper;
 use crate::common::runner::CommandRunner;
 
-pub mod commit_body;
+pub mod commit_message;
 mod conf_provider;
 mod editor;
 mod git_err;

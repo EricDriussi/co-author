@@ -1,16 +1,14 @@
+use crate::{common::conf, git::commit_message::CommitMessage};
+use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 use std::{
 	error::Error,
 	io::{BufRead, BufReader},
 };
 
-use git2::{Repository, StatusEntry, StatusOptions, Statuses};
-
-use crate::{common::conf, git::commit_body::CommitBody};
-
 const ERR_MSG: &str = "GIT ERROR";
 
-pub fn write_commit_to_file(commit_body: &CommitBody) -> Result<(), Box<dyn Error>> {
-	std::fs::write(conf::editmsg(), commit_body.formatted_body())?;
+pub fn write_commit_to_file(commit_message: &CommitMessage) -> Result<(), Box<dyn Error>> {
+	std::fs::write(conf::editmsg(), commit_message.formatted_body())?;
 	Ok(())
 }
 
@@ -21,15 +19,15 @@ pub fn read_editmsg() -> Option<String> {
 fn read(editmsg_path: String) -> Option<String> {
 	let file = std::fs::File::open(editmsg_path).expect("Something went wrong");
 	let reader = BufReader::new(file);
-	let mut commit_body = String::new();
+	let mut commit_message = String::new();
 
 	for line in reader.lines().flatten() {
 		if !line.starts_with('#') {
-			commit_body.push_str(line.trim());
-			commit_body.push('\n');
+			commit_message.push_str(line.trim());
+			commit_message.push('\n');
 		}
 	}
-	let trimmed_body = commit_body.trim().to_string();
+	let trimmed_body = commit_message.trim().to_string();
 
 	if has_message(&trimmed_body) {
 		Some(trimmed_body)
@@ -38,8 +36,8 @@ fn read(editmsg_path: String) -> Option<String> {
 	}
 }
 
-fn has_message(commit_body: &str) -> bool {
-	let lines_without_co_author = commit_body
+fn has_message(commit_message: &str) -> bool {
+	let lines_without_co_author = commit_message
 		.lines()
 		.filter(|line| !line.starts_with("Co-Authored-by"))
 		.collect::<Vec<&str>>()

@@ -1,5 +1,5 @@
 use crate::git::{
-	commit_body::{CommitBody, GitWrapper, MockGitWrapper},
+	commit_message::{CommitMessage, GitWrapper, MockGitWrapper},
 	editor::{EditmsgEditor, MockEditmsgEditor},
 	hook::{HookRunner, MockHookRunner},
 	service::{CommitMode, GitService},
@@ -42,7 +42,7 @@ fn should_write_commit_msg_and_authors() {
 	let authors = vec!["an author".to_string()];
 	mock_git_wrapper
 		.expect_write_to_editmsg()
-		.with(eq(CommitBody::new(message, authors.clone())))
+		.with(eq(CommitMessage::new(message, authors.clone())))
 		.returning(|_| Ok(()));
 	mock_git_wrapper.expect_add_status_to_editmsg().returning(|| Ok(()));
 	mock_editmsg_editor.expect_open().returning(|| Ok(()));

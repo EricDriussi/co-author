@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
 	git::{
-		commit_body::{CommitBody, GitWrapper},
+		commit_message::{CommitMessage, GitWrapper},
 		libgit_wrapper::LibGitWrapper,
 	},
 	test_utils::set_test_env,
@@ -40,10 +40,10 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 
 	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH)).expect("Could not setup test repo");
 	let authors = vec!["random author".to_string()];
-	let commit_body = CommitBody::new("irrelevant message", authors);
+	let commit_message = CommitMessage::new("irrelevant message", authors);
 
 	let editmsg_path = format!("{REPO_PATH}/.git/COMMIT_EDITMSG");
-	std::fs::write(editmsg_path, commit_body.formatted_body()).expect("Could not write to test editmsg file");
+	std::fs::write(editmsg_path, commit_message.formatted_body()).expect("Could not write to test editmsg file");
 
 	let result = repo.commit();
 
@@ -52,16 +52,16 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 
 #[test]
 #[serial]
-fn should_error_out_if_commit_body_is_empty() {
+fn should_error_out_if_commit_message_is_empty() {
 	let git_repo = init_repo(REPO_PATH).expect("Could not setup test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
 	let repo = LibGitWrapper::from(&PathBuf::from(REPO_PATH)).expect("Could not setup test repo");
 	let no_authors = vec![String::new()];
-	let commit_body = CommitBody::new("", no_authors);
+	let commit_message = CommitMessage::new("", no_authors);
 
 	let editmsg_path = format!("{REPO_PATH}/.git/COMMIT_EDITMSG");
-	std::fs::write(editmsg_path, commit_body.formatted_body()).expect("Could not write to test editmsg file");
+	std::fs::write(editmsg_path, commit_message.formatted_body()).expect("Could not write to test editmsg file");
 
 	let result = repo.commit();
 
