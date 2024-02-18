@@ -1,25 +1,20 @@
 use crate::Result;
 use crate::{
 	common::runner::MockRunner,
-	git::{
-		hook::{Hook, HookRunner},
-		test::fixtures::mock_runner,
-	},
+	git::hook::{Hook, HookRunner},
 };
 use mockall::predicate::{always, eq};
-use rstest::*;
+use parameterized::parameterized;
 
-#[rstest]
-#[case(Hook::run_pre_commit, "pre-commit")]
-#[case(Hook::run_commit_msg, "commit-msg")]
-fn should_call_runner_with_correct_hook(
-	#[case] run_fn: fn(&Hook<MockRunner>) -> Result<()>,
-	#[case] hook_name: String,
-	mut mock_runner: MockRunner,
-) {
+#[parameterized(
+	run_fn = { Hook::run_pre_commit, Hook::run_commit_msg },
+	hook_name = { "pre-commit", "commit-msg" }
+)]
+fn should_call_runner_with_correct_hook(run_fn: fn(&Hook<MockRunner>) -> Result<()>, hook_name: &str) {
+	let mut mock_runner = MockRunner::new();
 	mock_runner
 		.expect_run()
-		.withf(move |_, hook| hook.contains(&hook_name))
+		.withf(move |_, hook| hook.contains(hook_name))
 		.returning(|_, _| Ok(()));
 
 	let result = run_fn(&Hook::new(mock_runner));
@@ -27,13 +22,9 @@ fn should_call_runner_with_correct_hook(
 	assert!(result.is_ok());
 }
 
-#[rstest]
-#[case(Hook::run_pre_commit)]
-#[case(Hook::run_commit_msg)]
-fn should_call_runner_with_correct_shell(
-	#[case] run_fn: fn(&Hook<MockRunner>) -> Result<()>,
-	mut mock_runner: MockRunner,
-) {
+#[parameterized( run_fn = { Hook::run_pre_commit, Hook::run_commit_msg })]
+fn should_call_runner_with_correct_shell(run_fn: fn(&Hook<MockRunner>) -> Result<()>) {
+	let mut mock_runner = MockRunner::new();
 	mock_runner
 		.expect_run()
 		.with(eq("sh"), always())

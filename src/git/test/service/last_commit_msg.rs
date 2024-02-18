@@ -1,6 +1,5 @@
 use crate::git::{commit_body::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner, service::GitService};
 
-// TODO: use fixtures (mocks)
 #[test]
 fn should_return_message_when_present() {
 	let msg = "a message";

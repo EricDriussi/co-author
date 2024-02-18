@@ -1,5 +1,4 @@
 mod editor_test;
-mod fixtures;
 mod git;
 mod hook;
 mod libgit_wrapper;

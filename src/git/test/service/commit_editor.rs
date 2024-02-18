@@ -3,20 +3,18 @@ use crate::git::{
 	editor::{EditmsgEditor, MockEditmsgEditor},
 	hook::{HookRunner, MockHookRunner},
 	service::{CommitMode, GitService},
-	test::fixtures::{mock_editmsg_editor, mock_git_wrapper, mock_hook_runner},
 };
 use crate::Result;
 use mockall::{predicate::eq, Sequence};
-use rstest::*;
 
 const ERR_MSG: &str = "ERR";
 
-#[rstest]
-fn should_succeed(
-	mut mock_hook_runner: MockHookRunner,
-	mut mock_git_wrapper: MockGitWrapper,
-	mut mock_editmsg_editor: MockEditmsgEditor,
-) {
+#[test]
+fn should_succeed() {
+	let mut mock_hook_runner = MockHookRunner::new();
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+
 	mock_hook_runner.expect_run_pre_commit().returning(|| Ok(()));
 	mock_git_wrapper.expect_write_to_editmsg().returning(|_| Ok(()));
 	mock_git_wrapper.expect_add_status_to_editmsg().returning(|| Ok(()));
@@ -33,12 +31,12 @@ fn should_succeed(
 	assert!(result.is_ok());
 }
 
-#[rstest]
-fn should_write_commit_msg_and_authors(
-	mut mock_hook_runner: MockHookRunner,
-	mut mock_git_wrapper: MockGitWrapper,
-	mut mock_editmsg_editor: MockEditmsgEditor,
-) {
+#[test]
+fn should_write_commit_msg_and_authors() {
+	let mut mock_hook_runner = MockHookRunner::new();
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+
 	mock_hook_runner.expect_run_pre_commit().returning(|| Ok(()));
 	let message = "a message";
 	let authors = vec!["an author".to_string()];
@@ -57,12 +55,12 @@ fn should_write_commit_msg_and_authors(
 	assert!(result.is_ok());
 }
 
-#[rstest]
-fn should_perform_actions_in_order(
-	mut mock_hook_runner: MockHookRunner,
-	mut mock_git_wrapper: MockGitWrapper,
-	mut mock_editmsg_editor: MockEditmsgEditor,
-) {
+#[test]
+fn should_perform_actions_in_order() {
+	let mut mock_hook_runner = MockHookRunner::new();
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+
 	let mut seq = Sequence::new();
 	mock_hook_runner
 		.expect_run_pre_commit()
@@ -104,12 +102,12 @@ fn should_perform_actions_in_order(
 	assert!(result.is_ok());
 }
 
-#[rstest]
-fn should_stop_and_report_pre_commit_hook_failure(
-	mut mock_hook_runner: MockHookRunner,
-	mut mock_git_wrapper: MockGitWrapper,
-	mut mock_editmsg_editor: MockEditmsgEditor,
-) {
+#[test]
+fn should_stop_and_report_pre_commit_hook_failure() {
+	let mut mock_hook_runner = MockHookRunner::new();
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+
 	mock_hook_runner
 		.expect_run_pre_commit()
 		.returning(move || Err(ERR_MSG.into()));
@@ -128,12 +126,12 @@ fn should_stop_and_report_pre_commit_hook_failure(
 	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
 }
 
-#[rstest]
-fn should_stop_and_report_write_to_editmsg_error(
-	mut mock_hook_runner: MockHookRunner,
-	mut mock_git_wrapper: MockGitWrapper,
-	mut mock_editmsg_editor: MockEditmsgEditor,
-) {
+#[test]
+fn should_stop_and_report_write_to_editmsg_error() {
+	let mut mock_hook_runner = MockHookRunner::new();
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+
 	mock_hook_runner.expect_run_pre_commit().returning(|| Ok(()));
 	mock_git_wrapper
 		.expect_write_to_editmsg()
@@ -152,12 +150,12 @@ fn should_stop_and_report_write_to_editmsg_error(
 	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
 }
 
-#[rstest]
-fn should_stop_and_report_add_status_to_editmsg_error(
-	mut mock_hook_runner: MockHookRunner,
-	mut mock_git_wrapper: MockGitWrapper,
-	mut mock_editmsg_editor: MockEditmsgEditor,
-) {
+#[test]
+fn should_stop_and_report_add_status_to_editmsg_error() {
+	let mut mock_hook_runner = MockHookRunner::new();
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+
 	mock_hook_runner.expect_run_pre_commit().returning(|| Ok(()));
 	mock_git_wrapper.expect_write_to_editmsg().returning(|_| Ok(()));
 	mock_git_wrapper
@@ -176,12 +174,12 @@ fn should_stop_and_report_add_status_to_editmsg_error(
 	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
 }
 
-#[rstest]
-fn should_stop_and_report_when_editor_cannot_be_opened(
-	mut mock_hook_runner: MockHookRunner,
-	mut mock_git_wrapper: MockGitWrapper,
-	mut mock_editmsg_editor: MockEditmsgEditor,
-) {
+#[test]
+fn should_stop_and_report_when_editor_cannot_be_opened() {
+	let mut mock_hook_runner = MockHookRunner::new();
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+
 	mock_hook_runner.expect_run_pre_commit().returning(|| Ok(()));
 	mock_git_wrapper.expect_write_to_editmsg().returning(|_| Ok(()));
 	mock_git_wrapper.expect_add_status_to_editmsg().returning(|| Ok(()));
@@ -198,12 +196,12 @@ fn should_stop_and_report_when_editor_cannot_be_opened(
 	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
 }
 
-#[rstest]
-fn should_stop_and_report_commit_msg_hook_failure(
-	mut mock_hook_runner: MockHookRunner,
-	mut mock_git_wrapper: MockGitWrapper,
-	mut mock_editmsg_editor: MockEditmsgEditor,
-) {
+#[test]
+fn should_stop_and_report_commit_msg_hook_failure() {
+	let mut mock_hook_runner = MockHookRunner::new();
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+
 	mock_hook_runner.expect_run_pre_commit().returning(|| Ok(()));
 	mock_git_wrapper.expect_write_to_editmsg().returning(|_| Ok(()));
 	mock_git_wrapper.expect_add_status_to_editmsg().returning(|| Ok(()));
@@ -222,12 +220,12 @@ fn should_stop_and_report_commit_msg_hook_failure(
 	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
 }
 
-#[rstest]
-fn should_report_commit_error(
-	mut mock_hook_runner: MockHookRunner,
-	mut mock_git_wrapper: MockGitWrapper,
-	mut mock_editmsg_editor: MockEditmsgEditor,
-) {
+#[test]
+fn should_report_commit_error() {
+	let mut mock_hook_runner = MockHookRunner::new();
+	let mut mock_git_wrapper = MockGitWrapper::new();
+	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+
 	mock_hook_runner.expect_run_pre_commit().returning(|| Ok(()));
 	mock_git_wrapper.expect_write_to_editmsg().returning(|_| Ok(()));
 	mock_git_wrapper.expect_add_status_to_editmsg().returning(|| Ok(()));
