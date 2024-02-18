@@ -2,8 +2,9 @@ use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
 pub enum GitError {
-	Hook(String),
 	Editor,
+	Hook(String),
+	LibGit(String),
 }
 
 impl Error for GitError {}
@@ -12,8 +13,9 @@ impl Display for GitError {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, "GIT failure: ")?;
 		match self {
-			GitError::Hook(hook) => write!(f, "Hook: {hook}"),
 			GitError::Editor => write!(f, "Editor"),
+			GitError::Hook(hook) => write!(f, "Hook: {hook}"),
+			GitError::LibGit(err) => write!(f, "{err}"),
 		}
 	}
 }

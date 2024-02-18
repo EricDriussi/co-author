@@ -1,7 +1,11 @@
-use super::commit_message::{CommitMessage, GitWrapper};
+use super::{
+	commit_message::{CommitMessage, GitWrapper},
+	git_err::GitError,
+};
 use crate::common::conf;
+use crate::Result;
 use git2::{Repository, Signature};
-use std::{error::Error, fs::OpenOptions, io::Write, path::PathBuf};
+use std::{fs::OpenOptions, io::Write, path::PathBuf};
 
 pub mod editmsg_handler;
 
@@ -10,24 +14,25 @@ pub struct LibGitWrapper {
 }
 
 impl GitWrapper for LibGitWrapper {
-	fn commit(&self) -> Result<(), Box<dyn Error>> {
+	fn commit(&self) -> Result<()> {
 		let signature = self
 			.repo
 			.signature()
-			.map_err(|_| "User name and/or email not set".to_string())?;
+			.map_err(|_| GitError::LibGit("User name and/or email not set".to_string()))?;
 
-		let commit_message = editmsg_handler::read_editmsg().ok_or("Commit message cannot be empty")?;
+		let commit_message =
+			editmsg_handler::read_editmsg().ok_or(GitError::LibGit("Commit message cannot be empty".to_string()))?;
 
 		self.try_to_commit(&signature, &commit_message)
-			.map_err(|_| "Something went wrong!".to_string())?;
+			.map_err(|_| GitError::LibGit("Something went wrong!".to_string()))?;
 		Ok(())
 	}
 
-	fn write_to_editmsg(&self, commit_message: &CommitMessage) -> Result<(), Box<dyn Error>> {
+	fn write_to_editmsg(&self, commit_message: &CommitMessage) -> Result<()> {
 		editmsg_handler::write_commit_to_file(commit_message)
 	}
 
-	fn add_status_to_editmsg(&self) -> Result<(), Box<dyn Error>> {
+	fn add_status_to_editmsg(&self) -> Result<()> {
 		let status = editmsg_handler::get_status_for_commit_file(&self.repo);
 
 		let mut file_to_append = OpenOptions::new().create(true).append(true).open(conf::editmsg())?;
@@ -35,7 +40,7 @@ impl GitWrapper for LibGitWrapper {
 		Ok(())
 	}
 
-	fn prev_commit_msg(&self) -> Result<String, Box<dyn Error>> {
+	fn prev_commit_msg(&self) -> Result<String> {
 		let head_ref = self.repo.head()?;
 		let last_commit = head_ref.peel_to_commit()?;
 
@@ -47,34 +52,29 @@ impl GitWrapper for LibGitWrapper {
 }
 
 impl LibGitWrapper {
-	pub fn from(path: &PathBuf) -> Result<Self, String> {
-		if let Ok(repo) = Repository::open(path) {
-			return if Self::no_staged_changes(&repo) {
-				Err("No staged changes".to_string())
-			} else {
-				Ok(Self { repo })
-			};
+	pub fn from(path: &PathBuf) -> Result<Self> {
+		let repo = Repository::open(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
+		if Self::no_staged_changes(&repo) {
+			Err(Box::new(GitError::LibGit("No staged changes".to_string())))
+		} else {
+			Ok(Self { repo })
 		}
-		Err("Could not open the repo".to_string())
 	}
 
 	fn no_staged_changes(repo: &Repository) -> bool {
-		match repo.head() {
-			Err(_) => false,
-			Ok(head) => match head.peel_to_tree() {
-				Err(_) => false,
-				Ok(tree) => match repo.index() {
-					Err(_) => false,
-					Ok(index) => match repo.diff_tree_to_index(Some(&tree), Some(&index), None) {
-						Err(_) => false,
-						Ok(diff) => diff.deltas().count() == 0,
-					},
-				},
-			},
+		if let Ok(head) = repo.head() {
+			if let Ok(tree) = head.peel_to_tree() {
+				if let Ok(index) = repo.index() {
+					if let Ok(diff) = repo.diff_tree_to_index(Some(&tree), Some(&index), None) {
+						return diff.deltas().count() == 0;
+					}
+				}
+			}
 		}
+		false
 	}
 
-	fn try_to_commit(&self, signature: &Signature, commit_message: &str) -> Result<(), Box<dyn Error>> {
+	fn try_to_commit(&self, signature: &Signature, commit_message: &str) -> Result<()> {
 		let oid = self.repo.index()?.write_tree()?;
 		let tree = self.repo.find_tree(oid)?;
 		let parent_commit = self.repo.head()?.peel_to_commit()?;
