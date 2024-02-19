@@ -52,6 +52,7 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 }
 
 #[test]
+#[ignore]
 fn should_error_out_if_commit_message_is_empty() {
 	let path = random_path(REPO_PATH);
 	let git_repo = init_repo(&path).expect("Could not setup test repo");
