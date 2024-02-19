@@ -160,10 +160,6 @@ impl Readable for DummyAuthorsFile {
 		self.content.clone()
 	}
 
-	fn all_lines(&self) -> Vec<String> {
-		self.content.clone()
-	}
-
 	fn path(&self) -> &str {
 		"dummy/path"
 	}

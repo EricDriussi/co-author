@@ -195,10 +195,6 @@ impl Readable for DummyReadableFile {
 		self.content.clone()
 	}
 
-	fn all_lines(&self) -> Vec<String> {
-		self.content.clone()
-	}
-
 	fn path(&self) -> &str {
 		self.path.as_str()
 	}

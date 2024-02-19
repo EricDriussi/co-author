@@ -6,7 +6,6 @@ type Lines = Vec<String>;
 
 pub trait Readable {
 	fn non_empty_lines(&self) -> Lines;
-	fn all_lines(&self) -> Lines;
 	fn path(&self) -> &str;
 }
 
@@ -41,10 +40,6 @@ impl File {
 impl Readable for File {
 	fn non_empty_lines(&self) -> Lines {
 		self.valid_lines().filter(|line| !line.trim().is_empty()).collect()
-	}
-
-	fn all_lines(&self) -> Lines {
-		self.valid_lines().collect()
 	}
 
 	fn path(&self) -> &str {

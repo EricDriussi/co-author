@@ -24,15 +24,6 @@ fn should_present_non_empty_lines() {
 }
 
 #[test]
-fn should_present_all_lines() {
-	let file = File::from("src/common/fs/test/test_file.txt".to_string()).expect("Could not open test file");
-
-	let non_empyt_lines = file.all_lines();
-
-	assert_eq!(non_empyt_lines.len(), 5);
-}
-
-#[test]
 fn should_keep_track_of_path() {
 	let path = "src/common/fs/test/test_file.txt".to_string();
 	let file = File::from(path.clone()).expect("Could not open test file");
