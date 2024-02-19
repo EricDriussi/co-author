@@ -1,5 +1,6 @@
 use git2::{Config, Repository, RepositoryInitOptions, Signature};
 use rand::Rng;
+use serial_test::serial;
 use std::{
 	fs::{self, File},
 	path::{Path, PathBuf},
@@ -16,8 +17,10 @@ use crate::{
 const REPO_PATH: &str = "/var/tmp/coa";
 
 #[test]
+#[serial]
 fn should_determine_if_is_valid_git_repo() {
-	let path = random_path(REPO_PATH);
+	// let path = random_path(REPO_PATH);
+	let path = REPO_PATH.to_string();
 	let git_repo = init_repo(&path).expect("Could not setup test repo");
 
 	let repo_with_no_staged_changes = LibGitWrapper::from(&PathBuf::from(&path));
@@ -32,10 +35,11 @@ fn should_determine_if_is_valid_git_repo() {
 }
 
 #[test]
-#[ignore]
+#[serial]
 fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
 	set_test_env();
-	let path = random_path(REPO_PATH);
+	// let path = random_path(REPO_PATH);
+	let path = REPO_PATH.to_string();
 	let git_repo = init_repo(&path).expect("Could not setup test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
@@ -52,9 +56,10 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 }
 
 #[test]
-#[ignore]
+#[serial]
 fn should_error_out_if_commit_message_is_empty() {
-	let path = random_path(REPO_PATH);
+	// let path = random_path(REPO_PATH);
+	let path = REPO_PATH.to_string();
 	let git_repo = init_repo(&path).expect("Could not setup test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
@@ -71,10 +76,11 @@ fn should_error_out_if_commit_message_is_empty() {
 }
 
 #[test]
-#[ignore]
+#[serial]
 fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 	set_test_env();
-	let path = random_path(REPO_PATH);
+	// let path = random_path(REPO_PATH);
+	let path = REPO_PATH.to_string();
 	let git_repo = init_repo(&path)?;
 	create_and_add_file_to_git_tree(&git_repo, "foo")?;
 
