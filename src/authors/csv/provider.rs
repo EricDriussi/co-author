@@ -3,12 +3,12 @@ use super::mapper;
 
 use crate::authors::authors_err::AuthorsError;
 use crate::common::conf;
-use crate::common::fs::file::Readable;
+use crate::common::fs::file::File;
 use crate::common::fs::wrapper::FileLoader;
 use crate::Result;
 
 pub struct CSVReader {
-	src: Box<dyn Readable>,
+	src: Box<dyn File>,
 }
 
 impl CSVReader {

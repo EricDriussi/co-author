@@ -4,15 +4,12 @@ use mockall::predicate::{always, eq};
 use serial_test::serial;
 
 use crate::{
-	common::{
-		conf,
-		fs::{file::Readable, wrapper::MockFileLoader},
-		runner::MockRunner,
-	},
+	common::{conf, fs::wrapper::MockFileLoader, runner::MockRunner},
 	git::{
 		conf_provider::MockConfProvider,
 		editor::{EditmsgEditor, Editor},
 	},
+	test_utils::dummy_file::DummyFile,
 };
 
 #[test]
@@ -27,7 +24,7 @@ fn should_get_editmsg_from_conf() {
 	mock_file_loader
 		.expect_load_creating()
 		.with(eq(conf::editmsg().clone()))
-		.returning(move |_| Some(Box::new(DummyReadableFile::empty())));
+		.returning(move |_| Some(Box::new(DummyFile::empty())));
 	let editor = Editor::new(mock_runner, mock_file_loader, mock_conf_provider);
 
 	let result = editor.open();
@@ -156,7 +153,7 @@ fn successful_mock_file_loader() -> MockFileLoader {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_creating()
-		.returning(move |_| Some(Box::new(DummyReadableFile::empty())));
+		.returning(move |_| Some(Box::new(DummyFile::empty())));
 	mock_file_loader
 }
 
@@ -173,29 +170,4 @@ fn mock_conf_provider_with_no_editor() -> MockConfProvider {
 	let mut mock_conf_provider = MockConfProvider::new();
 	mock_conf_provider.expect_get_editor().returning(|| None);
 	mock_conf_provider
-}
-
-// TODO: dup code, extract
-pub struct DummyReadableFile {
-	content: Vec<String>,
-	path: String,
-}
-
-impl DummyReadableFile {
-	pub fn empty() -> Self {
-		Self {
-			content: (vec![]),
-			path: String::new(),
-		}
-	}
-}
-
-impl Readable for DummyReadableFile {
-	fn non_empty_lines(&self) -> Vec<String> {
-		self.content.clone()
-	}
-
-	fn path(&self) -> &str {
-		self.path.as_str()
-	}
 }

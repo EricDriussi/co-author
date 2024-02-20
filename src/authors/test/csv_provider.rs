@@ -1,6 +1,6 @@
 use crate::authors::csv::provider::CSVReader;
 use crate::common::conf;
-use crate::common::fs::file::Readable;
+use crate::test_utils::dummy_file::DummyFile;
 use crate::{authors::author::AuthorsProvider, common::fs::wrapper::MockFileLoader};
 
 use mockall::predicate::{self, eq};
@@ -14,7 +14,7 @@ fn should_build_using_fallback() {
 		.expect_load_file_with_fallback()
 		.with(eq(conf::authors_file()))
 		.times(1)
-		.returning(|_| Some(Box::new(DummyAuthorsFile::empty())));
+		.returning(|_| Some(Box::new(DummyFile::empty())));
 
 	assert!(CSVReader::from_cwd_fallback_home(&mock_file_loader).is_ok());
 }
@@ -40,7 +40,7 @@ fn should_build_from_given_file() {
 		.expect_load_file()
 		.with(eq(IRRELEVANT_FILE_PATH.to_string()))
 		.times(1)
-		.returning(|_| Some(Box::new(DummyAuthorsFile::empty())));
+		.returning(|_| Some(Box::new(DummyFile::empty())));
 
 	assert!(CSVReader::from(&mock_file_loader, IRRELEVANT_FILE_PATH).is_ok());
 }
@@ -67,7 +67,7 @@ fn should_provide_all_authors_in_file() {
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {
-			Some(Box::new(DummyAuthorsFile::with(vec![
+			Some(Box::new(DummyFile::with(vec![
 				"a,Name Surname,someone@users.noreply.github.com",
 				"b,username,something@gmail.com",
 			])))
@@ -87,7 +87,7 @@ fn should_provide_only_author_matching_an_alias() {
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {
-			Some(Box::new(DummyAuthorsFile::with(vec![
+			Some(Box::new(DummyFile::with(vec![
 				"a,Name Surname,someone@users.noreply.github.com",
 				"b,username,something@gmail.com",
 			])))
@@ -107,7 +107,7 @@ fn should_provide_all_authors_matching_an_alias() {
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {
-			Some(Box::new(DummyAuthorsFile::with(vec![
+			Some(Box::new(DummyFile::with(vec![
 				"a,Name Surname,someone@users.noreply.github.com",
 				"b,username,something@gmail.com",
 				"b,username2,something2@gmail.com",
@@ -128,7 +128,7 @@ fn should_provide_no_author_when_alias_doesnt_match() {
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {
-			Some(Box::new(DummyAuthorsFile::with(vec![
+			Some(Box::new(DummyFile::with(vec![
 				"a,Name Surname,someone@users.noreply.github.com",
 			])))
 		});
@@ -137,30 +137,4 @@ fn should_provide_no_author_when_alias_doesnt_match() {
 	let retrieved_authors = provider.find(vec!["z".to_string()]);
 
 	assert_eq!(retrieved_authors.len(), 0);
-}
-
-pub struct DummyAuthorsFile {
-	content: Vec<String>,
-}
-
-impl DummyAuthorsFile {
-	pub fn empty() -> Self {
-		Self { content: (vec![]) }
-	}
-
-	pub fn with(content: Vec<&str>) -> Self {
-		Self {
-			content: content.into_iter().map(String::from).collect(),
-		}
-	}
-}
-
-impl Readable for DummyAuthorsFile {
-	fn non_empty_lines(&self) -> Vec<String> {
-		self.content.clone()
-	}
-
-	fn path(&self) -> &str {
-		"dummy/path"
-	}
 }

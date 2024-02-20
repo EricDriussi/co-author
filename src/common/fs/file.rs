@@ -6,23 +6,32 @@ type Lines = Vec<String>;
 
 pub trait Readable {
 	fn non_empty_lines(&self) -> Lines;
+}
+
+pub trait Writable {
+	fn write(&self) -> &str;
+}
+
+pub trait Locatable {
 	fn path(&self) -> &str;
 }
 
-pub struct File {
+pub trait File: Readable + Writable + Locatable {}
+
+pub struct SimpleFile {
 	file: std::fs::File,
 	path: String,
 }
 
-pub type OptionalReadable = Option<Box<dyn Readable>>;
+pub type OptionalFile = Option<Box<dyn File>>;
 
-impl File {
-	pub fn from(path: String) -> OptionalReadable {
+impl SimpleFile {
+	pub fn from(path: String) -> OptionalFile {
 		let file = std::fs::File::open(path.clone());
 		Some(Box::new(Self { file: file.ok()?, path }))
 	}
 
-	pub fn open_or_create(path: String) -> OptionalReadable {
+	pub fn open_or_create(path: String) -> OptionalFile {
 		let file = OpenOptions::new()
 			.read(true)
 			.write(true)
@@ -37,11 +46,21 @@ impl File {
 	}
 }
 
-impl Readable for File {
+impl File for SimpleFile {}
+
+impl Readable for SimpleFile {
 	fn non_empty_lines(&self) -> Lines {
 		self.valid_lines().filter(|line| !line.trim().is_empty()).collect()
 	}
+}
 
+impl Writable for SimpleFile {
+	fn write(&self) -> &str {
+		"TODO"
+	}
+}
+
+impl Locatable for SimpleFile {
 	fn path(&self) -> &str {
 		self.path.as_str()
 	}
