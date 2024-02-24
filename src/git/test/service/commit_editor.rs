@@ -22,7 +22,7 @@ fn should_succeed() {
 	mock_hook_runner.expect_run_commit_msg().returning(|| Ok(()));
 	mock_git_wrapper.expect_commit().returning(|| Ok(()));
 
-	let result = do_commit(&GitService::new(
+	let result = do_commit(&mut GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		mock_editmsg_editor,
@@ -48,7 +48,7 @@ fn should_write_commit_msg_and_authors() {
 	mock_editmsg_editor.expect_open().returning(|| Ok(()));
 	mock_hook_runner.expect_run_commit_msg().returning(|| Ok(()));
 	mock_git_wrapper.expect_commit().returning(|| Ok(()));
-	let service = GitService::new(mock_git_wrapper, mock_hook_runner, mock_editmsg_editor);
+	let mut service = GitService::new(mock_git_wrapper, mock_hook_runner, mock_editmsg_editor);
 
 	let result = service.commit(CommitMode::WithoutEditor { message, authors });
 
@@ -93,7 +93,7 @@ fn should_perform_actions_in_order() {
 		.returning(|| Ok(()))
 		.in_sequence(&mut seq);
 
-	let result = do_commit(&GitService::new(
+	let result = do_commit(&mut GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		mock_editmsg_editor,
@@ -117,7 +117,7 @@ fn should_stop_and_report_pre_commit_hook_failure() {
 	mock_hook_runner.expect_run_commit_msg().times(0);
 	mock_git_wrapper.expect_commit().times(0);
 
-	let result = do_commit(&GitService::new(
+	let result = do_commit(&mut GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		mock_editmsg_editor,
@@ -141,7 +141,7 @@ fn should_stop_and_report_write_to_editmsg_error() {
 	mock_hook_runner.expect_run_commit_msg().times(0);
 	mock_git_wrapper.expect_commit().times(0);
 
-	let result = do_commit(&GitService::new(
+	let result = do_commit(&mut GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		mock_editmsg_editor,
@@ -165,7 +165,7 @@ fn should_stop_and_report_add_status_to_editmsg_error() {
 	mock_hook_runner.expect_run_commit_msg().times(0);
 	mock_git_wrapper.expect_commit().times(0);
 
-	let result = do_commit(&GitService::new(
+	let result = do_commit(&mut GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		mock_editmsg_editor,
@@ -187,7 +187,7 @@ fn should_stop_and_report_when_editor_cannot_be_opened() {
 	mock_hook_runner.expect_run_commit_msg().times(0);
 	mock_git_wrapper.expect_commit().times(0);
 
-	let result = do_commit(&GitService::new(
+	let result = do_commit(&mut GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		mock_editmsg_editor,
@@ -211,7 +211,7 @@ fn should_stop_and_report_commit_msg_hook_failure() {
 		.returning(move || Err(ERR_MSG.into()));
 	mock_git_wrapper.expect_commit().times(0);
 
-	let result = do_commit(&GitService::new(
+	let result = do_commit(&mut GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		mock_editmsg_editor,
@@ -233,7 +233,7 @@ fn should_report_commit_error() {
 	mock_hook_runner.expect_run_commit_msg().returning(|| Ok(()));
 	mock_git_wrapper.expect_commit().returning(move || Err(ERR_MSG.into()));
 
-	let result = do_commit(&GitService::new(
+	let result = do_commit(&mut GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		mock_editmsg_editor,
@@ -242,7 +242,7 @@ fn should_report_commit_error() {
 	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
 }
 
-fn do_commit<W: GitWrapper, H: HookRunner, E: EditmsgEditor>(service: &GitService<W, H, E>) -> Result<()> {
+fn do_commit<W: GitWrapper, H: HookRunner, E: EditmsgEditor>(service: &mut GitService<W, H, E>) -> Result<()> {
 	service.commit(CommitMode::WithEditor {
 		message: Some("a message"),
 		authors: vec!["an author".to_string()],

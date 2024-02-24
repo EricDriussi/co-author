@@ -1,4 +1,5 @@
 use crate::common::fs::file::{File, Locatable, Readable, Writable};
+use crate::Result;
 
 pub struct DummyFile {
 	content: Vec<String>,
@@ -29,8 +30,8 @@ impl Readable for DummyFile {
 }
 
 impl Writable for DummyFile {
-	fn write(&self) -> &str {
-		"TODO"
+	fn write(&mut self, _data: String) -> Result<()> {
+		Ok(())
 	}
 }
 

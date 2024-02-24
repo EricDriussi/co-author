@@ -2,15 +2,22 @@ use super::{
 	commit_message::{CommitMessage, GitWrapper},
 	git_err::GitError,
 };
-use crate::common::conf;
+use crate::common::{
+	conf,
+	fs::{
+		file::File,
+		wrapper::{FileLoader, FsWrapper},
+	},
+};
 use crate::Result;
 use git2::{Repository, Signature};
-use std::{fs::OpenOptions, io::Write, path::PathBuf};
+use std::path::PathBuf;
 
 pub mod editmsg_handler;
 
 pub struct LibGitWrapper {
 	repo: Repository,
+	editmsg: Box<dyn File>,
 }
 
 impl GitWrapper for LibGitWrapper {
@@ -20,24 +27,37 @@ impl GitWrapper for LibGitWrapper {
 			.signature()
 			.map_err(|_| GitError::LibGit("User name and/or email not set".to_string()))?;
 
-		let commit_message =
-			editmsg_handler::read_editmsg().ok_or(GitError::LibGit("Commit message cannot be empty".to_string()))?;
+		let commit_message = self
+			.editmsg
+			.non_empty_lines()
+			.into_iter()
+			.filter(|line| !line.starts_with('#'))
+			.collect::<Vec<String>>()
+			.join("\n");
+
+		let commit_only_has_co_author_lines = commit_message
+			.split('\n')
+			.filter(|line| !line.starts_with("Co-Authored-by"))
+			.collect::<Vec<&str>>()
+			.join("\n")
+			.is_empty();
+
+		if commit_only_has_co_author_lines {
+			return Err(Box::new(GitError::LibGit("Commit message cannot be empty".to_string())));
+		}
 
 		self.try_to_commit(&signature, &commit_message)
 			.map_err(|_| GitError::LibGit("Something went wrong!".to_string()))?;
 		Ok(())
 	}
 
-	fn write_to_editmsg(&self, commit_message: &CommitMessage) -> Result<()> {
-		editmsg_handler::write_commit_to_file(commit_message)
+	fn write_to_editmsg(&mut self, commit_message: &CommitMessage) -> Result<()> {
+		self.editmsg.write(commit_message.formatted_body())
 	}
 
-	fn add_status_to_editmsg(&self) -> Result<()> {
+	fn add_status_to_editmsg(&mut self) -> Result<()> {
 		let status = editmsg_handler::get_status_for_commit_file(&self.repo);
-
-		let mut file_to_append = OpenOptions::new().create(true).append(true).open(conf::editmsg())?;
-		file_to_append.write_all(status.as_bytes())?;
-		Ok(())
+		self.editmsg.write(status)
 	}
 
 	fn prev_commit_msg(&self) -> Result<String> {
@@ -52,12 +72,13 @@ impl GitWrapper for LibGitWrapper {
 }
 
 impl LibGitWrapper {
-	pub fn from(path: &PathBuf) -> Result<Self> {
+	pub fn from(path: &PathBuf, file_loader: &FsWrapper) -> Result<Self> {
 		let repo = Repository::open(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
+		let editmsg = file_loader.load_creating(conf::editmsg()).ok_or(GitError::Editor)?;
 		if Self::no_staged_changes(&repo) {
 			Err(Box::new(GitError::LibGit("No staged changes".to_string())))
 		} else {
-			Ok(Self { repo })
+			Ok(Self { repo, editmsg })
 		}
 	}
 

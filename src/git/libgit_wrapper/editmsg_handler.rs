@@ -1,51 +1,6 @@
-use crate::{common::conf, git::commit_message::CommitMessage};
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
-use std::{
-	error::Error,
-	io::{BufRead, BufReader},
-};
 
 const ERR_MSG: &str = "GIT ERROR";
-
-pub fn write_commit_to_file(commit_message: &CommitMessage) -> Result<(), Box<dyn Error>> {
-	std::fs::write(conf::editmsg(), commit_message.formatted_body())?;
-	Ok(())
-}
-
-pub fn read_editmsg() -> Option<String> {
-	read(conf::editmsg())
-}
-
-fn read(editmsg_path: String) -> Option<String> {
-	let file = std::fs::File::open(editmsg_path).expect("Something went wrong");
-	let reader = BufReader::new(file);
-	let mut commit_message = String::new();
-
-	for line in reader.lines().flatten() {
-		if !line.starts_with('#') {
-			commit_message.push_str(line.trim());
-			commit_message.push('\n');
-		}
-	}
-	let trimmed_body = commit_message.trim().to_string();
-
-	if has_message(&trimmed_body) {
-		Some(trimmed_body)
-	} else {
-		None
-	}
-}
-
-fn has_message(commit_message: &str) -> bool {
-	let lines_without_co_author = commit_message
-		.lines()
-		.filter(|line| !line.starts_with("Co-Authored-by"))
-		.collect::<Vec<&str>>()
-		.join("\n");
-
-	let contains_lines_without_co_author = !lines_without_co_author.trim().is_empty();
-	contains_lines_without_co_author
-}
 
 pub fn get_status_for_commit_file(repo: &Repository) -> String {
 	let mut options = StatusOptions::new();
@@ -129,41 +84,4 @@ fn untracked_files(file_statuses: &Statuses) -> String {
 #[allow(clippy::needless_pass_by_value)]
 fn format_path(file: StatusEntry) -> Option<String> {
 	file.path().map(|path| format!("#\t{path}\n"))
-}
-
-#[cfg(test)]
-mod test {
-
-	use crate::test_utils::file_cleanup::AfterAssert;
-
-	use super::*;
-
-	#[test]
-	fn test_removes_commented_lines_when_reading_commit_message() {
-		let commit_editmsg_path = ".git/COMMIT_EDITMSG_TEST_COMMENTS";
-		std::fs::write(
-			commit_editmsg_path,
-			"Test commit message.\n# This is a commented line.\n#And another one."
-				.to_string()
-				.clone(),
-		)
-		.expect("Could not create test EDITMSG");
-		let _after = AfterAssert::cleanup_file(commit_editmsg_path);
-
-		let result = read(commit_editmsg_path.to_string());
-
-		assert_eq!(result, Some("Test commit message.".to_string()));
-	}
-
-	#[test]
-	fn test_trims_lines_when_reading_commit_message() {
-		let test_commit_message = "  Test commit message.\nThis is a second line. \n".to_string();
-		let commit_editmsg_path = ".git/COMMIT_EDITMSG_TEST_TRIM";
-		std::fs::write(commit_editmsg_path, test_commit_message.clone()).expect("Could not create test EDITMSG");
-		let _after = AfterAssert::cleanup_file(commit_editmsg_path);
-
-		let result = read(commit_editmsg_path.to_string());
-
-		assert_eq!(result, Some(test_commit_message.trim().to_string()));
-	}
 }

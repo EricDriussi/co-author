@@ -36,7 +36,7 @@ impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
 		self.git_wrapper.prev_commit_msg().unwrap_or_default()
 	}
 
-	pub fn commit(&self, commit_mode: CommitMode) -> Result<()> {
+	pub fn commit(&mut self, commit_mode: CommitMode) -> Result<()> {
 		match commit_mode {
 			CommitMode::WithoutEditor { message, authors } => {
 				self.pre(&CommitMessage::new(message, authors))?;
@@ -50,12 +50,12 @@ impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
 		}
 	}
 
-	fn pre(&self, body: &CommitMessage) -> Result<()> {
+	fn pre(&mut self, body: &CommitMessage) -> Result<()> {
 		self.hook_runner.run_pre_commit()?;
 		self.git_wrapper.write_to_editmsg(body)
 	}
 
-	fn editor(&self) -> Result<()> {
+	fn editor(&mut self) -> Result<()> {
 		self.git_wrapper.add_status_to_editmsg()?;
 		self.editmsg_editor.open()
 	}

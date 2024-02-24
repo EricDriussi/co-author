@@ -7,6 +7,7 @@ use std::{
 };
 
 use crate::{
+	common::fs::wrapper::FsWrapper,
 	git::{
 		commit_message::{CommitMessage, GitWrapper},
 		libgit_wrapper::LibGitWrapper,
@@ -23,14 +24,14 @@ fn should_determine_if_is_valid_git_repo() {
 	let path = REPO_PATH.to_string();
 	let git_repo = init_repo(&path).expect("Could not setup test repo");
 
-	let repo_with_no_staged_changes = LibGitWrapper::from(&PathBuf::from(&path));
+	let repo_with_no_staged_changes = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new());
 	assert!(repo_with_no_staged_changes.is_err());
 
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
-	let valid_repo = LibGitWrapper::from(&PathBuf::from(&path));
+	let valid_repo = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new());
 	assert!(valid_repo.is_ok());
 
-	let invalid_repo = LibGitWrapper::from(&PathBuf::from("/path"));
+	let invalid_repo = LibGitWrapper::from(&PathBuf::from("/path"), &FsWrapper::new());
 	assert!(invalid_repo.is_err());
 }
 
@@ -43,7 +44,7 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 	let git_repo = init_repo(&path).expect("Could not setup test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
-	let repo = LibGitWrapper::from(&PathBuf::from(&path)).expect("Could not setup test repo");
+	let repo = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new()).expect("Could not setup test repo");
 	let authors = vec!["random author".to_string()];
 	let commit_message = CommitMessage::new("irrelevant message", authors);
 
@@ -63,7 +64,7 @@ fn should_error_out_if_commit_message_is_empty() {
 	let git_repo = init_repo(&path).expect("Could not setup test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
-	let repo = LibGitWrapper::from(&PathBuf::from(&path)).expect("Could not setup test repo");
+	let repo = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new()).expect("Could not setup test repo");
 	let no_authors = vec![String::new()];
 	let commit_message = CommitMessage::new("", no_authors);
 
@@ -99,7 +100,7 @@ fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 
 	add_commit(&git_repo, &tree, "IRRELEVANT")?;
 
-	let repo = LibGitWrapper::from(&PathBuf::from(&path))?;
+	let mut repo = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new())?;
 	repo.add_status_to_editmsg()?;
 
 	let commit_editmsg_path = "/var/tmp/coa/.git/COMMIT_EDITMSG";
@@ -136,7 +137,7 @@ fn should_only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dy
 	let mut index = git_repo.index()?;
 	let id = index.write_tree()?;
 	let tree = git_repo.find_tree(id)?;
-	let repo = LibGitWrapper::from(&PathBuf::from(&path))?;
+	let repo = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new())?;
 
 	let first_line = "FIRST LINE".to_string();
 	let msg = format!("{first_line}\nSECOND_LINE");

@@ -1,6 +1,6 @@
-use std::fs::OpenOptions;
 use std::io::{BufRead, BufReader, Error};
 use std::iter::MapWhile;
+use std::{fs::OpenOptions, io::Write};
 
 type Lines = Vec<String>;
 
@@ -9,7 +9,7 @@ pub trait Readable {
 }
 
 pub trait Writable {
-	fn write(&self) -> &str;
+	fn write(&mut self, data: String) -> crate::Result<()>;
 }
 
 pub trait Locatable {
@@ -34,7 +34,7 @@ impl SimpleFile {
 	pub fn open_or_create(path: String) -> OptionalFile {
 		let file = OpenOptions::new()
 			.read(true)
-			.write(true)
+			.append(true)
 			.create(true)
 			.open(path.clone())
 			.ok()?;
@@ -55,8 +55,9 @@ impl Readable for SimpleFile {
 }
 
 impl Writable for SimpleFile {
-	fn write(&self) -> &str {
-		"TODO"
+	fn write(&mut self, data: String) -> crate::Result<()> {
+		self.file.write_all(data.as_bytes())?;
+		Ok(())
 	}
 }
 
