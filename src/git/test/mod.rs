@@ -6,4 +6,5 @@ mod service {
 	mod commit_editor;
 	mod commit_no_editor;
 	mod last_commit_msg;
+	mod util;
 }

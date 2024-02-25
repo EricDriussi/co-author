@@ -1,5 +1,9 @@
+use crate::common::conf;
+use crate::common::fs::file::File;
+use crate::common::fs::wrapper::FileLoader;
 use crate::Result;
 
+use super::git_err::GitError;
 use super::hook::HookRunner;
 use super::{
 	commit_message::{CommitMessage, GitWrapper},
@@ -9,6 +13,7 @@ use super::{
 pub struct GitService<W: GitWrapper, H: HookRunner, E: EditmsgEditor> {
 	git_wrapper: W,
 	hook_runner: H,
+	editmsg: Box<dyn File>,
 	editmsg_editor: E,
 }
 
@@ -24,10 +29,15 @@ pub enum CommitMode<'a> {
 }
 
 impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
-	pub fn new(git_wrapper: W, runner: H, editmsg_editor: E) -> Self {
+	pub fn new(git_wrapper: W, runner: H, file_loader: &dyn FileLoader, editmsg_editor: E) -> Self {
+		let editmsg = file_loader
+			.load_creating(conf::editmsg())
+			.ok_or(GitError::Editor)
+			.expect("err"); // TODO: wrong err type, rm expect, test
 		Self {
 			git_wrapper,
 			hook_runner: runner,
+			editmsg,
 			editmsg_editor,
 		}
 	}
@@ -52,11 +62,16 @@ impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
 
 	fn pre(&mut self, body: &CommitMessage) -> Result<()> {
 		self.hook_runner.run_pre_commit()?;
-		self.git_wrapper.write_to_editmsg(body)
+		// TODO: this is not tested
+		self.editmsg.write(body.formatted_body())
+		//
 	}
 
 	fn editor(&mut self) -> Result<()> {
-		self.git_wrapper.add_status_to_editmsg()?;
+		// TODO: this is not tested
+		let status = self.git_wrapper.formatted_status()?;
+		self.editmsg.write(status)?;
+		//
 		self.editmsg_editor.open()
 	}
 

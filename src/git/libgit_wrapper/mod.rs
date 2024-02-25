@@ -1,7 +1,4 @@
-use super::{
-	commit_message::{CommitMessage, GitWrapper},
-	git_err::GitError,
-};
+use super::{commit_message::GitWrapper, git_err::GitError};
 use crate::common::{
 	conf,
 	fs::{
@@ -51,13 +48,8 @@ impl GitWrapper for LibGitWrapper {
 		Ok(())
 	}
 
-	fn write_to_editmsg(&mut self, commit_message: &CommitMessage) -> Result<()> {
-		self.editmsg.write(commit_message.formatted_body())
-	}
-
-	fn add_status_to_editmsg(&mut self) -> Result<()> {
-		let status = editmsg_handler::get_status_for_commit_file(&self.repo);
-		self.editmsg.write(status)
+	fn formatted_status(&self) -> Result<String> {
+		Ok(editmsg_handler::get_status_for_commit_file(&self.repo))
 	}
 
 	fn prev_commit_msg(&self) -> Result<String> {

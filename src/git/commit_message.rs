@@ -32,7 +32,6 @@ impl Display for CommitMessage {
 #[cfg_attr(test, automock)]
 pub trait GitWrapper {
 	fn commit(&self) -> Result<(), Box<dyn Error>>;
-	fn add_status_to_editmsg(&mut self) -> Result<(), Box<dyn Error>>;
-	fn write_to_editmsg(&mut self, commit_message: &CommitMessage) -> Result<(), Box<dyn Error>>;
+	fn formatted_status(&self) -> Result<String, Box<dyn Error>>;
 	fn prev_commit_msg(&self) -> Result<String, Box<dyn Error>>;
 }

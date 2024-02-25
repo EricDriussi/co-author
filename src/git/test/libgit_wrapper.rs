@@ -100,11 +100,9 @@ fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 
 	add_commit(&git_repo, &tree, "IRRELEVANT")?;
 
-	let mut repo = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new())?;
-	repo.add_status_to_editmsg()?;
+	let repo = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new())?;
+	let contents = repo.formatted_status();
 
-	let commit_editmsg_path = "/var/tmp/coa/.git/COMMIT_EDITMSG";
-	let contents = std::fs::read_to_string(Path::new(commit_editmsg_path));
 	assert_eq!(
 		contents?,
 		"

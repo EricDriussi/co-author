@@ -13,6 +13,7 @@ impl DummyFile {
 			path: String::new(),
 		}
 	}
+
 	pub fn with(content: Vec<&str>) -> Self {
 		Self {
 			content: content.into_iter().map(String::from).collect(),

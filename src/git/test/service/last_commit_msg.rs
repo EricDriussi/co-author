@@ -1,4 +1,7 @@
-use crate::git::{commit_message::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner, service::GitService};
+use crate::git::{
+	commit_message::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner, service::GitService,
+	test::service::util::successful_file_loader,
+};
 
 #[test]
 fn should_return_message_when_present() {
@@ -7,7 +10,12 @@ fn should_return_message_when_present() {
 	mock_git_wrapper
 		.expect_prev_commit_msg()
 		.returning(|| Ok(msg.to_string()));
-	let service = GitService::new(mock_git_wrapper, MockHookRunner::new(), MockEditmsgEditor::new());
+	let service = GitService::new(
+		mock_git_wrapper,
+		MockHookRunner::new(),
+		&successful_file_loader(),
+		MockEditmsgEditor::new(),
+	);
 
 	let result = service.last_commit_message();
 
@@ -20,7 +28,12 @@ fn should_return_empty_string_when_message_is_not_present() {
 	mock_git_wrapper
 		.expect_prev_commit_msg()
 		.returning(|| Err("ERR".to_string().into()));
-	let service = GitService::new(mock_git_wrapper, MockHookRunner::new(), MockEditmsgEditor::new());
+	let service = GitService::new(
+		mock_git_wrapper,
+		MockHookRunner::new(),
+		&successful_file_loader(),
+		MockEditmsgEditor::new(),
+	);
 
 	let result = service.last_commit_message();
 

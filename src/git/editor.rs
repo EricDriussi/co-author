@@ -17,11 +17,12 @@ pub trait EditmsgEditor {
 
 pub struct Editor<R: Runner, F: FileLoader, C: ConfProvider> {
 	runner: R,
-	file_loader: F,
+	file_loader: F, // TODO: this should not be here
 	conf_provider: C,
 }
 
 impl<R: Runner, F: FileLoader, C: ConfProvider> EditmsgEditor for Editor<R, F, C> {
+	// TODO: this should take a File as param
 	fn open(&self) -> Result<()> {
 		let editmsg = self
 			.file_loader

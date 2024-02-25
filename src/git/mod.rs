@@ -26,6 +26,7 @@ pub fn init_git_dependency_tree() -> Result<Service> {
 		Ok(wrapper) => Ok(GitService::new(
 			wrapper,
 			Hook::new(CommandRunner::new()),
+			&FsWrapper::new(),
 			Editor::new(CommandRunner::new(), FsWrapper::new(), GitConfProvider::new()),
 		)),
 		Err(e) => Err(e),
