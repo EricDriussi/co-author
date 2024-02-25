@@ -1,3 +1,5 @@
+use crate::common::conf;
+
 #[derive(Debug)]
 pub struct Author {
 	alias: String,
@@ -15,7 +17,7 @@ impl Author {
 	}
 
 	pub fn signature(&self) -> String {
-		format!("Co-Authored-by: {} <{}>", self.name, self.email)
+		format!("{}: {} <{}>", conf::co_author_prefix(), self.name, self.email)
 	}
 
 	pub fn alias(&self) -> String {

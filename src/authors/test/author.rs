@@ -1,4 +1,4 @@
-use crate::authors::author::Author;
+use crate::{authors::author::Author, common::conf};
 use parameterized::parameterized;
 
 #[test]
@@ -6,8 +6,9 @@ fn should_present_a_co_author_compliant_signature() {
 	let name = "alice";
 	let email = "alice@wonderland.not";
 	let author = Author::from("a", name, email);
+	let co_author_prefix = conf::co_author_prefix();
 
-	assert_eq!(author.signature(), format!("Co-Authored-by: {name} <{email}>"));
+	assert_eq!(author.signature(), format!("{co_author_prefix}: {name} <{email}>"));
 }
 
 #[test]

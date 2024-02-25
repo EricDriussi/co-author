@@ -37,7 +37,7 @@ impl GitWrapper for LibGitWrapper {
 
 		let commit_only_has_co_author_lines = commit_message
 			.split('\n')
-			.filter(|line| !line.starts_with("Co-Authored-by"))
+			.filter(|line| !line.starts_with(&conf::co_author_prefix()))
 			.collect::<Vec<&str>>()
 			.join("\n")
 			.is_empty();

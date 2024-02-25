@@ -22,6 +22,10 @@ pub fn editmsg() -> String {
 	get_config().get::<String>("editmsg").expect(CONFIG_ERR_MSG)
 }
 
+pub fn co_author_prefix() -> String {
+	get_config().get::<String>("co_author_prefix").expect(CONFIG_ERR_MSG)
+}
+
 fn get_config() -> Config {
 	let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "default".to_string());
 
