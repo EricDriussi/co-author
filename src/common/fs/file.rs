@@ -1,6 +1,6 @@
+use std::io::Write;
 use std::io::{BufRead, BufReader, Error};
 use std::iter::MapWhile;
-use std::{fs::OpenOptions, io::Write};
 
 type Lines = Vec<String>;
 
@@ -23,22 +23,9 @@ pub struct SimpleFile {
 	path: String,
 }
 
-pub type OptionalFile = Option<Box<dyn File>>;
-
 impl SimpleFile {
-	pub fn from(path: String) -> OptionalFile {
-		let file = std::fs::File::open(path.clone());
-		Some(Box::new(Self { file: file.ok()?, path }))
-	}
-
-	pub fn open_or_create(path: String) -> OptionalFile {
-		let file = OpenOptions::new()
-			.read(true)
-			.append(true)
-			.create(true)
-			.open(path.clone())
-			.ok()?;
-		Some(Box::new(Self { file, path }))
+	pub fn from(file: std::fs::File, path: String) -> Box<dyn File> {
+		Box::new(Self { file, path })
 	}
 
 	fn valid_lines(&self) -> FSLines {

@@ -13,7 +13,7 @@ pub struct CSVReader {
 
 impl CSVReader {
 	pub fn from_cwd_fallback_home(file_loader: &impl FileLoader) -> Result<Self> {
-		let file_in_home = file_loader.load_file_with_fallback(conf::authors_file());
+		let file_in_home = file_loader.load_with_fallback(conf::authors_file());
 		match file_in_home {
 			Some(file) => Ok(Self { src: file }),
 			None => Err(AuthorsError::NotFound("$PWD or $HOME".to_string()).into()),

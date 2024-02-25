@@ -11,7 +11,7 @@ const IRRELEVANT_FILE_PATH: &str = "a/path/file.hi";
 fn should_build_using_fallback() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_file_with_fallback()
+		.expect_load_with_fallback()
 		.with(eq(conf::authors_file()))
 		.times(1)
 		.returning(|_| Some(Box::new(DummyFile::empty())));
@@ -23,7 +23,7 @@ fn should_build_using_fallback() {
 fn should_not_build_using_fallback() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_file_with_fallback()
+		.expect_load_with_fallback()
 		.with(eq(conf::authors_file()))
 		.times(1)
 		.returning(|_| None);
@@ -63,7 +63,7 @@ fn should_not_build_from_given_file() {
 fn should_provide_all_authors_in_file() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_file_with_fallback()
+		.expect_load_with_fallback()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {
@@ -83,7 +83,7 @@ fn should_provide_all_authors_in_file() {
 fn should_provide_only_author_matching_an_alias() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_file_with_fallback()
+		.expect_load_with_fallback()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {
@@ -103,7 +103,7 @@ fn should_provide_only_author_matching_an_alias() {
 fn should_provide_all_authors_matching_an_alias() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_file_with_fallback()
+		.expect_load_with_fallback()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {
@@ -124,7 +124,7 @@ fn should_provide_all_authors_matching_an_alias() {
 fn should_provide_no_author_when_alias_doesnt_match() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_file_with_fallback()
+		.expect_load_with_fallback()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {

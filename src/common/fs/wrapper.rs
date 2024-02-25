@@ -1,8 +1,10 @@
-use std::env;
+use std::{env, fs::OpenOptions};
 
 use crate::common::conf;
 
-use super::file::{OptionalFile, SimpleFile};
+use super::file::{File, SimpleFile};
+
+pub type OptionalFile = Option<Box<dyn File>>;
 
 #[cfg(test)]
 use mockall::{automock, predicate::*};
@@ -11,7 +13,7 @@ use mockall::{automock, predicate::*};
 pub trait FileLoader {
 	fn load_if_present(&self, file_path: String) -> OptionalFile;
 	fn load(&self, file_path: String) -> OptionalFile;
-	fn load_file_with_fallback(&self, file_path: String) -> OptionalFile;
+	fn load_with_fallback(&self, file_path: String) -> OptionalFile;
 }
 
 pub struct FsWrapper {}
@@ -20,26 +22,43 @@ impl FsWrapper {
 	pub fn new() -> Self {
 		Self {}
 	}
+
+	fn home_fallback(&self, authors_dir: &str, file_path: &str) -> OptionalFile {
+		let home = env::var("HOME").ok()?;
+		self.load_if_present(format!("{home}/.config/{authors_dir}/{file_path}"))
+			.or_else(|| self.load_if_present(format!("{home}/.{authors_dir}/{file_path}")))
+			.or_else(|| self.load_if_present(format!("{home}/{file_path}")))
+	}
 }
 
 impl FileLoader for FsWrapper {
 	fn load_if_present(&self, file_path: String) -> OptionalFile {
-		SimpleFile::from(file_path)
+		let file = OpenOptions::new()
+			.read(true)
+			.append(true)
+			.open(file_path.clone())
+			.ok()?;
+		Some(SimpleFile::from(file, file_path))
 	}
 
 	fn load(&self, file_path: String) -> OptionalFile {
-		SimpleFile::open_or_create(file_path)
+		let file = OpenOptions::new()
+			.read(true)
+			.append(true)
+			.create(true)
+			.open(file_path.clone())
+			.ok()?;
+		Some(SimpleFile::from(file, file_path))
 	}
 
-	fn load_file_with_fallback(&self, file_path: String) -> OptionalFile {
+	// TODO: this should be in the provider, not here
+	fn load_with_fallback(&self, file_path: String) -> OptionalFile {
 		let authors_dir = conf::authors_dir();
-		if let Ok(xdg_config) = env::var("XDG_CONFIG_HOME") {
-			return SimpleFile::from(format!("{xdg_config}/{authors_dir}/{file_path}"));
+		match env::var("XDG_CONFIG_HOME") {
+			Err(_) => self.home_fallback(&authors_dir, &file_path),
+			Ok(xdg_config) => self
+				.load_if_present(format!("{xdg_config}/{authors_dir}/{file_path}"))
+				.or_else(|| self.home_fallback(&authors_dir, &file_path)),
 		}
-
-		let home = env::var("HOME").ok()?;
-		SimpleFile::from(format!("{home}/.config/{authors_dir}/{file_path}"))
-			.or_else(|| SimpleFile::from(format!("{home}/.{authors_dir}/{file_path}")))
-			.or_else(|| SimpleFile::from(format!("{home}/{file_path}")))
 	}
 }
