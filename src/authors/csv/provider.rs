@@ -21,7 +21,7 @@ impl CSVReader {
 	}
 
 	pub fn from(file_loader: &impl FileLoader, authors_file: &str) -> Result<Self> {
-		let given_file = file_loader.load_file(authors_file.to_string());
+		let given_file = file_loader.load_if_present(authors_file.to_string());
 		match given_file {
 			Some(file) => Ok(Self { src: file }),
 			None => Err(AuthorsError::NotFound(authors_file.to_string()).into()),

@@ -66,7 +66,7 @@ impl GitWrapper for LibGitWrapper {
 impl LibGitWrapper {
 	pub fn from(path: &PathBuf, file_loader: &FsWrapper) -> Result<Self> {
 		let repo = Repository::open(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
-		let editmsg = file_loader.load_creating(conf::editmsg()).ok_or(GitError::Editor)?;
+		let editmsg = file_loader.load(conf::editmsg()).ok_or(GitError::Editor)?;
 		if Self::no_staged_changes(&repo) {
 			Err(Box::new(GitError::LibGit("No staged changes".to_string())))
 		} else {

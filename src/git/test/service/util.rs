@@ -4,7 +4,7 @@ use crate::{common::fs::wrapper::MockFileLoader, test_utils::dummy_file::DummyFi
 pub fn successful_file_loader() -> MockFileLoader {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_creating()
+		.expect_load()
 		.returning(|_| Some(Box::new(DummyFile::empty())));
 	mock_file_loader
 }

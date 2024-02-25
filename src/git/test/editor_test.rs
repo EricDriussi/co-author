@@ -22,7 +22,7 @@ fn should_get_editmsg_from_conf() {
 		.returning(|| Some("an_editor".to_string()));
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_creating()
+		.expect_load()
 		.with(eq(conf::editmsg().clone()))
 		.returning(move |_| Some(Box::new(DummyFile::empty())));
 	let editor = Editor::new(mock_runner, mock_file_loader, mock_conf_provider);
@@ -42,7 +42,7 @@ fn should_error_when_no_editmsg_is_found() {
 		.returning(|| Some("an_editor".to_string()));
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_creating()
+		.expect_load()
 		.with(eq(conf::editmsg().clone()))
 		.returning(move |_| None);
 	let editor = Editor::new(mock_runner, mock_file_loader, mock_conf_provider);
@@ -152,7 +152,7 @@ fn should_error_when_no_editor_is_available() {
 fn successful_mock_file_loader() -> MockFileLoader {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_creating()
+		.expect_load()
 		.returning(move |_| Some(Box::new(DummyFile::empty())));
 	mock_file_loader
 }

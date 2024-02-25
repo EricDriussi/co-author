@@ -37,7 +37,7 @@ fn should_not_build_using_fallback() {
 fn should_build_from_given_file() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_file()
+		.expect_load_if_present()
 		.with(eq(IRRELEVANT_FILE_PATH.to_string()))
 		.times(1)
 		.returning(|_| Some(Box::new(DummyFile::empty())));
@@ -49,7 +49,7 @@ fn should_build_from_given_file() {
 fn should_not_build_from_given_file() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_file()
+		.expect_load_if_present()
 		.with(eq(IRRELEVANT_FILE_PATH.to_string()))
 		.times(1)
 		.returning(|_| None);
