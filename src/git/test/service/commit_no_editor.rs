@@ -42,7 +42,7 @@ fn should_succeed() {
 		.returning(|| Ok(()))
 		.in_sequence(&mut seq);
 
-	let result = do_commit(&mut GitService::new(
+	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		&file_loader_loading(mock_file),
@@ -60,7 +60,7 @@ fn should_write_commit_msg_and_authors() {
 		.withf(move |param| param.contains(COMMIT_MSG) && param.contains(AUTHOR))
 		.returning(|_| Ok(()));
 
-	let result = do_commit(&mut GitService::new(
+	let result = do_commit(GitService::new(
 		ok_git_wrapper(String::new()),
 		ok_hook_runner(),
 		&file_loader_loading(mock_file),
@@ -76,7 +76,7 @@ fn should_not_add_status_to_editmsg_file() {
 	mock_git_wrapper.expect_formatted_status().times(0);
 	mock_git_wrapper.expect_commit().returning(|| Ok(()));
 
-	let result = do_commit(&mut GitService::new(
+	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		ok_hook_runner(),
 		&file_loader_loading(ok_file()),
@@ -91,7 +91,7 @@ fn should_not_open_editor() {
 	let mut mock_editmsg_editor = MockEditmsgEditor::new();
 	mock_editmsg_editor.expect_open().times(0);
 
-	let result = do_commit(&mut GitService::new(
+	let result = do_commit(GitService::new(
 		ok_git_wrapper(String::new()),
 		ok_hook_runner(),
 		&file_loader_loading(ok_file()),
@@ -114,7 +114,7 @@ fn should_stop_and_report_pre_commit_hook_failure() {
 	mock_hook_runner.expect_run_commit_msg().times(0);
 	mock_git_wrapper.expect_commit().times(0);
 
-	let result = do_commit(&mut GitService::new(
+	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		&file_loader_loading(mock_file),
@@ -135,7 +135,7 @@ fn should_stop_and_report_commit_msg_hook_failure() {
 		.returning(move || Err(ERR_MSG.into()));
 	mock_git_wrapper.expect_commit().times(0);
 
-	let result = do_commit(&mut GitService::new(
+	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		&file_loader_loading(ok_file()),
@@ -150,7 +150,7 @@ fn should_report_commit_error() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	mock_git_wrapper.expect_commit().returning(move || Err(ERR_MSG.into()));
 
-	let result = do_commit(&mut GitService::new(
+	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		ok_hook_runner(),
 		&file_loader_loading(ok_file()),
@@ -160,9 +160,11 @@ fn should_report_commit_error() {
 	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
 }
 
-fn do_commit<W: GitWrapper, H: HookRunner, E: EditmsgEditor>(service: &mut GitService<W, H, E>) -> Result<()> {
-	service.commit(CommitMode::WithoutEditor {
-		message: COMMIT_MSG,
-		authors: vec![AUTHOR.to_string()],
-	})
+fn do_commit<W: GitWrapper, H: HookRunner, E: EditmsgEditor>(service: Result<GitService<W, H, E>>) -> Result<()> {
+	service
+		.expect("could not set up git service in tests")
+		.commit(CommitMode::WithoutEditor {
+			message: COMMIT_MSG,
+			authors: vec![AUTHOR.to_string()],
+		})
 }

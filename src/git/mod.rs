@@ -23,12 +23,12 @@ type Service = GitService<LibGitWrapper, GitHook, TextEditor>;
 pub fn init_git_dependency_tree() -> Result<Service> {
 	let cwd = env::current_dir().map_err(|_| "Could not get current directory".to_string())?;
 	match LibGitWrapper::from(&cwd, &FsWrapper::new()) {
-		Ok(wrapper) => Ok(GitService::new(
+		Ok(wrapper) => GitService::new(
 			wrapper,
 			Hook::new(CommandRunner::new()),
 			&FsWrapper::new(),
 			Editor::new(CommandRunner::new(), FsWrapper::new(), GitConfProvider::new()),
-		)),
+		),
 		Err(e) => Err(e),
 	}
 }

@@ -5,6 +5,7 @@ pub enum GitError {
 	Editor,
 	Hook(String),
 	LibGit(String),
+	Editmsg,
 }
 
 impl Error for GitError {}
@@ -16,6 +17,7 @@ impl Display for GitError {
 			GitError::Editor => write!(f, "Editor"),
 			GitError::Hook(hook) => write!(f, "Hook: {hook}"),
 			GitError::LibGit(err) => write!(f, "{err}"),
+			GitError::Editmsg => write!(f, "EDITMSG file not found"),
 		}
 	}
 }

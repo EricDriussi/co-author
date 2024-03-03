@@ -18,7 +18,8 @@ fn should_return_message_when_present() {
 		MockHookRunner::new(),
 		&file_loader_loading(ok_file()),
 		MockEditmsgEditor::new(),
-	);
+	)
+	.expect("could not set up git service in tests");
 
 	let result = service.last_commit_message();
 
@@ -36,7 +37,8 @@ fn should_return_empty_string_when_message_is_not_present() {
 		MockHookRunner::new(),
 		&file_loader_loading(ok_file()),
 		MockEditmsgEditor::new(),
-	);
+	)
+	.expect("could not set up git service in tests");
 
 	let result = service.last_commit_message();
 

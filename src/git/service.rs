@@ -29,14 +29,15 @@ pub enum CommitMode<'a> {
 }
 
 impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
-	pub fn new(git_wrapper: W, runner: H, file_loader: &dyn FileLoader, editmsg_editor: E) -> Self {
-		let editmsg = file_loader.load(conf::editmsg()).ok_or(GitError::Editor).expect("err"); // TODO: wrong err type, rm expect, test
-		Self {
+	pub fn new(git_wrapper: W, runner: H, file_loader: &dyn FileLoader, editmsg_editor: E) -> Result<Self> {
+		// TODO: test err case
+		let editmsg = file_loader.load(conf::editmsg()).ok_or(GitError::Editmsg)?;
+		Ok(Self {
 			git_wrapper,
 			hook_runner: runner,
 			editmsg,
 			editmsg_editor,
-		}
+		})
 	}
 
 	pub fn last_commit_message(&self) -> String {
