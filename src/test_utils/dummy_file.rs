@@ -1,9 +1,11 @@
 use crate::common::fs::file::{File, Locatable, Readable, Writable};
 use crate::Result;
 
+#[derive(Clone)]
 pub struct DummyFile {
 	content: Vec<String>,
 	path: String,
+	write_was_called_with: String,
 }
 
 impl DummyFile {
@@ -11,6 +13,7 @@ impl DummyFile {
 		Self {
 			content: (vec![]),
 			path: String::new(),
+			write_was_called_with: String::new(),
 		}
 	}
 
@@ -18,7 +21,12 @@ impl DummyFile {
 		Self {
 			content: content.into_iter().map(String::from).collect(),
 			path: String::new(),
+			write_was_called_with: String::new(),
 		}
+	}
+
+	pub fn write_was_called_with(&self) -> &str {
+		self.write_was_called_with.as_str()
 	}
 }
 
@@ -31,7 +39,8 @@ impl Readable for DummyFile {
 }
 
 impl Writable for DummyFile {
-	fn write(&mut self, _data: String) -> Result<()> {
+	fn write(&mut self, data: String) -> Result<()> {
+		self.write_was_called_with = data;
 		Ok(())
 	}
 }

@@ -2,6 +2,35 @@ use std::io::Write;
 use std::io::{BufRead, BufReader, Error};
 use std::iter::MapWhile;
 
+#[cfg(test)]
+use mockall::predicate::*;
+#[cfg(test)]
+use mockall::*;
+
+#[cfg(test)]
+mock! {
+	pub File {}
+
+	impl Readable for File {
+		fn non_empty_lines(&self) -> Lines;
+	}
+
+	impl Writable for File {
+		fn write(&mut self, data: String) -> crate::Result<()>;
+	}
+
+	impl Locatable for File {
+		fn path(&self) -> &str;
+	}
+
+	impl Clone for File {
+		fn clone(&self) -> Self;
+	}
+
+	impl File for File {}
+
+}
+
 type Lines = Vec<String>;
 
 pub trait Readable {

@@ -59,16 +59,12 @@ impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
 
 	fn pre(&mut self, body: &CommitMessage) -> Result<()> {
 		self.hook_runner.run_pre_commit()?;
-		// TODO: this is not tested
 		self.editmsg.write(body.formatted_body())
-		//
 	}
 
 	fn editor(&mut self) -> Result<()> {
-		// TODO: this is not tested
 		let status = self.git_wrapper.formatted_status()?;
 		self.editmsg.write(status)?;
-		//
 		self.editmsg_editor.open()
 	}
 

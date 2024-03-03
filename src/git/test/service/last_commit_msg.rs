@@ -1,6 +1,9 @@
 use crate::git::{
-	commit_message::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner, service::GitService,
-	test::service::util::successful_file_loader,
+	commit_message::MockGitWrapper,
+	editor::MockEditmsgEditor,
+	hook::MockHookRunner,
+	service::GitService,
+	test::service::util::{file_loader_loading, ok_file},
 };
 
 #[test]
@@ -13,7 +16,7 @@ fn should_return_message_when_present() {
 	let service = GitService::new(
 		mock_git_wrapper,
 		MockHookRunner::new(),
-		&successful_file_loader(),
+		&file_loader_loading(ok_file()),
 		MockEditmsgEditor::new(),
 	);
 
@@ -31,7 +34,7 @@ fn should_return_empty_string_when_message_is_not_present() {
 	let service = GitService::new(
 		mock_git_wrapper,
 		MockHookRunner::new(),
-		&successful_file_loader(),
+		&file_loader_loading(ok_file()),
 		MockEditmsgEditor::new(),
 	);
 
