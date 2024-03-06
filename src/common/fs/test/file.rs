@@ -1,10 +1,15 @@
-use std::fs::{self, OpenOptions};
+use std::{
+	fs::{self, OpenOptions},
+	io::Write,
+};
 
-use crate::common::fs::file::SimpleFile;
+use crate::common::fs::{file::SimpleFile, test::create_random_tmp_file};
 
 #[test]
 fn should_present_non_empty_lines() {
-	let path = "src/common/fs/test/test_file.txt".to_string();
+	let (mut file, path) = create_random_tmp_file();
+	file.write_all(b"one\n\ntwo\n\nthree\n\n")
+		.expect("Could not write to file for test");
 	let file = SimpleFile::from(
 		OpenOptions::new()
 			.read(true)
@@ -16,12 +21,13 @@ fn should_present_non_empty_lines() {
 
 	let non_empyt_lines = file.non_empty_lines();
 
+	fs::remove_file(path).expect("Could not cleanup file for test");
 	assert_eq!(non_empyt_lines.len(), 3);
 }
 
 #[test]
 fn should_keep_track_of_path() {
-	let path = "src/common/fs/test/test_file.txt".to_string();
+	let (_, path) = create_random_tmp_file();
 	let file = SimpleFile::from(
 		OpenOptions::new()
 			.read(true)
@@ -38,7 +44,7 @@ fn should_keep_track_of_path() {
 
 #[test]
 fn should_write_to_file() {
-	let path = "/tmp/coa_test_file_write.txt".to_string();
+	let (_, path) = create_random_tmp_file();
 	let mut file = SimpleFile::from(
 		OpenOptions::new()
 			.read(true)

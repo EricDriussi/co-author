@@ -1,10 +1,10 @@
 use git2::{Config, Repository, RepositoryInitOptions, Signature};
-use rand::Rng;
 use serial_test::serial;
 use std::{
 	fs::{self, File},
 	path::{Path, PathBuf},
 };
+use uuid::Uuid;
 
 use crate::{
 	common::fs::wrapper::FsWrapper,
@@ -15,6 +15,7 @@ use crate::{
 	test_utils::set_test_env,
 };
 
+// TODO: this should point to "/tmp/coa/test_repo" but tests break
 const REPO_PATH: &str = "/var/tmp/coa";
 
 #[test]
@@ -147,10 +148,9 @@ fn should_only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dy
 	Ok(())
 }
 
-fn random_path(path: &str) -> String {
-	let mut rng = rand::thread_rng();
-	let random_number: u32 = rng.gen();
-	format!("{path}{random_number}")
+pub fn random_path(path: &str) -> String {
+	let random = Uuid::new_v4();
+	format!("{path}/{random}")
 }
 
 fn init_repo(path: &str) -> Result<Repository, Box<dyn std::error::Error>> {
