@@ -3,6 +3,7 @@ use std::env;
 use config::{Config, Environment, File, FileFormat};
 
 const DEFAULT_CONFIG: &str = include_str!("default.yaml");
+// TODO: test yml might not be needed
 const TEST_CONFIG: &str = include_str!("test.yaml");
 const CONFIG_ERR_MSG: &str = "Config not loaded properly";
 

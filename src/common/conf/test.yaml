@@ -1,3 +1,3 @@
 authors_file_path: "src/authors/test/data/"
 authors_file_name: "authors"
-editmsg: "/var/tmp/coa/.git/COMMIT_EDITMSG"
+editmsg: ".git/COMMIT_EDITMSG"

@@ -1,5 +1,4 @@
 use git2::{Config, Repository, RepositoryInitOptions, Signature};
-use serial_test::serial;
 use std::{
 	fs::{self, File},
 	path::{Path, PathBuf},
@@ -15,15 +14,12 @@ use crate::{
 	test_utils::set_test_env,
 };
 
-// TODO: this should point to "/tmp/coa/test_repo" but tests break
-const REPO_PATH: &str = "/var/tmp/coa";
+const TEST_DIR_PATH: &str = "/tmp/coa/libgit_wrapper";
 
 #[test]
-#[serial]
 fn should_determine_if_is_valid_git_repo() {
-	// let path = random_path(REPO_PATH);
-	let path = REPO_PATH.to_string();
-	let git_repo = init_repo(&path).expect("Could not setup test repo");
+	let path = random_tmp_path_in(TEST_DIR_PATH);
+	let git_repo = init_repo(&path).expect("Could not create test repo");
 
 	let repo_with_no_staged_changes = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new());
 	assert!(repo_with_no_staged_changes.is_err());
@@ -33,16 +29,16 @@ fn should_determine_if_is_valid_git_repo() {
 	assert!(valid_repo.is_ok());
 
 	let invalid_repo = LibGitWrapper::from(&PathBuf::from("/path"), &FsWrapper::new());
+	fs::remove_dir_all(path).ok();
 	assert!(invalid_repo.is_err());
 }
 
 #[test]
-#[serial]
 fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
 	set_test_env();
-	// let path = random_path(REPO_PATH);
-	let path = REPO_PATH.to_string();
-	let git_repo = init_repo(&path).expect("Could not setup test repo");
+	let path = random_tmp_path_in(TEST_DIR_PATH);
+	fs::remove_dir_all(&path).ok();
+	let git_repo = init_repo(&path).expect("Could not create test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
 	let repo = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new()).expect("Could not setup test repo");
@@ -54,15 +50,14 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 
 	let result = repo.commit();
 
+	fs::remove_dir_all(path).ok();
 	assert!(result.is_ok());
 }
 
 #[test]
-#[serial]
 fn should_error_out_if_commit_message_is_empty() {
-	// let path = random_path(REPO_PATH);
-	let path = REPO_PATH.to_string();
-	let git_repo = init_repo(&path).expect("Could not setup test repo");
+	let path = random_tmp_path_in(TEST_DIR_PATH);
+	let git_repo = init_repo(&path).expect("Could not create test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
 	let repo = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new()).expect("Could not setup test repo");
@@ -74,15 +69,14 @@ fn should_error_out_if_commit_message_is_empty() {
 
 	let result = repo.commit();
 
+	fs::remove_dir_all(path).ok();
 	assert!(matches!(result, Err(e) if e.to_string().contains("Commit message cannot be empty")));
 }
 
 #[test]
-#[serial]
 fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 	set_test_env();
-	// let path = random_path(REPO_PATH);
-	let path = REPO_PATH.to_string();
+	let path = random_tmp_path_in(TEST_DIR_PATH);
 	let git_repo = init_repo(&path)?;
 	create_and_add_file_to_git_tree(&git_repo, "foo")?;
 
@@ -104,6 +98,7 @@ fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 	let repo = LibGitWrapper::from(&PathBuf::from(&path), &FsWrapper::new())?;
 	let contents = repo.formatted_status();
 
+	fs::remove_dir_all(path).ok();
 	assert_eq!(
 		contents?,
 		"
@@ -129,7 +124,7 @@ fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 
 #[test]
 fn should_only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
-	let path = random_path(REPO_PATH);
+	let path = random_tmp_path_in(TEST_DIR_PATH);
 	let git_repo = init_repo(&path)?;
 	create_and_add_file_to_git_tree(&git_repo, "foo")?;
 
@@ -144,19 +139,14 @@ fn should_only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dy
 
 	let result = repo.prev_commit_msg();
 
+	fs::remove_dir_all(path).ok();
 	assert!(matches!(result, Ok(line) if line.to_string().contains(first_line.as_str())));
 	Ok(())
 }
 
-pub fn random_path(path: &str) -> String {
-	let random = Uuid::new_v4();
-	format!("{path}/{random}")
-}
-
 fn init_repo(path: &str) -> Result<Repository, Box<dyn std::error::Error>> {
 	let dir = PathBuf::from(path);
-	fs::remove_dir_all(&dir).ok();
-	let repo = Repository::init_opts(&dir, &RepositoryInitOptions::new())?;
+	let repo = Repository::init_opts(dir, &RepositoryInitOptions::new())?;
 	set_user_and_email(&mut repo.config()?)?;
 
 	let mut index = repo.index()?;
@@ -202,4 +192,9 @@ fn create_and_add_file_to_git_tree(repo: &Repository, file_name: &str) -> Result
 	index.add_path(Path::new(file_name))?;
 	index.write()?;
 	Ok(())
+}
+
+pub fn random_tmp_path_in(path: &str) -> String {
+	let random = Uuid::new_v4();
+	format!("{path}/{random}")
 }
