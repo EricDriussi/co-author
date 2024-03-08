@@ -1,5 +1,3 @@
-#[cfg(test)]
-use mockall::{automock, predicate::*};
 use std::{error::Error, fmt::Display};
 
 // TODO: handle subject and body
@@ -29,7 +27,7 @@ impl Display for CommitMessage {
 	}
 }
 
-#[cfg_attr(test, automock)]
+#[cfg_attr(test, mockall::automock)]
 pub trait GitWrapper {
 	fn commit(&self) -> Result<(), Box<dyn Error>>;
 	fn formatted_status(&self) -> Result<String, Box<dyn Error>>;

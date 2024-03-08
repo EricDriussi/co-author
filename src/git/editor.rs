@@ -1,16 +1,12 @@
-use std::env;
-
+use super::conf_provider::ConfProvider;
+use super::git_err::GitError;
 use crate::{
 	common::{conf, fs::wrapper::FileLoader, runner::Runner},
 	Result,
 };
+use std::env;
 
-use super::conf_provider::ConfProvider;
-use super::git_err::GitError;
-
-#[cfg(test)]
-use mockall::{automock, predicate::*};
-#[cfg_attr(test, automock)]
+#[cfg_attr(test, mockall::automock)]
 pub trait EditmsgEditor {
 	fn open(&self) -> Result<()>;
 }

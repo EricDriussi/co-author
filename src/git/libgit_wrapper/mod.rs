@@ -9,7 +9,6 @@ use crate::common::{
 use crate::Result;
 use git2::{Repository, Signature};
 use std::path::PathBuf;
-
 pub mod editmsg_handler;
 
 pub struct LibGitWrapper {

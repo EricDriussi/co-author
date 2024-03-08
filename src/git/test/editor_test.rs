@@ -1,8 +1,3 @@
-use std::env;
-
-use mockall::predicate::{always, eq};
-use serial_test::serial;
-
 use crate::{
 	common::{conf, fs::wrapper::MockFileLoader, runner::MockRunner},
 	git::{
@@ -11,6 +6,9 @@ use crate::{
 	},
 	test_utils::dummy_file::DummyFile,
 };
+use mockall::predicate::{always, eq};
+use serial_test::serial;
+use std::env;
 
 #[test]
 fn should_get_editmsg_from_conf() {

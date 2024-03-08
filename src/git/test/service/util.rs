@@ -5,17 +5,16 @@ use crate::{
 	},
 	git::{commit_message::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner},
 };
-#[cfg(test)]
 use mockall::*;
 
-// TODO: rename file and eval if this is needed in other modules
-#[allow(clippy::unwrap_used)]
 pub fn file_loader_loading(file: MockFile) -> MockFileLoader {
 	let mut mock_file_loader = MockFileLoader::new();
-	let mut mock_file_ref = Some(file);
+	let mut mock_file_opt = Some(file);
+	#[allow(clippy::unwrap_used)]
 	mock_file_loader
 		.expect_load()
-		.returning(move |_| Some(Box::new(mock_file_ref.take().unwrap())));
+		// This is an ugly workaround to appease the borrow checker
+		.returning(move |_| Some(Box::new(mock_file_opt.take().unwrap())));
 	mock_file_loader
 }
 
@@ -47,7 +46,6 @@ pub fn ok_editor() -> MockEditmsgEditor {
 	mock_editmsg_editor
 }
 
-#[cfg(test)]
 mock! {
 	pub File {}
 
@@ -64,5 +62,4 @@ mock! {
 	}
 
 	impl File for File {}
-
 }

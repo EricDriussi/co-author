@@ -1,15 +1,10 @@
-use std::{env, fs::OpenOptions};
-
-use crate::common::conf;
-
 use super::file::{File, SimpleFile};
+use crate::common::conf;
+use std::{env, fs::OpenOptions};
 
 pub type OptionalFile = Option<Box<dyn File>>;
 
-#[cfg(test)]
-use mockall::{automock, predicate::*};
-
-#[cfg_attr(test, automock)]
+#[cfg_attr(test, mockall::automock)]
 pub trait FileLoader {
 	fn load_if_present(&self, file_path: String) -> OptionalFile;
 	fn load(&self, file_path: String) -> OptionalFile;

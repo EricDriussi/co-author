@@ -1,13 +1,10 @@
-use std::env;
-
-use libgit_wrapper::LibGitWrapper;
-use service::GitService;
-
 use self::{conf_provider::GitConfProvider, editor::Editor, hook::Hook};
 use crate::common::fs::wrapper::FsWrapper;
 use crate::common::runner::CommandRunner;
 use crate::Result;
-
+use libgit_wrapper::LibGitWrapper;
+use service::GitService;
+use std::env;
 pub mod commit_message;
 mod conf_provider;
 mod editor;

@@ -1,6 +1,5 @@
-use std::env;
-
 use config::{Config, Environment, File, FileFormat};
+use std::env;
 
 const DEFAULT_CONFIG: &str = include_str!("default.yaml");
 // TODO: test yml might not be needed

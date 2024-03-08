@@ -1,9 +1,6 @@
 use git2::Config;
 
-#[cfg(test)]
-use mockall::{automock, predicate::*};
-
-#[cfg_attr(test, automock)]
+#[cfg_attr(test, mockall::automock)]
 pub trait ConfProvider {
 	fn get_editor(&self) -> Option<String>;
 }

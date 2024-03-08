@@ -1,10 +1,6 @@
 use std::fs;
-
 use uuid::Uuid;
-
-#[cfg(test)]
 mod file;
-#[cfg(test)]
 mod wrapper;
 
 pub fn create_random_tmp_file() -> (fs::File, String) {

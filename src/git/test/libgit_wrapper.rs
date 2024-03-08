@@ -1,10 +1,3 @@
-use git2::{Config, Repository, RepositoryInitOptions, Signature};
-use std::{
-	fs::{self, File},
-	path::{Path, PathBuf},
-};
-use uuid::Uuid;
-
 use crate::{
 	common::fs::wrapper::FsWrapper,
 	git::{
@@ -13,6 +6,12 @@ use crate::{
 	},
 	test_utils::set_test_env,
 };
+use git2::{Config, Repository, RepositoryInitOptions, Signature};
+use std::{
+	fs::{self, File},
+	path::{Path, PathBuf},
+};
+use uuid::Uuid;
 
 const TEST_DIR_PATH: &str = "/tmp/coa/libgit_wrapper";
 

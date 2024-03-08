@@ -1,14 +1,13 @@
-use crate::common::conf;
-use crate::common::fs::file::File;
-use crate::common::fs::wrapper::FileLoader;
-use crate::Result;
-
 use super::git_err::GitError;
 use super::hook::HookRunner;
 use super::{
 	commit_message::{CommitMessage, GitWrapper},
 	editor::EditmsgEditor,
 };
+use crate::common::conf;
+use crate::common::fs::file::File;
+use crate::common::fs::wrapper::FileLoader;
+use crate::Result;
 
 pub struct GitService<W: GitWrapper, H: HookRunner, E: EditmsgEditor> {
 	git_wrapper: W,

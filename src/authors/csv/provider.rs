@@ -1,6 +1,5 @@
 use super::super::author::{Author, AuthorsProvider};
 use super::mapper;
-
 use crate::authors::authors_err::AuthorsError;
 use crate::common::conf;
 use crate::common::fs::file::File;

@@ -1,6 +1,5 @@
-use crate::authors::author::Author;
-
 use super::{input_reader::MockReader, prompt::Prompt};
+use crate::authors::author::Author;
 
 #[test]
 fn should_prompt_for_commit_message() {

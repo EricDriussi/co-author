@@ -1,11 +1,8 @@
+use super::cli_err::CliError;
 use crate::Result;
-#[cfg(test)]
-use mockall::{automock, predicate::*};
 use rustyline::{error::ReadlineError, DefaultEditor};
 
-use super::cli_err::CliError;
-
-#[cfg_attr(test, automock)]
+#[cfg_attr(test, mockall::automock)]
 pub trait Reader {
 	fn readline(&mut self, prompt_msg: &str) -> Result<String>;
 	fn readline_with_initial<'a>(&mut self, prompt: &str, initial: (&'a str, &'a str)) -> Result<String>;
