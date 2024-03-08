@@ -1,5 +1,4 @@
-use crate::common::fs::file::MockFile;
-use crate::git::test::service::util::{ok_file, ok_git_wrapper, ok_hook_runner};
+use crate::git::test::service::util::{ok_file, ok_git_wrapper, ok_hook_runner, MockFile};
 use crate::git::{
 	commit_message::{GitWrapper, MockGitWrapper},
 	editor::{EditmsgEditor, MockEditmsgEditor},
