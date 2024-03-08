@@ -1,17 +1,20 @@
 use crate::{
-	common::{conf, fs::wrapper::MockFileLoader, runner::MockRunner},
+	common::{
+		conf,
+		fs::{test::util::dummy_file::DummyFile, wrapper::MockFileLoader},
+		runner::MockRunner,
+	},
 	git::{
 		conf_provider::MockConfProvider,
 		editor::{EditmsgEditor, Editor},
 	},
-	test_utils::dummy_file::DummyFile,
 };
 use mockall::predicate::{always, eq};
 use serial_test::serial;
 use std::env;
 
 #[test]
-fn should_get_editmsg_from_conf() {
+fn get_editmsg_from_conf() {
 	let mut mock_runner = MockRunner::new();
 	mock_runner.expect_spawn().returning(|_, _| Ok(()));
 	let mut mock_conf_provider = MockConfProvider::new();
@@ -31,7 +34,7 @@ fn should_get_editmsg_from_conf() {
 }
 
 #[test]
-fn should_error_when_no_editmsg_is_found() {
+fn error_when_no_editmsg_is_found() {
 	let mut mock_runner = MockRunner::new();
 	mock_runner.expect_spawn().returning(|_, _| Ok(()));
 	let mut mock_conf_provider = MockConfProvider::new();
@@ -51,7 +54,7 @@ fn should_error_when_no_editmsg_is_found() {
 }
 
 #[test]
-fn should_open_with_git_conf_editor() {
+fn open_with_git_conf_editor() {
 	let a_user_editor = "an_editor";
 	let mut mock_conf_provider = MockConfProvider::new();
 	mock_conf_provider
@@ -70,7 +73,7 @@ fn should_open_with_git_conf_editor() {
 
 #[test]
 #[serial]
-fn should_open_with_env_editor() {
+fn open_with_env_editor() {
 	let a_user_editor = "an_editor";
 	env::set_var("EDITOR", a_user_editor);
 	let editor = Editor::new(
@@ -86,7 +89,7 @@ fn should_open_with_env_editor() {
 
 #[test]
 #[serial]
-fn should_open_with_vim_editor() {
+fn open_with_vim_editor() {
 	env::remove_var("EDITOR");
 	let editor = Editor::new(
 		successful_runner_for("vim"),
@@ -101,7 +104,7 @@ fn should_open_with_vim_editor() {
 
 #[test]
 #[serial]
-fn should_open_with_vi_editor() {
+fn open_with_vi_editor() {
 	env::remove_var("EDITOR");
 	let mut mock_runner = MockRunner::new();
 	mock_runner
@@ -125,7 +128,7 @@ fn should_open_with_vi_editor() {
 
 #[test]
 #[serial]
-fn should_error_when_no_editor_is_available() {
+fn error_when_no_editor_is_available() {
 	env::remove_var("EDITOR");
 	let mut mock_runner = MockRunner::new();
 	mock_runner

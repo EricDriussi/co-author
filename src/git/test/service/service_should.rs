@@ -1,17 +1,14 @@
+use crate::git::test::service::util::mock_helpers::{ok_file, ok_file_loader};
 use crate::{
 	common::fs::wrapper::MockFileLoader,
 	git::{
-		commit_message::MockGitWrapper,
-		editor::MockEditmsgEditor,
-		git_err::GitError,
-		hook::MockHookRunner,
+		commit_message::MockGitWrapper, editor::MockEditmsgEditor, git_err::GitError, hook::MockHookRunner,
 		service::GitService,
-		test::service::util::{file_loader_loading, ok_file},
 	},
 };
 
 #[test]
-fn should_not_instantiate_if_editmsg_is_not_present() {
+fn not_instantiate_if_editmsg_is_not_present() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader.expect_load().returning(|_| None);
 
@@ -33,7 +30,7 @@ fn should_not_instantiate_if_editmsg_is_not_present() {
 }
 
 #[test]
-fn should_return_message_when_present() {
+fn return_message_when_present() {
 	let msg = "a message";
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	mock_git_wrapper
@@ -42,7 +39,7 @@ fn should_return_message_when_present() {
 	let service = GitService::new(
 		mock_git_wrapper,
 		MockHookRunner::new(),
-		&file_loader_loading(ok_file()),
+		&ok_file_loader(ok_file()),
 		MockEditmsgEditor::new(),
 	)
 	.expect("could not set up git service in tests");
@@ -53,7 +50,7 @@ fn should_return_message_when_present() {
 }
 
 #[test]
-fn should_return_empty_string_when_message_is_not_present() {
+fn return_empty_string_when_message_is_not_present() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	mock_git_wrapper
 		.expect_prev_commit_msg()
@@ -61,7 +58,7 @@ fn should_return_empty_string_when_message_is_not_present() {
 	let service = GitService::new(
 		mock_git_wrapper,
 		MockHookRunner::new(),
-		&file_loader_loading(ok_file()),
+		&ok_file_loader(ok_file()),
 		MockEditmsgEditor::new(),
 	)
 	.expect("could not set up git service in tests");

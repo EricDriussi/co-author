@@ -10,7 +10,7 @@ use parameterized::parameterized;
 	run_fn = { Hook::run_pre_commit, Hook::run_commit_msg },
 	hook_name = { "pre-commit", "commit-msg" }
 )]
-fn should_call_runner_with_correct_hook(run_fn: fn(&Hook<MockRunner>) -> Result<()>, hook_name: &str) {
+fn call_runner_with_correct_hook(run_fn: fn(&Hook<MockRunner>) -> Result<()>, hook_name: &str) {
 	let mut mock_runner = MockRunner::new();
 	mock_runner
 		.expect_run()
@@ -23,7 +23,7 @@ fn should_call_runner_with_correct_hook(run_fn: fn(&Hook<MockRunner>) -> Result<
 }
 
 #[parameterized( run_fn = { Hook::run_pre_commit, Hook::run_commit_msg })]
-fn should_call_runner_with_correct_shell(run_fn: fn(&Hook<MockRunner>) -> Result<()>) {
+fn call_runner_with_correct_shell(run_fn: fn(&Hook<MockRunner>) -> Result<()>) {
 	let mut mock_runner = MockRunner::new();
 	mock_runner
 		.expect_run()

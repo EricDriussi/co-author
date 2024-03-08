@@ -3,11 +3,11 @@ use std::{
 	io::Write,
 };
 
-use crate::common::fs::{file::SimpleFile, test::create_random_tmp_file};
+use crate::common::fs::{file::SimpleFile, test::util::random_tmp_file};
 
 #[test]
-fn should_present_non_empty_lines() {
-	let (mut file, path) = create_random_tmp_file();
+fn present_non_empty_lines() {
+	let (mut file, path) = random_tmp_file::create();
 	file.write_all(b"one\n\ntwo\n\nthree\n\n")
 		.expect("Could not write to file for test");
 	let file = SimpleFile::from(
@@ -26,8 +26,8 @@ fn should_present_non_empty_lines() {
 }
 
 #[test]
-fn should_keep_track_of_path() {
-	let (_, path) = create_random_tmp_file();
+fn keep_track_of_path() {
+	let (_, path) = random_tmp_file::create();
 	let file = SimpleFile::from(
 		OpenOptions::new()
 			.read(true)
@@ -43,8 +43,8 @@ fn should_keep_track_of_path() {
 }
 
 #[test]
-fn should_write_to_file() {
-	let (_, path) = create_random_tmp_file();
+fn write_to_file() {
+	let (_, path) = random_tmp_file::create();
 	let mut file = SimpleFile::from(
 		OpenOptions::new()
 			.read(true)

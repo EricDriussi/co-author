@@ -4,7 +4,6 @@ use crate::{
 		commit_message::{CommitMessage, GitWrapper},
 		libgit_wrapper::LibGitWrapper,
 	},
-	test_utils::set_test_env,
 };
 use git2::{Config, Repository, RepositoryInitOptions, Signature};
 use std::{
@@ -16,7 +15,7 @@ use uuid::Uuid;
 const TEST_DIR_PATH: &str = "/tmp/coa/libgit_wrapper";
 
 #[test]
-fn should_determine_if_is_valid_git_repo() {
+fn determine_if_is_valid_git_repo() {
 	let path = random_tmp_path_in(TEST_DIR_PATH);
 	let git_repo = init_repo(&path).expect("Could not create test repo");
 
@@ -33,8 +32,7 @@ fn should_determine_if_is_valid_git_repo() {
 }
 
 #[test]
-fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
-	set_test_env();
+fn create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
 	let path = random_tmp_path_in(TEST_DIR_PATH);
 	fs::remove_dir_all(&path).ok();
 	let git_repo = init_repo(&path).expect("Could not create test repo");
@@ -54,7 +52,7 @@ fn should_create_a_commit_on_an_already_existing_git_repo_with_staged_changes() 
 }
 
 #[test]
-fn should_error_out_if_commit_message_is_empty() {
+fn error_out_if_commit_message_is_empty() {
 	let path = random_tmp_path_in(TEST_DIR_PATH);
 	let git_repo = init_repo(&path).expect("Could not create test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
@@ -74,7 +72,6 @@ fn should_error_out_if_commit_message_is_empty() {
 
 #[test]
 fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
-	set_test_env();
 	let path = random_tmp_path_in(TEST_DIR_PATH);
 	let git_repo = init_repo(&path)?;
 	create_and_add_file_to_git_tree(&git_repo, "foo")?;
@@ -122,7 +119,7 @@ fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-fn should_only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
+fn only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
 	let path = random_tmp_path_in(TEST_DIR_PATH);
 	let git_repo = init_repo(&path)?;
 	create_and_add_file_to_git_tree(&git_repo, "foo")?;

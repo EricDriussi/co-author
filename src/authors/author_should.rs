@@ -2,7 +2,7 @@ use crate::{authors::author::Author, common::conf};
 use parameterized::parameterized;
 
 #[test]
-fn should_present_a_co_author_compliant_signature() {
+fn present_a_co_author_compliant_signature() {
 	let name = "alice";
 	let email = "alice@wonderland.not";
 	let author = Author::from("a", name, email);
@@ -12,7 +12,7 @@ fn should_present_a_co_author_compliant_signature() {
 }
 
 #[test]
-fn should_get_alias() {
+fn get_alias() {
 	let alias = "a";
 	let author = Author::from(alias, "alice", "alice@wonderland.not");
 
@@ -20,7 +20,7 @@ fn should_get_alias() {
 }
 
 #[test]
-fn should_get_name() {
+fn get_name() {
 	let name = "alice";
 	let author = Author::from("a", name, "alice@wonderland.not");
 
@@ -28,7 +28,7 @@ fn should_get_name() {
 }
 
 #[test]
-fn should_be_equal_to_another_author_with_equal_data() {
+fn be_equal_to_another_author_with_equal_data() {
 	let alias = "a";
 	let name = "alice";
 	let email = "alice@wonderland.not";
@@ -44,6 +44,6 @@ fn should_be_equal_to_another_author_with_equal_data() {
 	Author::from("a", "not_alice", "alice@wonderland.not"),
 	Author::from("a", "alice", "someone@wonderland.not")
 })]
-fn should_not_be_equal_to_another_author_with_different_data(different_author: Author) {
+fn not_be_equal_to_another_author_with_different_data(different_author: Author) {
 	assert_ne!(Author::from("a", "alice", "alice@wonderland.not"), different_author);
 }

@@ -1,7 +1,7 @@
 use crate::git::commit_message::CommitMessage;
 
 #[test]
-fn should_produce_a_correctly_formatted_commit_message() {
+fn produce_a_correctly_formatted_commit_message() {
 	let message = "Irrelevant commit message";
 	let author1 = String::from("author 1");
 	let author2 = String::from("author 2");

@@ -1,13 +1,13 @@
 use crate::authors::csv::provider::CSVReader;
 use crate::common::conf;
-use crate::test_utils::dummy_file::DummyFile;
+use crate::common::fs::test::util::dummy_file::DummyFile;
 use crate::{authors::author::AuthorsProvider, common::fs::wrapper::MockFileLoader};
 use mockall::predicate::{self, eq};
 
 const IRRELEVANT_FILE_PATH: &str = "a/path/file.hi";
 
 #[test]
-fn should_build_using_fallback() {
+fn build_using_fallback() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_with_fallback()
@@ -19,7 +19,7 @@ fn should_build_using_fallback() {
 }
 
 #[test]
-fn should_not_build_using_fallback() {
+fn not_build_using_fallback() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_with_fallback()
@@ -33,7 +33,7 @@ fn should_not_build_using_fallback() {
 }
 
 #[test]
-fn should_build_from_given_file() {
+fn build_from_given_file() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_if_present()
@@ -45,7 +45,7 @@ fn should_build_from_given_file() {
 }
 
 #[test]
-fn should_not_build_from_given_file() {
+fn not_build_from_given_file() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_if_present()
@@ -59,7 +59,7 @@ fn should_not_build_from_given_file() {
 }
 
 #[test]
-fn should_provide_all_authors_in_file() {
+fn provide_all_authors_in_file() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_with_fallback()
@@ -79,7 +79,7 @@ fn should_provide_all_authors_in_file() {
 }
 
 #[test]
-fn should_provide_only_author_matching_an_alias() {
+fn provide_only_author_matching_an_alias() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_with_fallback()
@@ -99,7 +99,7 @@ fn should_provide_only_author_matching_an_alias() {
 }
 
 #[test]
-fn should_provide_all_authors_matching_an_alias() {
+fn provide_all_authors_matching_an_alias() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_with_fallback()
@@ -120,7 +120,7 @@ fn should_provide_all_authors_matching_an_alias() {
 }
 
 #[test]
-fn should_provide_no_author_when_alias_doesnt_match() {
+fn provide_no_author_when_alias_doesnt_match() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_with_fallback()

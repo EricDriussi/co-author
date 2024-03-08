@@ -9,11 +9,8 @@ repository = "https://github.com/EricDriussi/co-author"
 keywords = ["git", "libgit2", "git2rs", "author", "co-author"]
 categories = ["command-line-interface", "command-line-utilities", "development-tools"]
 exclude = [
-    ".*",
     "**/test/**/*",
-    "**/test.rs",
-    "Taskfile.yml",
-    "LICENSE",
+    "**/test_utils/**/*",
 ]
 
 [dependencies]

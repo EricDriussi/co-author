@@ -1,13 +1,13 @@
 use std::fs;
 
 use crate::common::fs::{
-	test::create_random_tmp_file,
+	test::util::random_tmp_file,
 	wrapper::{FileLoader, FsWrapper},
 };
 
 #[test]
-fn should_load_file_if_present() {
-	let (_, file_path) = create_random_tmp_file();
+fn load_file_if_present() {
+	let (_, file_path) = random_tmp_file::create();
 	let wrapper = FsWrapper::new();
 
 	let actual_file = wrapper.load_if_present(file_path.to_string());
@@ -17,8 +17,8 @@ fn should_load_file_if_present() {
 }
 
 #[test]
-fn should_not_load_file_if_absent() {
-	let (_, file_path) = create_random_tmp_file();
+fn not_load_file_if_absent() {
+	let (_, file_path) = random_tmp_file::create();
 	fs::remove_file(file_path.clone()).expect("Could not cleanup file for test");
 	let wrapper = FsWrapper::new();
 
@@ -28,9 +28,9 @@ fn should_not_load_file_if_absent() {
 }
 
 #[test]
-fn should_create_file_when_absent() {
+fn create_file_when_absent() {
 	let wrapper = FsWrapper::new();
-	let (_, file_path) = create_random_tmp_file();
+	let (_, file_path) = random_tmp_file::create();
 	fs::remove_file(file_path.clone()).expect("Could not cleanup file for test");
 
 	let actual_file = wrapper.load(file_path.to_string());

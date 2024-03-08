@@ -1,9 +1,6 @@
 use config::{Config, Environment, File, FileFormat};
-use std::env;
 
-const DEFAULT_CONFIG: &str = include_str!("default.yaml");
-// TODO: test yml might not be needed
-const TEST_CONFIG: &str = include_str!("test.yaml");
+const CONFIG: &str = include_str!("config.yaml");
 const CONFIG_ERR_MSG: &str = "Config not loaded properly";
 
 pub fn authors_dir() -> String {
@@ -27,25 +24,12 @@ pub fn co_author_prefix() -> String {
 }
 
 fn get_config() -> Config {
-	let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "default".to_string());
-
-	match run_mode.as_str() {
-		"test" => Config::builder()
-			.add_source(File::from_str(DEFAULT_CONFIG, FileFormat::Yaml))
-			// optional config, overrides default
-			.add_source(File::from_str(TEST_CONFIG, FileFormat::Yaml))
-			// allow settings from the environment (with a prefix of APP)
-			.add_source(Environment::with_prefix("app"))
-			.build()
-			.expect(CONFIG_ERR_MSG),
-
-		_ => Config::builder()
-			.add_source(File::from_str(DEFAULT_CONFIG, FileFormat::Yaml))
-			// allow settings from the environment (with a prefix of APP)
-			.add_source(Environment::with_prefix("app"))
-			.build()
-			.expect(CONFIG_ERR_MSG),
-	}
+	Config::builder()
+		.add_source(File::from_str(CONFIG, FileFormat::Yaml))
+		// allow settings from the environment (with a prefix of APP)
+		.add_source(Environment::with_prefix("app"))
+		.build()
+		.expect(CONFIG_ERR_MSG)
 }
 
 #[cfg(test)]

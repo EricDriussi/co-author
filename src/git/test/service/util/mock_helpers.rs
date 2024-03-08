@@ -1,13 +1,10 @@
+use super::mock_file::MockFile;
 use crate::{
-	common::fs::{
-		file::{File, Locatable, Readable, Writable},
-		wrapper::MockFileLoader,
-	},
+	common::fs::wrapper::MockFileLoader,
 	git::{commit_message::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner},
 };
-use mockall::*;
 
-pub fn file_loader_loading(file: MockFile) -> MockFileLoader {
+pub fn ok_file_loader(file: MockFile) -> MockFileLoader {
 	let mut mock_file_loader = MockFileLoader::new();
 	let mut mock_file_opt = Some(file);
 	#[allow(clippy::unwrap_used)]
@@ -44,22 +41,4 @@ pub fn ok_editor() -> MockEditmsgEditor {
 	let mut mock_editmsg_editor = MockEditmsgEditor::new();
 	mock_editmsg_editor.expect_open().returning(|| Ok(()));
 	mock_editmsg_editor
-}
-
-mock! {
-	pub File {}
-
-	impl Readable for File {
-		fn non_empty_lines(&self) -> Vec<String>;
-	}
-
-	impl Writable for File {
-		fn write(&mut self, data: String) -> crate::Result<()>;
-	}
-
-	impl Locatable for File {
-		fn path(&self) -> &str;
-	}
-
-	impl File for File {}
 }

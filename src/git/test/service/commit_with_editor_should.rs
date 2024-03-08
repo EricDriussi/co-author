@@ -1,5 +1,6 @@
-use crate::git::test::service::util::{
-	file_loader_loading, ok_editor, ok_file, ok_git_wrapper, ok_hook_runner, MockFile,
+use crate::git::test::service::util::mock_file::MockFile;
+use crate::git::test::service::util::mock_helpers::{
+	ok_editor, ok_file, ok_file_loader, ok_git_wrapper, ok_hook_runner,
 };
 use crate::git::{
 	commit_message::{GitWrapper, MockGitWrapper},
@@ -16,7 +17,7 @@ const COMMIT_MSG: &str = "a message";
 const AUTHOR: &str = "an author";
 
 #[test]
-fn should_succeed() {
+fn succeed() {
 	let mut mock_hook_runner = MockHookRunner::new();
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	let mut mock_editmsg_editor = MockEditmsgEditor::new();
@@ -62,7 +63,7 @@ fn should_succeed() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
-		&file_loader_loading(mock_file),
+		&ok_file_loader(mock_file),
 		mock_editmsg_editor,
 	));
 
@@ -70,7 +71,7 @@ fn should_succeed() {
 }
 
 #[test]
-fn should_write_commit_msg_and_authors() {
+fn write_commit_msg_and_authors() {
 	let mut mock_file = MockFile::new();
 	let mut seq = Sequence::new();
 	mock_file
@@ -88,7 +89,7 @@ fn should_write_commit_msg_and_authors() {
 	let result = do_commit(GitService::new(
 		ok_git_wrapper(String::new()),
 		ok_hook_runner(),
-		&file_loader_loading(mock_file),
+		&ok_file_loader(mock_file),
 		ok_editor(),
 	));
 
@@ -96,7 +97,7 @@ fn should_write_commit_msg_and_authors() {
 }
 
 #[test]
-fn should_add_status_to_editmsg_file() {
+fn add_status_to_editmsg_file() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	let mut mock_file = MockFile::new();
 	let mut seq = Sequence::new();
@@ -122,7 +123,7 @@ fn should_add_status_to_editmsg_file() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		ok_hook_runner(),
-		&file_loader_loading(mock_file),
+		&ok_file_loader(mock_file),
 		ok_editor(),
 	));
 
@@ -130,7 +131,7 @@ fn should_add_status_to_editmsg_file() {
 }
 
 #[test]
-fn should_stop_and_report_pre_commit_hook_failure() {
+fn stop_and_report_pre_commit_hook_failure() {
 	let mut mock_hook_runner = MockHookRunner::new();
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	let mut mock_editmsg_editor = MockEditmsgEditor::new();
@@ -148,7 +149,7 @@ fn should_stop_and_report_pre_commit_hook_failure() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
-		&file_loader_loading(mock_file),
+		&ok_file_loader(mock_file),
 		mock_editmsg_editor,
 	));
 
@@ -156,7 +157,7 @@ fn should_stop_and_report_pre_commit_hook_failure() {
 }
 
 #[test]
-fn should_stop_and_report_add_status_to_editmsg_error() {
+fn stop_and_report_add_status_to_editmsg_error() {
 	let mut mock_hook_runner = MockHookRunner::new();
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	let mut mock_editmsg_editor = MockEditmsgEditor::new();
@@ -175,7 +176,7 @@ fn should_stop_and_report_add_status_to_editmsg_error() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
-		&file_loader_loading(mock_file),
+		&ok_file_loader(mock_file),
 		mock_editmsg_editor,
 	));
 
@@ -183,7 +184,7 @@ fn should_stop_and_report_add_status_to_editmsg_error() {
 }
 
 #[test]
-fn should_stop_and_report_when_editor_cannot_be_opened() {
+fn stop_and_report_when_editor_cannot_be_opened() {
 	let mut mock_hook_runner = MockHookRunner::new();
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	let mut mock_editmsg_editor = MockEditmsgEditor::new();
@@ -199,7 +200,7 @@ fn should_stop_and_report_when_editor_cannot_be_opened() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
-		&file_loader_loading(ok_file()),
+		&ok_file_loader(ok_file()),
 		mock_editmsg_editor,
 	));
 
@@ -207,7 +208,7 @@ fn should_stop_and_report_when_editor_cannot_be_opened() {
 }
 
 #[test]
-fn should_stop_and_report_commit_msg_hook_failure() {
+fn stop_and_report_commit_msg_hook_failure() {
 	let mut mock_hook_runner = MockHookRunner::new();
 	let mut mock_git_wrapper = MockGitWrapper::new();
 
@@ -223,7 +224,7 @@ fn should_stop_and_report_commit_msg_hook_failure() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
-		&file_loader_loading(ok_file()),
+		&ok_file_loader(ok_file()),
 		ok_editor(),
 	));
 
@@ -231,7 +232,7 @@ fn should_stop_and_report_commit_msg_hook_failure() {
 }
 
 #[test]
-fn should_report_commit_error() {
+fn report_commit_error() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
 
 	mock_git_wrapper
@@ -242,7 +243,7 @@ fn should_report_commit_error() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		ok_hook_runner(),
-		&file_loader_loading(ok_file()),
+		&ok_file_loader(ok_file()),
 		ok_editor(),
 	));
 

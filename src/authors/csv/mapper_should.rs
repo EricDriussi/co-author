@@ -1,7 +1,7 @@
 use crate::authors::{author::Author, csv::mapper};
 
 #[test]
-fn should_map_from_valid_csv_line() {
+fn map_from_valid_csv_line() {
 	let alias = "a";
 	let name = "alice";
 	let email = "alice@wonderland.not";
@@ -12,7 +12,7 @@ fn should_map_from_valid_csv_line() {
 }
 
 #[test]
-fn should_not_map_from_invalid_csv_line() {
+fn not_map_from_invalid_csv_line() {
 	let name = "alice";
 	let email = "alice@wonderland.not";
 

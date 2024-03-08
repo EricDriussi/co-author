@@ -86,33 +86,39 @@ fn get_project_root_dir() -> Option<PathBuf> {
 // TODO: do something with this mess, check what needs to be public
 mod args;
 mod error;
+mod git;
+mod handler;
+
 mod authors {
 	pub mod author;
 	pub mod csv {
 		pub mod mapper;
+		#[cfg(test)]
+		mod mapper_should;
 		pub mod provider;
+		#[cfg(test)]
+		mod provider_should;
 	}
-	pub mod authors_err;
 	#[cfg(test)]
-	mod test;
+	mod author_should;
+	pub mod authors_err;
 }
+
 mod cli {
 	pub mod cli_err;
 	pub mod input_reader;
 	pub mod prompt;
 	#[cfg(test)]
-	mod prompt_test;
+	mod prompt_should;
 }
-mod git;
-mod handler;
-pub mod test_utils;
+
 mod common {
 	pub mod conf;
 	pub mod runner;
 	pub mod fs {
 		pub mod file;
 		#[cfg(test)]
-		mod test;
+		pub mod test;
 		pub mod wrapper;
 	}
 }

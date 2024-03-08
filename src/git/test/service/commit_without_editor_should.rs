@@ -1,10 +1,10 @@
-use crate::git::test::service::util::{ok_file, ok_git_wrapper, ok_hook_runner, MockFile};
+use crate::git::test::service::util::mock_file::MockFile;
+use crate::git::test::service::util::mock_helpers::{ok_file, ok_file_loader, ok_git_wrapper, ok_hook_runner};
 use crate::git::{
 	commit_message::{GitWrapper, MockGitWrapper},
 	editor::{EditmsgEditor, MockEditmsgEditor},
 	hook::{HookRunner, MockHookRunner},
 	service::{CommitMode, GitService},
-	test::service::util::file_loader_loading,
 };
 use crate::Result;
 use mockall::Sequence;
@@ -14,7 +14,7 @@ const COMMIT_MSG: &str = "a message";
 const AUTHOR: &str = "an author";
 
 #[test]
-fn should_succeed() {
+fn succeed() {
 	let mut mock_hook_runner = MockHookRunner::new();
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	let mut mock_file = MockFile::new();
@@ -44,7 +44,7 @@ fn should_succeed() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
-		&file_loader_loading(mock_file),
+		&ok_file_loader(mock_file),
 		MockEditmsgEditor::new(),
 	));
 
@@ -52,7 +52,7 @@ fn should_succeed() {
 }
 
 #[test]
-fn should_write_commit_msg_and_authors() {
+fn write_commit_msg_and_authors() {
 	let mut mock_file = MockFile::new();
 	mock_file
 		.expect_write()
@@ -62,7 +62,7 @@ fn should_write_commit_msg_and_authors() {
 	let result = do_commit(GitService::new(
 		ok_git_wrapper(String::new()),
 		ok_hook_runner(),
-		&file_loader_loading(mock_file),
+		&ok_file_loader(mock_file),
 		MockEditmsgEditor::new(),
 	));
 
@@ -70,7 +70,7 @@ fn should_write_commit_msg_and_authors() {
 }
 
 #[test]
-fn should_not_add_status_to_editmsg_file() {
+fn not_add_status_to_editmsg_file() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	mock_git_wrapper.expect_formatted_status().times(0);
 	mock_git_wrapper.expect_commit().returning(|| Ok(()));
@@ -78,7 +78,7 @@ fn should_not_add_status_to_editmsg_file() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		ok_hook_runner(),
-		&file_loader_loading(ok_file()),
+		&ok_file_loader(ok_file()),
 		MockEditmsgEditor::new(),
 	));
 
@@ -86,14 +86,14 @@ fn should_not_add_status_to_editmsg_file() {
 }
 
 #[test]
-fn should_not_open_editor() {
+fn not_open_editor() {
 	let mut mock_editmsg_editor = MockEditmsgEditor::new();
 	mock_editmsg_editor.expect_open().times(0);
 
 	let result = do_commit(GitService::new(
 		ok_git_wrapper(String::new()),
 		ok_hook_runner(),
-		&file_loader_loading(ok_file()),
+		&ok_file_loader(ok_file()),
 		mock_editmsg_editor,
 	));
 
@@ -101,7 +101,7 @@ fn should_not_open_editor() {
 }
 
 #[test]
-fn should_stop_and_report_pre_commit_hook_failure() {
+fn stop_and_report_pre_commit_hook_failure() {
 	let mut mock_hook_runner = MockHookRunner::new();
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	let mut mock_file = MockFile::new();
@@ -116,7 +116,7 @@ fn should_stop_and_report_pre_commit_hook_failure() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
-		&file_loader_loading(mock_file),
+		&ok_file_loader(mock_file),
 		MockEditmsgEditor::new(),
 	));
 
@@ -124,7 +124,7 @@ fn should_stop_and_report_pre_commit_hook_failure() {
 }
 
 #[test]
-fn should_stop_and_report_commit_msg_hook_failure() {
+fn stop_and_report_commit_msg_hook_failure() {
 	let mut mock_hook_runner = MockHookRunner::new();
 	let mut mock_git_wrapper = MockGitWrapper::new();
 
@@ -137,7 +137,7 @@ fn should_stop_and_report_commit_msg_hook_failure() {
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
-		&file_loader_loading(ok_file()),
+		&ok_file_loader(ok_file()),
 		MockEditmsgEditor::new(),
 	));
 
@@ -145,14 +145,14 @@ fn should_stop_and_report_commit_msg_hook_failure() {
 }
 
 #[test]
-fn should_report_commit_error() {
+fn report_commit_error() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	mock_git_wrapper.expect_commit().returning(move || Err(ERR_MSG.into()));
 
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		ok_hook_runner(),
-		&file_loader_loading(ok_file()),
+		&ok_file_loader(ok_file()),
 		MockEditmsgEditor::new(),
 	));
 

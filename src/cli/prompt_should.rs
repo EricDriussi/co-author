@@ -2,7 +2,7 @@ use super::{input_reader::MockReader, prompt::Prompt};
 use crate::authors::author::Author;
 
 #[test]
-fn should_prompt_for_commit_message() {
+fn prompt_for_commit_message() {
 	let mut reader = MockReader::new();
 	reader
 		.expect_readline()
@@ -16,7 +16,7 @@ fn should_prompt_for_commit_message() {
 }
 
 #[test]
-fn should_trim_commit_message() {
+fn trim_commit_message() {
 	let trimmed_msg = "test commit message";
 	let padded_msg = format!(" {trimmed_msg}  ");
 	let mut reader = MockReader::new();
@@ -32,7 +32,7 @@ fn should_trim_commit_message() {
 }
 
 #[test]
-fn should_prompt_for_aliases() {
+fn prompt_for_aliases() {
 	let mut reader = MockReader::new();
 	reader
 		.expect_readline()
@@ -46,7 +46,7 @@ fn should_prompt_for_aliases() {
 }
 
 #[test]
-fn should_pretty_print_authors_when_prompting_for_aliases() {
+fn pretty_print_authors_when_prompting_for_aliases() {
 	let alias = "a";
 	let name = "alice";
 	let author = Author::from(alias, name, "email");
@@ -63,7 +63,7 @@ fn should_pretty_print_authors_when_prompting_for_aliases() {
 }
 
 #[test]
-fn should_space_split_aliases() {
+fn space_split_aliases() {
 	let aliases = " a b cd   ";
 	let mut reader = MockReader::new();
 	reader
