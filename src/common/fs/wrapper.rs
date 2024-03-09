@@ -9,7 +9,7 @@ pub trait FileLoader {
 	fn load_or_create(&self, file_path: String) -> OptionalFile;
 }
 
-pub struct FsWrapper {}
+pub struct FsWrapper;
 
 impl FsWrapper {
 	pub fn new() -> Self {

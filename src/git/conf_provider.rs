@@ -5,7 +5,7 @@ pub trait ConfProvider {
 	fn get_editor(&self) -> Option<String>;
 }
 
-pub struct GitConfProvider {}
+pub struct GitConfProvider;
 
 impl GitConfProvider {
 	pub fn new() -> Self {

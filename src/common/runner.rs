@@ -7,7 +7,7 @@ pub trait Runner {
 	fn spawn(&self, editor: &str, path: &str) -> Result<()>;
 }
 
-pub struct CommandRunner {}
+pub struct CommandRunner;
 
 impl CommandRunner {
 	pub fn new() -> Self {
