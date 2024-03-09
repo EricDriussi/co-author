@@ -1,9 +1,35 @@
 use crate::authors::csv::provider::CSVReader;
+use crate::common::conf;
 use crate::common::fs::test::util::dummy_file::DummyFile;
 use crate::{authors::author::AuthorsProvider, common::fs::wrapper::MockFileLoader};
 use mockall::predicate::{self, eq};
+use mockall::Sequence;
 
 const IRRELEVANT_FILE_PATH: &str = "a/path/file.hi";
+
+#[test]
+fn build_from_given_file() {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_if_present()
+		.with(eq(IRRELEVANT_FILE_PATH.to_string()))
+		.returning(|_| Some(Box::new(DummyFile::empty())));
+
+	assert!(CSVReader::from(&mock_file_loader, IRRELEVANT_FILE_PATH).is_ok());
+}
+
+#[test]
+fn not_build_from_given_file() {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_if_present()
+		.with(eq(IRRELEVANT_FILE_PATH.to_string()))
+		.returning(|_| None);
+
+	assert!(matches!(
+	CSVReader::from(&mock_file_loader, IRRELEVANT_FILE_PATH),
+	Err(e) if e.to_string().contains(format!("No file at {IRRELEVANT_FILE_PATH}").as_str())));
+}
 
 #[test]
 fn build_using_fallback() {
@@ -30,29 +56,43 @@ fn not_build_using_fallback() {
 }
 
 #[test]
-fn build_from_given_file() {
+fn fallback_sensibly() {
+	let xdg_config = "a_path";
+	let home = "a_home";
+	std::env::set_var("XDG_CONFIG_HOME", xdg_config);
+	std::env::set_var("HOME", home);
+	let file_path = &conf::authors_file();
+	let dir_path = &conf::authors_dir();
+	let mut seq = Sequence::new();
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_if_present()
-		.with(eq(IRRELEVANT_FILE_PATH.to_string()))
+		.with(eq(format!("{xdg_config}/{dir_path}/{file_path}")))
+		.returning(|_| None)
 		.times(1)
-		.returning(|_| Some(Box::new(DummyFile::empty())));
-
-	assert!(CSVReader::from(&mock_file_loader, IRRELEVANT_FILE_PATH).is_ok());
-}
-
-#[test]
-fn not_build_from_given_file() {
-	let mut mock_file_loader = MockFileLoader::new();
+		.in_sequence(&mut seq);
 	mock_file_loader
 		.expect_load_if_present()
-		.with(eq(IRRELEVANT_FILE_PATH.to_string()))
+		.with(eq(format!("{home}/.config/{dir_path}/{file_path}")))
 		.times(1)
-		.returning(|_| None);
+		.returning(|_| None)
+		.in_sequence(&mut seq);
+	mock_file_loader
+		.expect_load_if_present()
+		.with(eq(format!("{home}/.{dir_path}/{file_path}")))
+		.times(1)
+		.returning(|_| None)
+		.in_sequence(&mut seq);
+	mock_file_loader
+		.expect_load_if_present()
+		.with(eq(format!("{home}/{file_path}")))
+		.times(1)
+		.returning(|_| None)
+		.in_sequence(&mut seq);
 
 	assert!(matches!(
-	CSVReader::from(&mock_file_loader, IRRELEVANT_FILE_PATH),
-	Err(e) if e.to_string().contains(format!("No file at {IRRELEVANT_FILE_PATH}").as_str())));
+	CSVReader::from_cwd_fallback_home(&mock_file_loader),
+	Err(e) if e.to_string().contains("No file at $PWD or $HOME")));
 }
 
 #[test]
