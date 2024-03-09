@@ -1,10 +1,7 @@
 use super::{commit_message::GitWrapper, err::GitError};
 use crate::common::{
 	conf,
-	fs::{
-		file::File,
-		wrapper::{FileLoader, FsWrapper},
-	},
+	fs::{file::File, wrapper::FileLoader},
 };
 use crate::Result;
 use git2::{Repository, Signature};
@@ -63,7 +60,7 @@ impl GitWrapper for LibGitWrapper {
 }
 
 impl LibGitWrapper {
-	pub fn from(path: &PathBuf, file_loader: &FsWrapper) -> Result<Self> {
+	pub fn from(path: &PathBuf, file_loader: &dyn FileLoader) -> Result<Self> {
 		let repo = Repository::open(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
 		// TODO: improve this ugly concatenation
 		let editmsg = file_loader

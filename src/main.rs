@@ -1,7 +1,7 @@
 use args::Args;
 use clap::Parser;
-use cli::prompt::Prompt;
-use git::commit_mode::CommitMode;
+use cli::di::init_cli_module;
+use git::{commit_mode::CommitMode, di::init_git_module};
 use std::{env, error::Error, path::PathBuf, process, result};
 
 // TODO: improve tests
@@ -24,14 +24,15 @@ pub type Result<T> = result::Result<T, Box<dyn Error>>;
 // pub type Result<T> = result::Result<T, Error>;
 
 fn run(args: &Args) -> Result<()> {
-	set_cwd_to_git_root()?;
-
-	let mut cli = Prompt::new(rustyline::DefaultEditor::new()?);
-	let authors_signatures = handler::handle_authors(args, &mut cli)?;
+	let project_root_dir = get_project_root_dir().ok_or("Not in a valid git repo")?;
+	env::set_current_dir(project_root_dir.clone()).map_err(|_| "Something went wrong")?;
 
 	// FIXME. Find a way to pass this to handle_commit_msg (clone/copy)
-	let mut git_service = git::init_git_dependency_tree()?;
+	let mut git_service = init_git_module(&project_root_dir)?;
 	let prev = git_service.last_commit_message();
+
+	let mut cli = init_cli_module()?;
+	let authors_signatures = handler::handle_authors(args, &mut cli)?;
 
 	if args.editor {
 		if args.pre_populate {
@@ -51,11 +52,6 @@ fn run(args: &Args) -> Result<()> {
 		message: msg.as_str(),
 		authors: authors_signatures,
 	})
-}
-
-fn set_cwd_to_git_root() -> Result<()> {
-	let project_root_dir = get_project_root_dir().ok_or("Not in a valid git repo")?;
-	env::set_current_dir(project_root_dir).map_err(|_| "Something went wrong".into())
 }
 
 // TODO: eval if this should be used to get the root dir, maybe expose it from the git module

@@ -2,17 +2,16 @@ use crate::{
 	args::Args,
 	authors::{
 		author::{Author, AuthorsProvider},
-		csv::provider::CSVReader,
+		di::{init_authors_module, init_authors_module_for},
 	},
 	cli::{input_reader::Reader, prompt::Prompt},
-	common::fs::wrapper::FsWrapper,
 	Result,
 };
 
 pub fn handle_authors<T: Reader>(args: &Args, cli: &mut Prompt<T>) -> Result<Vec<String>> {
 	let authors_prov = match &args.file {
-		Some(file) => CSVReader::from(&FsWrapper::new(), file)?,
-		None => CSVReader::from_cwd_fallback_home(&FsWrapper::new())?,
+		Some(file) => init_authors_module_for(file)?,
+		None => init_authors_module()?,
 	};
 
 	if args.all {
