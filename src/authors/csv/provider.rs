@@ -27,16 +27,25 @@ impl CSVReader {
 		let file_path = &conf::authors_file();
 		let dir_path = &conf::authors_dir();
 
-		let authors_file = match env::var("XDG_CONFIG_HOME") {
-			Err(_) => Self::home_fallback(file_loader, dir_path, file_path),
-			Ok(xdg_config) => file_loader
-				.load_if_present(format!("{xdg_config}/{dir_path}/{file_path}"))
-				.or_else(|| Self::home_fallback(file_loader, dir_path, file_path)),
+		let authors_file = match env::current_dir() {
+			Err(_) => Self::xdg_fallback(file_loader, dir_path, file_path),
+			Ok(cwd) => file_loader
+				.load_if_present(format!("{}/{file_path}", cwd.display()))
+				.or_else(|| Self::xdg_fallback(file_loader, dir_path, file_path)),
 		};
 
 		match authors_file {
 			Some(file) => Ok(Self { src: file }),
 			None => Err(AuthorsError::NotFound("$PWD or $HOME".to_string()).into()),
+		}
+	}
+
+	fn xdg_fallback(file_loader: &impl FileLoader, authors_dir: &str, file_path: &str) -> OptionalFile {
+		match env::var("XDG_CONFIG_HOME") {
+			Err(_) => Self::home_fallback(file_loader, authors_dir, file_path),
+			Ok(xdg_config) => file_loader
+				.load_if_present(format!("{xdg_config}/{authors_dir}/{file_path}"))
+				.or_else(|| Self::home_fallback(file_loader, authors_dir, file_path)),
 		}
 	}
 

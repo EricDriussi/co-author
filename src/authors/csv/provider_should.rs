@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::authors::csv::provider::CSVReader;
 use crate::common::conf;
 use crate::common::fs::test::util::dummy_file::DummyFile;
@@ -59,12 +61,20 @@ fn not_build_using_fallback() {
 fn fallback_sensibly() {
 	let xdg_config = "a_path";
 	let home = "a_home";
+	let cwd = "/tmp";
+	std::env::set_current_dir(PathBuf::from(cwd)).expect("Could not set current dir for tests");
 	std::env::set_var("XDG_CONFIG_HOME", xdg_config);
 	std::env::set_var("HOME", home);
 	let file_path = &conf::authors_file();
 	let dir_path = &conf::authors_dir();
 	let mut seq = Sequence::new();
 	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_if_present()
+		.with(eq(format!("{cwd}/{file_path}")))
+		.returning(|_| None)
+		.times(1)
+		.in_sequence(&mut seq);
 	mock_file_loader
 		.expect_load_if_present()
 		.with(eq(format!("{xdg_config}/{dir_path}/{file_path}")))
