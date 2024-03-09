@@ -2,7 +2,7 @@ use crate::git::test::service::util::mock_helpers::{ok_file, ok_file_loader};
 use crate::{
 	common::fs::wrapper::MockFileLoader,
 	git::{
-		commit_message::MockGitWrapper, editor::MockEditmsgEditor, git_err::GitError, hook::MockHookRunner,
+		commit_message::MockGitWrapper, editor::MockEditmsgEditor, err::GitError, hook::MockHookRunner,
 		service::GitService,
 	},
 };

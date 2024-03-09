@@ -5,13 +5,6 @@ use crate::Result;
 use libgit_wrapper::LibGitWrapper;
 use service::GitService;
 use std::env;
-pub mod commit_message;
-mod conf_provider;
-mod editor;
-mod git_err;
-mod hook;
-pub mod libgit_wrapper;
-pub mod service;
 
 type TextEditor = Editor<CommandRunner, FsWrapper, GitConfProvider>;
 type GitHook = Hook<CommandRunner>;
@@ -30,5 +23,29 @@ pub fn init_git_dependency_tree() -> Result<Service> {
 	}
 }
 
+mod commit_message;
+pub mod commit_mode;
+mod conf_provider;
+mod editor;
+mod err;
+mod hook;
+mod libgit_wrapper;
+mod service;
+
 #[cfg(test)]
-mod test;
+mod test {
+	mod editor_should;
+	mod git_should;
+	mod hook_should;
+	mod libgit_wrapper_should;
+	mod service {
+		mod commit_with_editor_should;
+		mod commit_without_editor_should;
+		mod service_should;
+
+		pub mod util {
+			pub mod mock_file;
+			pub mod mock_helpers;
+		}
+	}
+}

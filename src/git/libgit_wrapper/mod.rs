@@ -1,4 +1,4 @@
-use super::{commit_message::GitWrapper, git_err::GitError};
+use super::{commit_message::GitWrapper, err::GitError};
 use crate::common::{
 	conf,
 	fs::{

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{authors::authors_err::AuthorsError, cli::cli_err::CliError};
+use crate::{authors::err::AuthorsError, cli::err::CliError};
 
 #[derive(Debug)]
 pub enum Error {

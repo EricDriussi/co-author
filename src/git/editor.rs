@@ -1,5 +1,5 @@
 use super::conf_provider::ConfProvider;
-use super::git_err::GitError;
+use super::err::GitError;
 use crate::{
 	common::{conf, fs::wrapper::FileLoader, runner::Runner},
 	Result,

@@ -1,4 +1,4 @@
-use super::cli_err::CliError;
+use super::err::CliError;
 use crate::Result;
 use rustyline::{error::ReadlineError, DefaultEditor};
 

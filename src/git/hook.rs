@@ -1,4 +1,4 @@
-use super::git_err::GitError;
+use super::err::GitError;
 use crate::{
 	common::{conf, runner::Runner},
 	Result,

@@ -1,10 +1,11 @@
+use crate::git::commit_mode::CommitMode;
 use crate::git::test::service::util::mock_file::MockFile;
 use crate::git::test::service::util::mock_helpers::{ok_file, ok_file_loader, ok_git_wrapper, ok_hook_runner};
 use crate::git::{
 	commit_message::{GitWrapper, MockGitWrapper},
 	editor::{EditmsgEditor, MockEditmsgEditor},
 	hook::{HookRunner, MockHookRunner},
-	service::{CommitMode, GitService},
+	service::GitService,
 };
 use crate::Result;
 use mockall::Sequence;

@@ -1,4 +1,5 @@
-use super::git_err::GitError;
+use super::commit_mode::CommitMode;
+use super::err::GitError;
 use super::hook::HookRunner;
 use super::{
 	commit_message::{CommitMessage, GitWrapper},
@@ -14,17 +15,6 @@ pub struct GitService<W: GitWrapper, H: HookRunner, E: EditmsgEditor> {
 	hook_runner: H,
 	editmsg: Box<dyn File>,
 	editmsg_editor: E,
-}
-
-pub enum CommitMode<'a> {
-	WithEditor {
-		message: Option<&'a str>,
-		authors: Vec<String>,
-	},
-	WithoutEditor {
-		message: &'a str,
-		authors: Vec<String>,
-	},
 }
 
 impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
