@@ -33,7 +33,7 @@ fn create_file_when_absent() {
 	let (_, file_path) = random_tmp_file::create();
 	fs::remove_file(file_path.clone()).expect("Could not cleanup file for test");
 
-	let actual_file = wrapper.load(file_path.to_string());
+	let actual_file = wrapper.load_or_create(file_path.to_string());
 
 	fs::remove_file(file_path).expect("Could not cleanup file for test");
 	assert!(actual_file.is_some());

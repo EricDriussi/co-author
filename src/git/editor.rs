@@ -20,7 +20,10 @@ pub struct Editor<R: Runner, F: FileLoader, C: ConfProvider> {
 impl<R: Runner, F: FileLoader, C: ConfProvider> EditmsgEditor for Editor<R, F, C> {
 	// TODO: this should take a File as param
 	fn open(&self) -> Result<()> {
-		let editmsg = self.file_loader.load(conf::editmsg()).ok_or(GitError::Editor)?;
+		let editmsg = self
+			.file_loader
+			.load_or_create(conf::editmsg())
+			.ok_or(GitError::Editor)?;
 
 		let editing_operation_result = match self.conf_provider.get_editor() {
 			None => self.env_fallback(editmsg.path()),

@@ -64,7 +64,7 @@ impl LibGitWrapper {
 		let repo = Repository::open(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
 		// TODO: improve this ugly concatenation
 		let editmsg = file_loader
-			.load(path.join(conf::editmsg()).to_string_lossy().to_string())
+			.load_or_create(path.join(conf::editmsg()).to_string_lossy().to_string())
 			.ok_or(GitError::Editor)?;
 		if Self::no_staged_changes(&repo) {
 			Err(Box::new(GitError::LibGit("No staged changes".to_string())))

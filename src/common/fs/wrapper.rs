@@ -7,7 +7,7 @@ pub type OptionalFile = Option<Box<dyn File>>;
 #[cfg_attr(test, mockall::automock)]
 pub trait FileLoader {
 	fn load_if_present(&self, file_path: String) -> OptionalFile;
-	fn load(&self, file_path: String) -> OptionalFile;
+	fn load_or_create(&self, file_path: String) -> OptionalFile;
 	fn load_with_fallback(&self, file_path: String) -> OptionalFile;
 }
 
@@ -36,7 +36,7 @@ impl FileLoader for FsWrapper {
 		Some(SimpleFile::from(file, file_path))
 	}
 
-	fn load(&self, file_path: String) -> OptionalFile {
+	fn load_or_create(&self, file_path: String) -> OptionalFile {
 		let file = OpenOptions::new()
 			.read(true)
 			.append(true)

@@ -19,7 +19,7 @@ pub struct GitService<W: GitWrapper, H: HookRunner, E: EditmsgEditor> {
 
 impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
 	pub fn new(git_wrapper: W, runner: H, file_loader: &dyn FileLoader, editmsg_editor: E) -> Result<Self> {
-		let editmsg = file_loader.load(conf::editmsg()).ok_or(GitError::Editmsg)?;
+		let editmsg = file_loader.load_or_create(conf::editmsg()).ok_or(GitError::Editmsg)?;
 		Ok(Self {
 			git_wrapper,
 			hook_runner: runner,

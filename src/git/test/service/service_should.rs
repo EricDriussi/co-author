@@ -10,7 +10,7 @@ use crate::{
 #[test]
 fn not_instantiate_if_editmsg_is_not_present() {
 	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader.expect_load().returning(|_| None);
+	mock_file_loader.expect_load_or_create().returning(|_| None);
 
 	let service = GitService::new(
 		MockGitWrapper::new(),

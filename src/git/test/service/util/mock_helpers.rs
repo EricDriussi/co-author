@@ -9,7 +9,7 @@ pub fn ok_file_loader(file: MockFile) -> MockFileLoader {
 	let mut mock_file_opt = Some(file);
 	#[allow(clippy::unwrap_used)]
 	mock_file_loader
-		.expect_load()
+		.expect_load_or_create()
 		// This is an ugly workaround to appease the borrow checker
 		.returning(move |_| Some(Box::new(mock_file_opt.take().unwrap())));
 	mock_file_loader
