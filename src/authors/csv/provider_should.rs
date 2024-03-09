@@ -1,5 +1,4 @@
 use crate::authors::csv::provider::CSVReader;
-use crate::common::conf;
 use crate::common::fs::test::util::dummy_file::DummyFile;
 use crate::{authors::author::AuthorsProvider, common::fs::wrapper::MockFileLoader};
 use mockall::predicate::{self, eq};
@@ -10,9 +9,8 @@ const IRRELEVANT_FILE_PATH: &str = "a/path/file.hi";
 fn build_using_fallback() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_with_fallback()
-		.with(eq(conf::authors_file()))
-		.times(1)
+		.expect_load_if_present()
+		.with(predicate::always())
 		.returning(|_| Some(Box::new(DummyFile::empty())));
 
 	assert!(CSVReader::from_cwd_fallback_home(&mock_file_loader).is_ok());
@@ -22,9 +20,8 @@ fn build_using_fallback() {
 fn not_build_using_fallback() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_with_fallback()
-		.with(eq(conf::authors_file()))
-		.times(1)
+		.expect_load_if_present()
+		.with(predicate::always())
 		.returning(|_| None);
 
 	assert!(matches!(
@@ -62,7 +59,7 @@ fn not_build_from_given_file() {
 fn provide_all_authors_in_file() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_with_fallback()
+		.expect_load_if_present()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {
@@ -82,7 +79,7 @@ fn provide_all_authors_in_file() {
 fn provide_only_author_matching_an_alias() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_with_fallback()
+		.expect_load_if_present()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {
@@ -102,7 +99,7 @@ fn provide_only_author_matching_an_alias() {
 fn provide_all_authors_matching_an_alias() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_with_fallback()
+		.expect_load_if_present()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {
@@ -123,7 +120,7 @@ fn provide_all_authors_matching_an_alias() {
 fn provide_no_author_when_alias_doesnt_match() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
-		.expect_load_with_fallback()
+		.expect_load_if_present()
 		.with(predicate::always())
 		.times(1)
 		.returning(|_| {

@@ -1,3 +1,5 @@
+use std::env;
+
 use super::super::author::{Author, AuthorsProvider};
 use super::mapper;
 use crate::authors::err::AuthorsError;
@@ -6,25 +8,44 @@ use crate::common::fs::file::File;
 use crate::common::fs::wrapper::FileLoader;
 use crate::Result;
 
+type OptionalFile = Option<Box<dyn File>>;
+
 pub struct CSVReader {
 	src: Box<dyn File>,
 }
 
 impl CSVReader {
-	pub fn from_cwd_fallback_home(file_loader: &impl FileLoader) -> Result<Self> {
-		let file_in_home = file_loader.load_with_fallback(conf::authors_file());
-		match file_in_home {
-			Some(file) => Ok(Self { src: file }),
-			None => Err(AuthorsError::NotFound("$PWD or $HOME".to_string()).into()),
-		}
-	}
-
 	pub fn from(file_loader: &impl FileLoader, authors_file: &str) -> Result<Self> {
 		let given_file = file_loader.load_if_present(authors_file.to_string());
 		match given_file {
 			Some(file) => Ok(Self { src: file }),
 			None => Err(AuthorsError::NotFound(authors_file.to_string()).into()),
 		}
+	}
+
+	pub fn from_cwd_fallback_home(file_loader: &impl FileLoader) -> Result<Self> {
+		let file_path = &conf::authors_file();
+		let dir_path = &conf::authors_dir();
+
+		let authors_file = match env::var("XDG_CONFIG_HOME") {
+			Err(_) => Self::home_fallback(file_loader, dir_path, file_path),
+			Ok(xdg_config) => file_loader
+				.load_if_present(format!("{xdg_config}/{dir_path}/{file_path}"))
+				.or_else(|| Self::home_fallback(file_loader, dir_path, file_path)),
+		};
+
+		match authors_file {
+			Some(file) => Ok(Self { src: file }),
+			None => Err(AuthorsError::NotFound("$PWD or $HOME".to_string()).into()),
+		}
+	}
+
+	fn home_fallback(file_loader: &impl FileLoader, authors_dir: &str, file_path: &str) -> OptionalFile {
+		let home = env::var("HOME").ok()?;
+		file_loader
+			.load_if_present(format!("{home}/.config/{authors_dir}/{file_path}"))
+			.or_else(|| file_loader.load_if_present(format!("{home}/.{authors_dir}/{file_path}")))
+			.or_else(|| file_loader.load_if_present(format!("{home}/{file_path}")))
 	}
 }
 
