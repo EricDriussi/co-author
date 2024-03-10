@@ -1,4 +1,5 @@
-use std::{error::Error, fmt::Display};
+use crate::Result;
+use std::fmt::Display;
 
 // TODO: handle subject and body
 #[derive(Debug, PartialEq)]
@@ -29,7 +30,7 @@ impl Display for CommitMessage {
 
 #[cfg_attr(test, mockall::automock)]
 pub trait GitWrapper {
-	fn commit(&self) -> Result<(), Box<dyn Error>>;
-	fn formatted_status(&self) -> Result<String, Box<dyn Error>>;
-	fn prev_commit_msg(&self) -> Result<String, Box<dyn Error>>;
+	fn commit(&self) -> Result<()>;
+	fn formatted_status(&self) -> Result<String>;
+	fn prev_commit_msg(&self) -> Result<String>;
 }

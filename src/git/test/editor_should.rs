@@ -4,9 +4,11 @@ use crate::{
 		fs::{test::util::dummy_file::DummyFile, wrapper::MockFileLoader},
 		runner::MockRunner,
 	},
+	error::assert_error_type,
 	git::{
 		conf_provider::MockConfProvider,
 		editor::{EditmsgEditor, Editor},
+		err::GitError,
 	},
 };
 use mockall::predicate::{always, eq};
@@ -50,7 +52,7 @@ fn error_when_no_editmsg_is_found() {
 
 	let result = editor.open();
 
-	assert!(matches!(result, Err(e) if e.to_string().contains("Editor")));
+	assert_error_type(&result, &GitError::Editor);
 }
 
 #[test]
@@ -147,7 +149,7 @@ fn error_when_no_editor_is_available() {
 
 	let result = editor.open();
 
-	assert!(matches!(result, Err(e) if e.to_string().contains("Editor")));
+	assert_error_type(&result, &GitError::Editor);
 }
 
 fn successful_mock_file_loader() -> MockFileLoader {

@@ -1,3 +1,4 @@
+use crate::error::assert_error_contains_msg;
 use crate::git::commit_mode::CommitMode;
 use crate::git::test::service::util::mock_file::MockFile;
 use crate::git::test::service::util::mock_helpers::{
@@ -154,7 +155,7 @@ fn stop_and_report_pre_commit_hook_failure() {
 		mock_editmsg_editor,
 	));
 
-	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
+	assert_error_contains_msg(&result, ERR_MSG);
 }
 
 #[test]
@@ -181,7 +182,7 @@ fn stop_and_report_add_status_to_editmsg_error() {
 		mock_editmsg_editor,
 	));
 
-	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
+	assert_error_contains_msg(&result, ERR_MSG);
 }
 
 #[test]
@@ -205,7 +206,7 @@ fn stop_and_report_when_editor_cannot_be_opened() {
 		mock_editmsg_editor,
 	));
 
-	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
+	assert_error_contains_msg(&result, ERR_MSG);
 }
 
 #[test]
@@ -229,7 +230,7 @@ fn stop_and_report_commit_msg_hook_failure() {
 		ok_editor(),
 	));
 
-	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
+	assert_error_contains_msg(&result, ERR_MSG);
 }
 
 #[test]
@@ -248,7 +249,7 @@ fn report_commit_error() {
 		ok_editor(),
 	));
 
-	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
+	assert_error_contains_msg(&result, ERR_MSG);
 }
 
 fn do_commit<W: GitWrapper, H: HookRunner, E: EditmsgEditor>(service: Result<GitService<W, H, E>>) -> Result<()> {

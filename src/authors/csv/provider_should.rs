@@ -1,8 +1,10 @@
 use std::path::PathBuf;
 
 use crate::authors::csv::provider::CSVReader;
+use crate::authors::err::AuthorsError;
 use crate::common::conf;
 use crate::common::fs::test::util::dummy_file::DummyFile;
+use crate::error::{assert_error_contains_msg, assert_error_type};
 use crate::{authors::author::AuthorsProvider, common::fs::wrapper::MockFileLoader};
 use mockall::predicate::{self, eq};
 use mockall::Sequence;
@@ -28,9 +30,10 @@ fn not_build_from_given_file() {
 		.with(eq(IRRELEVANT_FILE_PATH.to_string()))
 		.returning(|_| None);
 
-	assert!(matches!(
-	CSVReader::from(&mock_file_loader, IRRELEVANT_FILE_PATH),
-	Err(e) if e.to_string().contains(format!("No file at {IRRELEVANT_FILE_PATH}").as_str())));
+	let result = CSVReader::from(&mock_file_loader, IRRELEVANT_FILE_PATH);
+
+	assert_error_type(&result, &AuthorsError::NotFound(String::new()));
+	assert_error_contains_msg(&result, IRRELEVANT_FILE_PATH);
 }
 
 #[test]
@@ -52,9 +55,10 @@ fn not_build_using_fallback() {
 		.with(predicate::always())
 		.returning(|_| None);
 
-	assert!(matches!(
-	CSVReader::from_cwd_fallback_home(&mock_file_loader),
-	Err(e) if e.to_string().contains("No file at $PWD or $HOME")));
+	let result = CSVReader::from_cwd_fallback_home(&mock_file_loader);
+
+	assert_error_type(&result, &AuthorsError::NotFound(String::new()));
+	assert_error_contains_msg(&result, "$PWD or $HOME");
 }
 
 #[test]
@@ -100,9 +104,10 @@ fn fallback_sensibly() {
 		.returning(|_| None)
 		.in_sequence(&mut seq);
 
-	assert!(matches!(
-	CSVReader::from_cwd_fallback_home(&mock_file_loader),
-	Err(e) if e.to_string().contains("No file at $PWD or $HOME")));
+	let result = CSVReader::from_cwd_fallback_home(&mock_file_loader);
+
+	assert_error_type(&result, &AuthorsError::NotFound(String::new()));
+	assert_error_contains_msg(&result, "$PWD or $HOME");
 }
 
 #[test]

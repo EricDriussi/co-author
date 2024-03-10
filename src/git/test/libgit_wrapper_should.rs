@@ -1,7 +1,9 @@
 use crate::{
 	common::fs::wrapper::FsWrapper,
+	error::assert_error_type,
 	git::{
 		commit_message::{CommitMessage, GitWrapper},
+		err::GitError,
 		libgit_wrapper::LibGitWrapper,
 	},
 };
@@ -67,7 +69,7 @@ fn error_out_if_commit_message_is_empty() {
 	let result = repo.commit();
 
 	fs::remove_dir_all(path).ok();
-	assert!(matches!(result, Err(e) if e.to_string().contains("Commit message cannot be empty")));
+	assert_error_type(&result, &GitError::LibGit(String::new()));
 }
 
 #[test]

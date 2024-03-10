@@ -1,4 +1,5 @@
-use std::{error::Error, fmt::Display};
+use crate::Error;
+use std::fmt::Display;
 
 #[derive(Debug)]
 pub enum AuthorsError {
@@ -7,11 +8,30 @@ pub enum AuthorsError {
 
 impl Error for AuthorsError {}
 
+impl PartialEq for AuthorsError {
+	fn eq(&self, other: &Self) -> bool {
+		matches!((self, other), (AuthorsError::NotFound(_), AuthorsError::NotFound(_)))
+	}
+}
+
 impl Display for AuthorsError {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "Authors error: ")?;
+		write!(f, "Authors failure: ")?;
 		match self {
 			AuthorsError::NotFound(location) => write!(f, "No file at {location}"),
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_authors_error_display() {
+		assert_eq!(
+			format!("{}", AuthorsError::NotFound("path/to/file".to_string())),
+			"Authors failure: No file at path/to/file"
+		);
 	}
 }

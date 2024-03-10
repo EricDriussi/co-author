@@ -3,7 +3,7 @@ pub mod commit_mode;
 mod conf_provider;
 pub mod di;
 mod editor;
-mod err;
+pub mod err;
 mod hook;
 mod libgit_wrapper;
 mod service;

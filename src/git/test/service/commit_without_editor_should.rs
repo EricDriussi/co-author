@@ -1,3 +1,4 @@
+use crate::error::assert_error_contains_msg;
 use crate::git::commit_mode::CommitMode;
 use crate::git::test::service::util::mock_file::MockFile;
 use crate::git::test::service::util::mock_helpers::{ok_file, ok_file_loader, ok_git_wrapper, ok_hook_runner};
@@ -121,7 +122,7 @@ fn stop_and_report_pre_commit_hook_failure() {
 		MockEditmsgEditor::new(),
 	));
 
-	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
+	assert_error_contains_msg(&result, ERR_MSG);
 }
 
 #[test]
@@ -142,7 +143,7 @@ fn stop_and_report_commit_msg_hook_failure() {
 		MockEditmsgEditor::new(),
 	));
 
-	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
+	assert_error_contains_msg(&result, ERR_MSG);
 }
 
 #[test]
@@ -157,7 +158,7 @@ fn report_commit_error() {
 		MockEditmsgEditor::new(),
 	));
 
-	assert!(matches!(result, Err(e) if e.to_string().contains(ERR_MSG)));
+	assert_error_contains_msg(&result, ERR_MSG);
 }
 
 fn do_commit<W: GitWrapper, H: HookRunner, E: EditmsgEditor>(service: Result<GitService<W, H, E>>) -> Result<()> {

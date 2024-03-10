@@ -1,3 +1,4 @@
+use crate::error::assert_error_type;
 use crate::git::test::service::util::mock_helpers::{ok_file, ok_file_loader};
 use crate::{
 	common::fs::wrapper::MockFileLoader,
@@ -19,14 +20,7 @@ fn not_instantiate_if_editmsg_is_not_present() {
 		MockEditmsgEditor::new(),
 	);
 
-	// TODO: make custom assert, something like:
-	// fn assert_git_error<T, E: Error + 'static>(result: Result<T, Box<dyn Error>>, expected_error: E) {
-	// 	assert!(matches!(result, Err(e) if e.downcast_ref::<E>().map_or(false, |err| *err == expected_error)));
-	// }
-	// checks if Error, GitError and GitError::Editmsg
-	assert!(
-		matches!(service, Err(e) if e.downcast_ref::<GitError>().map_or(false, |err| matches!(err, GitError::Editmsg)))
-	);
+	assert_error_type(&service, &GitError::Editmsg);
 }
 
 #[test]

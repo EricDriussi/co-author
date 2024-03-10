@@ -48,11 +48,12 @@ impl GitWrapper for LibGitWrapper {
 	}
 
 	fn prev_commit_msg(&self) -> Result<String> {
-		let head_ref = self.repo.head()?;
-		let last_commit = head_ref.peel_to_commit()?;
+		let last_commit = self.repo.head().and_then(|head_ref| head_ref.peel_to_commit())?;
 
-		let commit_message = last_commit.message().unwrap_or_default();
-		let first_line = commit_message.lines().next().unwrap_or_default();
+		let first_line = last_commit
+			.message()
+			.and_then(|msg| msg.lines().next())
+			.unwrap_or_default();
 
 		Ok(first_line.to_string())
 	}
