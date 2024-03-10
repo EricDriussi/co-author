@@ -41,7 +41,6 @@ fn build_using_fallback() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader
 		.expect_load_if_present()
-		.with(predicate::always())
 		.returning(|_| Some(Box::new(DummyFile::empty())));
 
 	assert!(CSVReader::from_cwd_fallback_home(&mock_file_loader).is_ok());
@@ -50,10 +49,7 @@ fn build_using_fallback() {
 #[test]
 fn not_build_using_fallback() {
 	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_if_present()
-		.with(predicate::always())
-		.returning(|_| None);
+	mock_file_loader.expect_load_if_present().returning(|_| None);
 
 	let result = CSVReader::from_cwd_fallback_home(&mock_file_loader);
 
@@ -113,16 +109,12 @@ fn fallback_sensibly() {
 #[test]
 fn provide_all_authors_in_file() {
 	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_if_present()
-		.with(predicate::always())
-		.times(1)
-		.returning(|_| {
-			Some(Box::new(DummyFile::with(vec![
-				"a,Name Surname,someone@users.noreply.github.com",
-				"b,username,something@gmail.com",
-			])))
-		});
+	mock_file_loader.expect_load_if_present().times(1).returning(|_| {
+		Some(Box::new(DummyFile::with(vec![
+			"a,Name Surname,someone@users.noreply.github.com",
+			"b,username,something@gmail.com",
+		])))
+	});
 	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let retrieved_authors = provider.all();
@@ -133,16 +125,12 @@ fn provide_all_authors_in_file() {
 #[test]
 fn provide_only_author_matching_an_alias() {
 	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_if_present()
-		.with(predicate::always())
-		.times(1)
-		.returning(|_| {
-			Some(Box::new(DummyFile::with(vec![
-				"a,Name Surname,someone@users.noreply.github.com",
-				"b,username,something@gmail.com",
-			])))
-		});
+	mock_file_loader.expect_load_if_present().times(1).returning(|_| {
+		Some(Box::new(DummyFile::with(vec![
+			"a,Name Surname,someone@users.noreply.github.com",
+			"b,username,something@gmail.com",
+		])))
+	});
 	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let retrieved_authors = provider.find(vec!["a".to_string()]);
@@ -153,17 +141,13 @@ fn provide_only_author_matching_an_alias() {
 #[test]
 fn provide_all_authors_matching_an_alias() {
 	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_if_present()
-		.with(predicate::always())
-		.times(1)
-		.returning(|_| {
-			Some(Box::new(DummyFile::with(vec![
-				"a,Name Surname,someone@users.noreply.github.com",
-				"b,username,something@gmail.com",
-				"b,username2,something2@gmail.com",
-			])))
-		});
+	mock_file_loader.expect_load_if_present().times(1).returning(|_| {
+		Some(Box::new(DummyFile::with(vec![
+			"a,Name Surname,someone@users.noreply.github.com",
+			"b,username,something@gmail.com",
+			"b,username2,something2@gmail.com",
+		])))
+	});
 	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let retrieved_authors = provider.find(vec!["b".to_string()]);

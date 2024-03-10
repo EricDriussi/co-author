@@ -1,10 +1,11 @@
 use crate::error::assert_error_contains_msg;
 use crate::git::commit_mode::CommitMode;
+use crate::git::editor::MockEditor;
 use crate::git::test::service::util::mock_file::MockFile;
 use crate::git::test::service::util::mock_helpers::{ok_file, ok_file_loader, ok_git_wrapper, ok_hook_runner};
 use crate::git::{
 	commit_message::{GitWrapper, MockGitWrapper},
-	editor::{EditmsgEditor, MockEditmsgEditor},
+	editor::Editor,
 	hook::{HookRunner, MockHookRunner},
 	service::GitService,
 };
@@ -47,7 +48,7 @@ fn succeed() {
 		mock_git_wrapper,
 		mock_hook_runner,
 		&ok_file_loader(mock_file),
-		MockEditmsgEditor::new(),
+		MockEditor::new(),
 	));
 
 	assert!(result.is_ok());
@@ -65,7 +66,7 @@ fn write_commit_msg_and_authors() {
 		ok_git_wrapper(String::new()),
 		ok_hook_runner(),
 		&ok_file_loader(mock_file),
-		MockEditmsgEditor::new(),
+		MockEditor::new(),
 	));
 
 	assert!(result.is_ok());
@@ -81,7 +82,7 @@ fn not_add_status_to_editmsg_file() {
 		mock_git_wrapper,
 		ok_hook_runner(),
 		&ok_file_loader(ok_file()),
-		MockEditmsgEditor::new(),
+		MockEditor::new(),
 	));
 
 	assert!(result.is_ok());
@@ -89,7 +90,7 @@ fn not_add_status_to_editmsg_file() {
 
 #[test]
 fn not_open_editor() {
-	let mut mock_editmsg_editor = MockEditmsgEditor::new();
+	let mut mock_editmsg_editor = MockEditor::new();
 	mock_editmsg_editor.expect_open().times(0);
 
 	let result = do_commit(GitService::new(
@@ -119,7 +120,7 @@ fn stop_and_report_pre_commit_hook_failure() {
 		mock_git_wrapper,
 		mock_hook_runner,
 		&ok_file_loader(mock_file),
-		MockEditmsgEditor::new(),
+		MockEditor::new(),
 	));
 
 	assert_error_contains_msg(&result, ERR_MSG);
@@ -140,7 +141,7 @@ fn stop_and_report_commit_msg_hook_failure() {
 		mock_git_wrapper,
 		mock_hook_runner,
 		&ok_file_loader(ok_file()),
-		MockEditmsgEditor::new(),
+		MockEditor::new(),
 	));
 
 	assert_error_contains_msg(&result, ERR_MSG);
@@ -155,13 +156,13 @@ fn report_commit_error() {
 		mock_git_wrapper,
 		ok_hook_runner(),
 		&ok_file_loader(ok_file()),
-		MockEditmsgEditor::new(),
+		MockEditor::new(),
 	));
 
 	assert_error_contains_msg(&result, ERR_MSG);
 }
 
-fn do_commit<W: GitWrapper, H: HookRunner, E: EditmsgEditor>(service: Result<GitService<W, H, E>>) -> Result<()> {
+fn do_commit<W: GitWrapper, H: HookRunner, E: Editor>(service: Result<GitService<W, H, E>>) -> Result<()> {
 	service
 		.expect("could not set up git service in tests")
 		.commit(CommitMode::WithoutEditor {

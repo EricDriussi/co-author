@@ -1,5 +1,5 @@
 use super::conf_provider::GitConfProvider;
-use super::editor::Editor;
+use super::editor::SimpleEditor;
 use super::hook::Hook;
 use super::libgit_wrapper::LibGitWrapper;
 use super::service::GitService;
@@ -7,7 +7,7 @@ use crate::common::fs::wrapper::FsWrapper;
 use crate::common::runner::CommandRunner;
 use crate::Result;
 
-type TextEditor = Editor<CommandRunner, FsWrapper, GitConfProvider>;
+type TextEditor = SimpleEditor<CommandRunner, GitConfProvider>;
 type GitHook = Hook<CommandRunner>;
 type Service = GitService<LibGitWrapper, GitHook, TextEditor>;
 
@@ -17,7 +17,7 @@ pub fn init_git_module(dir: &str) -> Result<Service> {
 			wrapper,
 			Hook::new(CommandRunner::new()),
 			&FsWrapper::new(),
-			Editor::new(CommandRunner::new(), FsWrapper::new(), GitConfProvider::new()),
+			SimpleEditor::new(CommandRunner::new(), GitConfProvider::new()),
 		),
 		Err(e) => Err(e),
 	}

@@ -1,7 +1,7 @@
 use super::mock_file::MockFile;
 use crate::{
 	common::fs::wrapper::MockFileLoader,
-	git::{commit_message::MockGitWrapper, editor::MockEditmsgEditor, hook::MockHookRunner},
+	git::{commit_message::MockGitWrapper, editor::MockEditor, hook::MockHookRunner},
 };
 
 pub fn ok_file_loader(file: MockFile) -> MockFileLoader {
@@ -37,8 +37,8 @@ pub fn ok_git_wrapper(status: String) -> MockGitWrapper {
 	mock_git_wrapper
 }
 
-pub fn ok_editor() -> MockEditmsgEditor {
-	let mut mock_editmsg_editor = MockEditmsgEditor::new();
-	mock_editmsg_editor.expect_open().returning(|| Ok(()));
+pub fn ok_editor() -> MockEditor {
+	let mut mock_editmsg_editor = MockEditor::new();
+	mock_editmsg_editor.expect_open().returning(|_| Ok(()));
 	mock_editmsg_editor
 }

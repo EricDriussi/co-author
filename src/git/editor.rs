@@ -1,30 +1,23 @@
 use super::conf_provider::ConfProvider;
 use super::err::GitError;
 use crate::{
-	common::{conf, fs::wrapper::FileLoader, runner::Runner},
+	common::{fs::file::File, runner::Runner},
 	Result,
 };
 use std::env;
 
 #[cfg_attr(test, mockall::automock)]
-pub trait EditmsgEditor {
-	fn open(&self) -> Result<()>;
+pub trait Editor {
+	fn open(&self, editmsg: &dyn File) -> Result<()>;
 }
 
-pub struct Editor<R: Runner, F: FileLoader, C: ConfProvider> {
+pub struct SimpleEditor<R: Runner, C: ConfProvider> {
 	runner: R,
-	file_loader: F, // TODO: this should not be here
 	conf_provider: C,
 }
 
-impl<R: Runner, F: FileLoader, C: ConfProvider> EditmsgEditor for Editor<R, F, C> {
-	// TODO: this should take a File as param
-	fn open(&self) -> Result<()> {
-		let editmsg = self
-			.file_loader
-			.load_or_create(conf::editmsg())
-			.ok_or(GitError::Editor)?;
-
+impl<R: Runner, C: ConfProvider> Editor for SimpleEditor<R, C> {
+	fn open(&self, editmsg: &dyn File) -> Result<()> {
 		let editing_operation_result = match self.conf_provider.get_editor() {
 			None => self.env_fallback(editmsg.path()),
 			Some(git_editor) => self.runner.spawn(&git_editor, editmsg.path()),
@@ -34,13 +27,9 @@ impl<R: Runner, F: FileLoader, C: ConfProvider> EditmsgEditor for Editor<R, F, C
 	}
 }
 
-impl<R: Runner, F: FileLoader, C: ConfProvider> Editor<R, F, C> {
-	pub fn new(runner: R, file_loader: F, conf_provider: C) -> Self {
-		Self {
-			runner,
-			file_loader,
-			conf_provider,
-		}
+impl<R: Runner, C: ConfProvider> SimpleEditor<R, C> {
+	pub fn new(runner: R, conf_provider: C) -> Self {
+		Self { runner, conf_provider }
 	}
 
 	fn env_fallback(&self, path: &str) -> Result<()> {

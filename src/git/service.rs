@@ -3,21 +3,21 @@ use super::err::GitError;
 use super::hook::HookRunner;
 use super::{
 	commit_message::{CommitMessage, GitWrapper},
-	editor::EditmsgEditor,
+	editor::Editor,
 };
 use crate::common::conf;
 use crate::common::fs::file::File;
 use crate::common::fs::wrapper::FileLoader;
 use crate::Result;
 
-pub struct GitService<W: GitWrapper, H: HookRunner, E: EditmsgEditor> {
+pub struct GitService<W: GitWrapper, H: HookRunner, E: Editor> {
 	git_wrapper: W,
 	hook_runner: H,
 	editmsg: Box<dyn File>,
 	editmsg_editor: E,
 }
 
-impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
+impl<W: GitWrapper, H: HookRunner, E: Editor> GitService<W, H, E> {
 	pub fn new(git_wrapper: W, runner: H, file_loader: &dyn FileLoader, editmsg_editor: E) -> Result<Self> {
 		let editmsg = file_loader.load_or_create(conf::editmsg()).ok_or(GitError::Editmsg)?;
 		Ok(Self {
@@ -54,7 +54,7 @@ impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
 	fn editor(&mut self) -> Result<()> {
 		let status = self.git_wrapper.formatted_status()?;
 		self.editmsg.write(status)?;
-		self.editmsg_editor.open()
+		self.editmsg_editor.open(self.editmsg.as_ref())
 	}
 
 	fn run_commit(&self) -> Result<()> {

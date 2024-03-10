@@ -1,59 +1,18 @@
 use crate::{
-	common::{
-		conf,
-		fs::{test::util::dummy_file::DummyFile, wrapper::MockFileLoader},
-		runner::MockRunner,
-	},
+	common::{fs::test::util::dummy_file::DummyFile, runner::MockRunner},
 	error::assert_error_type,
 	git::{
 		conf_provider::MockConfProvider,
-		editor::{EditmsgEditor, Editor},
+		editor::{Editor, SimpleEditor},
 		err::GitError,
 	},
 };
-use mockall::predicate::{always, eq};
+use mockall::{
+	predicate::{always, eq},
+	Sequence,
+};
 use serial_test::serial;
 use std::env;
-
-#[test]
-fn get_editmsg_from_conf() {
-	let mut mock_runner = MockRunner::new();
-	mock_runner.expect_spawn().returning(|_, _| Ok(()));
-	let mut mock_conf_provider = MockConfProvider::new();
-	mock_conf_provider
-		.expect_get_editor()
-		.returning(|| Some("an_editor".to_string()));
-	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_or_create()
-		.with(eq(conf::editmsg().clone()))
-		.returning(move |_| Some(Box::new(DummyFile::empty())));
-	let editor = Editor::new(mock_runner, mock_file_loader, mock_conf_provider);
-
-	let result = editor.open();
-
-	assert!(result.is_ok());
-}
-
-#[test]
-fn error_when_no_editmsg_is_found() {
-	let mut mock_runner = MockRunner::new();
-	mock_runner.expect_spawn().returning(|_, _| Ok(()));
-	let mut mock_conf_provider = MockConfProvider::new();
-	mock_conf_provider
-		.expect_get_editor()
-		.returning(|| Some("an_editor".to_string()));
-	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_or_create()
-		.with(eq(conf::editmsg().clone()))
-		.returning(move |_| None);
-	let editor = Editor::new(mock_runner, mock_file_loader, mock_conf_provider);
-
-	let result = editor.open();
-
-	assert_error_type(&result, &GitError::Editor);
-}
 
 #[test]
 fn open_with_git_conf_editor() {
@@ -62,13 +21,9 @@ fn open_with_git_conf_editor() {
 	mock_conf_provider
 		.expect_get_editor()
 		.returning(|| Some(a_user_editor.to_string()));
-	let editor = Editor::new(
-		successful_runner_for(a_user_editor),
-		successful_mock_file_loader(),
-		mock_conf_provider,
-	);
+	let editor = SimpleEditor::new(successful_runner_for(a_user_editor), mock_conf_provider);
 
-	let result = editor.open();
+	let result = editor.open(&DummyFile::empty());
 
 	assert!(result.is_ok());
 }
@@ -78,86 +33,39 @@ fn open_with_git_conf_editor() {
 fn open_with_env_editor() {
 	let a_user_editor = "an_editor";
 	env::set_var("EDITOR", a_user_editor);
-	let editor = Editor::new(
+	let editor = SimpleEditor::new(
 		successful_runner_for(a_user_editor),
-		successful_mock_file_loader(),
 		mock_conf_provider_with_no_editor(),
 	);
 
-	let result = editor.open();
+	let result = editor.open(&DummyFile::empty());
 
 	assert!(result.is_ok());
 }
 
 #[test]
 #[serial]
-fn open_with_vim_editor() {
+fn fallback_sensibly() {
 	env::remove_var("EDITOR");
-	let editor = Editor::new(
-		successful_runner_for("vim"),
-		successful_mock_file_loader(),
-		mock_conf_provider_with_no_editor(),
-	);
-
-	let result = editor.open();
-
-	assert!(result.is_ok());
-}
-
-#[test]
-#[serial]
-fn open_with_vi_editor() {
-	env::remove_var("EDITOR");
+	let mut seq = Sequence::new();
 	let mut mock_runner = MockRunner::new();
 	mock_runner
 		.expect_spawn()
-		.with(eq("vim"), always())
-		.returning(|_, _| Err("ERROR".into()));
+		.with(eq("vim".to_string()), always())
+		.returning(|_, _| Err("ERROR".into()))
+		.times(1)
+		.in_sequence(&mut seq);
 	mock_runner
 		.expect_spawn()
-		.with(eq("vi"), always())
-		.returning(|_, _| Ok(()));
-	let editor = Editor::new(
-		mock_runner,
-		successful_mock_file_loader(),
-		mock_conf_provider_with_no_editor(),
-	);
+		.with(eq("vi".to_string()), always())
+		.returning(|_, _| Err("ERROR".into()))
+		.times(1)
+		.in_sequence(&mut seq);
+	let editor = SimpleEditor::new(mock_runner, mock_conf_provider_with_no_editor());
 
-	let result = editor.open();
-
-	assert!(result.is_ok());
-}
-
-#[test]
-#[serial]
-fn error_when_no_editor_is_available() {
-	env::remove_var("EDITOR");
-	let mut mock_runner = MockRunner::new();
-	mock_runner
-		.expect_spawn()
-		.with(eq("vim"), always())
-		.returning(|_, _| Err("ERROR".into()));
-	mock_runner
-		.expect_spawn()
-		.with(eq("vi"), always())
-		.returning(|_, _| Err("ERROR".into()));
-	let editor = Editor::new(
-		mock_runner,
-		successful_mock_file_loader(),
-		mock_conf_provider_with_no_editor(),
-	);
-
-	let result = editor.open();
+	let result = editor.open(&DummyFile::empty());
 
 	assert_error_type(&result, &GitError::Editor);
-}
-
-fn successful_mock_file_loader() -> MockFileLoader {
-	let mut mock_file_loader = MockFileLoader::new();
-	mock_file_loader
-		.expect_load_or_create()
-		.returning(move |_| Some(Box::new(DummyFile::empty())));
-	mock_file_loader
 }
 
 fn successful_runner_for(editor: &str) -> MockRunner {

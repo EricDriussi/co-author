@@ -1,12 +1,31 @@
+use mockall::predicate::eq;
+
+use crate::common::conf;
+use crate::common::fs::test::util::dummy_file::DummyFile;
 use crate::error::assert_error_type;
+use crate::git::editor::MockEditor;
 use crate::git::test::service::util::mock_helpers::{ok_file, ok_file_loader};
 use crate::{
 	common::fs::wrapper::MockFileLoader,
-	git::{
-		commit_message::MockGitWrapper, editor::MockEditmsgEditor, err::GitError, hook::MockHookRunner,
-		service::GitService,
-	},
+	git::{commit_message::MockGitWrapper, err::GitError, hook::MockHookRunner, service::GitService},
 };
+
+#[test]
+fn get_editmsg_path_from_conf() {
+	let mut mock_file_loader = MockFileLoader::new();
+	mock_file_loader
+		.expect_load_or_create()
+		.with(eq(conf::editmsg().clone()))
+		.returning(move |_| Some(Box::new(DummyFile::empty())));
+
+	let _ = GitService::new(
+		MockGitWrapper::new(),
+		MockHookRunner::new(),
+		&mock_file_loader,
+		MockEditor::new(),
+	);
+	// Only interested in params passed to the mock (withf)
+}
 
 #[test]
 fn not_instantiate_if_editmsg_is_not_present() {
@@ -17,7 +36,7 @@ fn not_instantiate_if_editmsg_is_not_present() {
 		MockGitWrapper::new(),
 		MockHookRunner::new(),
 		&mock_file_loader,
-		MockEditmsgEditor::new(),
+		MockEditor::new(),
 	);
 
 	assert_error_type(&service, &GitError::Editmsg);
@@ -34,7 +53,7 @@ fn return_message_when_present() {
 		mock_git_wrapper,
 		MockHookRunner::new(),
 		&ok_file_loader(ok_file()),
-		MockEditmsgEditor::new(),
+		MockEditor::new(),
 	)
 	.expect("could not set up git service in tests");
 
@@ -53,7 +72,7 @@ fn return_empty_string_when_message_is_not_present() {
 		mock_git_wrapper,
 		MockHookRunner::new(),
 		&ok_file_loader(ok_file()),
-		MockEditmsgEditor::new(),
+		MockEditor::new(),
 	)
 	.expect("could not set up git service in tests");
 
