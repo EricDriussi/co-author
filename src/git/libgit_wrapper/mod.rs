@@ -5,7 +5,6 @@ use crate::common::{
 };
 use crate::Result;
 use git2::{Repository, Signature};
-use std::path::PathBuf;
 pub mod editmsg_handler;
 
 pub struct LibGitWrapper {
@@ -60,11 +59,10 @@ impl GitWrapper for LibGitWrapper {
 }
 
 impl LibGitWrapper {
-	pub fn from(path: &PathBuf, file_loader: &dyn FileLoader) -> Result<Self> {
+	pub fn from(path: &str, file_loader: &dyn FileLoader) -> Result<Self> {
 		let repo = Repository::open(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
-		// TODO: improve this ugly concatenation
 		let editmsg = file_loader
-			.load_or_create(path.join(conf::editmsg()).to_string_lossy().to_string())
+			.load_or_create(format!("{path}/{}", conf::editmsg()))
 			.ok_or(GitError::Editor)?;
 		if Self::no_staged_changes(&repo) {
 			Err(Box::new(GitError::LibGit("No staged changes".to_string())))

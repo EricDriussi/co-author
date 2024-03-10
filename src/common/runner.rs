@@ -4,7 +4,7 @@ use std::process::Command;
 #[cfg_attr(test, mockall::automock)]
 pub trait Runner {
 	fn run(&self, cmd: &str, arg: &str) -> Result<()>;
-	fn spawn(&self, editor: &str, path: &str) -> Result<()>;
+	fn spawn(&self, editor: &str, arg: &str) -> Result<()>;
 }
 
 pub struct CommandRunner;

@@ -2,7 +2,7 @@ use args::Args;
 use clap::Parser;
 use cli::di::init_cli_module;
 use git::{commit_mode::CommitMode, di::init_git_module};
-use std::{env, error::Error, path::PathBuf, process, result};
+use std::{env, error::Error, process, result};
 
 // TODO: improve tests
 // TODO: review optional/result handling
@@ -62,13 +62,13 @@ fn run(args: &Args) -> Result<()> {
 // The parent of the .git directory is the root of the repository
 // let root_dir = git_dir.parent().unwrap();
 
-fn get_project_root_dir() -> Option<PathBuf> {
+fn get_project_root_dir() -> Option<String> {
 	let mut cwd = env::current_dir().ok()?;
 
 	loop {
 		let git_dir = cwd.join(".git");
 		if git_dir.is_dir() {
-			return Some(cwd);
+			return Some(cwd.to_string_lossy().to_string());
 		}
 
 		if !cwd.pop() {
