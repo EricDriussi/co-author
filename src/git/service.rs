@@ -48,7 +48,7 @@ impl<W: GitWrapper, H: HookRunner, E: EditmsgEditor> GitService<W, H, E> {
 
 	fn pre(&mut self, body: &CommitMessage) -> Result<()> {
 		self.hook_runner.run_pre_commit()?;
-		self.editmsg.write(body.formatted_body())
+		self.editmsg.write(body.formatted())
 	}
 
 	fn editor(&mut self) -> Result<()> {

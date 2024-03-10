@@ -38,26 +38,32 @@ mod test {
 	use super::*;
 
 	#[test]
-	fn should_return_expected_test_authors_file_path() {
+	fn should_return_expected_authors_file_path() {
 		let authors_dir = authors_dir();
 		assert_eq!(authors_dir, "co-author");
 	}
 
 	#[test]
-	fn should_return_expected_test_authors_file_name() {
+	fn should_return_expected_authors_file_name() {
 		let authors_file = authors_file();
 		assert_eq!(authors_file, "authors.csv");
 	}
 
 	#[test]
-	fn should_return_expected_test_hooks_path() {
+	fn should_return_expected_hooks_path() {
 		let hooks_path = hooks_path();
 		assert_eq!(hooks_path, ".git/hooks");
 	}
 
 	#[test]
-	fn should_return_expected_test_editmsg_file() {
+	fn should_return_expected_editmsg_file() {
 		let commit_editmsg = editmsg();
 		assert_eq!(commit_editmsg, ".git/COMMIT_EDITMSG");
+	}
+
+	#[test]
+	fn should_return_expected_co_author_prefix() {
+		let commit_editmsg = co_author_prefix();
+		assert_eq!(commit_editmsg, "Co-authored-by");
 	}
 }

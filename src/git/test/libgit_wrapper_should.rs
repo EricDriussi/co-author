@@ -43,7 +43,7 @@ fn create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
 	let commit_message = CommitMessage::new("irrelevant message", authors);
 
 	let editmsg_path = format!("{path}/.git/COMMIT_EDITMSG");
-	std::fs::write(editmsg_path, commit_message.formatted_body()).expect("Could not write to test editmsg file");
+	std::fs::write(editmsg_path, commit_message.formatted()).expect("Could not write to test editmsg file");
 
 	let result = repo.commit();
 
@@ -62,7 +62,7 @@ fn error_out_if_commit_message_is_empty() {
 	let commit_message = CommitMessage::new("", no_authors);
 
 	let editmsg_path = format!("{path}/.git/COMMIT_EDITMSG");
-	std::fs::write(editmsg_path, commit_message.formatted_body()).expect("Could not write to test editmsg file");
+	std::fs::write(editmsg_path, commit_message.formatted()).expect("Could not write to test editmsg file");
 
 	let result = repo.commit();
 

@@ -16,14 +16,14 @@ impl CommitMessage {
 		}
 	}
 
-	pub fn formatted_body(&self) -> String {
+	pub fn formatted(&self) -> String {
 		format!("{}\n\n\n{}", self.subject, self.authors.join("\n"))
 	}
 }
 
 impl Display for CommitMessage {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "{}\n\n{}", self.subject, self.authors.join("\n"))
+		write!(f, "{}", self.formatted())
 	}
 }
 
