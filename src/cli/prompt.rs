@@ -3,12 +3,12 @@ use crate::authors::author::Author;
 use crate::Result;
 use colored::Colorize;
 
-pub struct Prompt<T: Reader> {
-	reader: T,
+pub struct Prompt {
+	reader: Box<dyn Reader>,
 }
 
-impl<T: Reader> Prompt<T> {
-	pub fn new(reader: T) -> Self {
+impl Prompt {
+	pub fn new(reader: Box<dyn Reader>) -> Self {
 		Self { reader }
 	}
 

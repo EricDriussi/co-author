@@ -9,7 +9,7 @@ fn prompt_for_commit_message() {
 		.withf(|prompt_msg| prompt_msg.contains("Enter your commit message"))
 		.times(1)
 		.returning(|_| Ok("whatever".to_string()));
-	let mut cli = Prompt::new(reader);
+	let mut cli = Prompt::new(Box::new(reader));
 
 	let _ = cli.prompt_commit_message();
 	// Only interested in params passed to the mock (withf)
@@ -24,7 +24,7 @@ fn trim_commit_message() {
 		.expect_readline()
 		.times(1)
 		.returning(move |_| Ok(padded_msg.clone()));
-	let mut cli = Prompt::new(reader);
+	let mut cli = Prompt::new(Box::new(reader));
 
 	let result = cli.prompt_commit_message();
 
@@ -39,7 +39,7 @@ fn prompt_for_aliases() {
 		.withf(|prompt_msg| prompt_msg.contains("Enter co-authors aliases"))
 		.times(1)
 		.returning(|_| Ok("whatever".to_string()));
-	let mut cli = Prompt::new(reader);
+	let mut cli = Prompt::new(Box::new(reader));
 
 	let _ = cli.prompt_aliases(&[]);
 	// Only interested in params passed to the mock (withf)
@@ -56,7 +56,7 @@ fn pretty_print_authors_when_prompting_for_aliases() {
 		.withf(move |prompt_msg| contains_in_order(prompt_msg, &["⦔", alias, "->", name]))
 		.times(1)
 		.returning(move |_| Ok("whatever".to_string()));
-	let mut cli = Prompt::new(reader);
+	let mut cli = Prompt::new(Box::new(reader));
 
 	let _ = cli.prompt_aliases(&[author]);
 	// Only interested in params passed to the mock (withf())
@@ -70,7 +70,7 @@ fn space_split_aliases() {
 		.expect_readline()
 		.times(1)
 		.returning(move |_| Ok(aliases.to_string()));
-	let mut cli = Prompt::new(reader);
+	let mut cli = Prompt::new(Box::new(reader));
 
 	let result = cli.prompt_aliases(&[]);
 

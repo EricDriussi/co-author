@@ -1,14 +1,14 @@
 use crate::{
 	args::Args,
 	authors::{
-		author::{Author, AuthorsProvider},
+		author::Author,
 		di::{init_authors_module, init_authors_module_for},
 	},
-	cli::{input_reader::Reader, prompt::Prompt},
+	cli::prompt::Prompt,
 	Result,
 };
 
-pub fn handle_authors<T: Reader>(args: &Args, cli: &mut Prompt<T>) -> Result<Vec<String>> {
+pub fn handle_authors(args: &Args, cli: &mut Prompt) -> Result<Vec<String>> {
 	let authors_prov = match &args.file {
 		Some(file) => init_authors_module_for(file)?,
 		None => init_authors_module()?,
@@ -40,7 +40,7 @@ pub fn handle_authors<T: Reader>(args: &Args, cli: &mut Prompt<T>) -> Result<Vec
 	}
 }
 
-pub fn handle_commit_msg<T: Reader>(args: &Args, cli: &mut Prompt<T>, prev: &str) -> Result<String> {
+pub fn handle_commit_msg(args: &Args, cli: &mut Prompt, prev: &str) -> Result<String> {
 	match (args.message.clone(), args.pre_populate) {
 		(Some(msg), _) => Ok(msg),
 		(None, false) => cli.prompt_commit_message(),
