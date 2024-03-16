@@ -11,7 +11,7 @@ type TextEditor = SimpleEditor<CommandRunner, GitConfProvider>;
 type GitHook = Hook<CommandRunner>;
 type Service = GitService<LibGitWrapper, GitHook, TextEditor>;
 
-pub fn init_git_module(dir: &str) -> Result<Service> {
+pub fn init(dir: &str) -> Result<Service> {
 	match LibGitWrapper::from(dir, &FsWrapper::new()) {
 		Ok(wrapper) => GitService::new(
 			wrapper,

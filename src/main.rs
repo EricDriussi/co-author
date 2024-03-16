@@ -1,7 +1,6 @@
 use args::Args;
 use clap::Parser;
-use cli::di::init_cli_module;
-use git::{commit_mode::CommitMode, di::init_git_module};
+use git::commit_mode::CommitMode;
 use std::{env, error::Error, process, result};
 
 // TODO: improve tests
@@ -28,10 +27,10 @@ fn run(args: &Args) -> Result<()> {
 	env::set_current_dir(project_root_dir.clone()).map_err(|_| "Something went wrong")?;
 
 	// FIXME. Find a way to pass this to handle_commit_msg (clone/copy)
-	let mut git_service = init_git_module(&project_root_dir)?;
+	let mut git_service = git::di::init(&project_root_dir)?;
 	let prev = git_service.last_commit_message();
 
-	let mut cli = init_cli_module()?;
+	let mut cli = cli::di::init()?;
 	let authors_signatures = handler::handle_authors(args, &mut cli)?;
 
 	if args.editor {

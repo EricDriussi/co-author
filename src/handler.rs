@@ -1,17 +1,14 @@
 use crate::{
 	args::Args,
-	authors::{
-		author::Author,
-		di::{init_authors_module, init_authors_module_for},
-	},
+	authors::{self, author::Author},
 	cli::prompt::Prompt,
 	Result,
 };
 
 pub fn handle_authors(args: &Args, cli: &mut Prompt) -> Result<Vec<String>> {
 	let authors_prov = match &args.file {
-		Some(file) => init_authors_module_for(file)?,
-		None => init_authors_module()?,
+		Some(file) => authors::di::init_for(file)?,
+		None => authors::di::init()?,
 	};
 
 	if args.all {
