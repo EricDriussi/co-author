@@ -2,9 +2,11 @@ use std::path::PathBuf;
 
 use crate::authors::csv::provider::CSVReader;
 use crate::authors::err::AuthorsError;
+use crate::authors::load_mode::LoadMode;
 use crate::common::conf;
 use crate::common::fs::test::util::dummy_file::DummyFile;
 use crate::error::{assert_error_contains_msg, assert_error_type};
+use crate::Result;
 use crate::{authors::author::AuthorsProvider, common::fs::wrapper::MockFileLoader};
 use mockall::predicate::{self, eq};
 use mockall::Sequence;
@@ -19,7 +21,7 @@ fn build_from_given_file() {
 		.with(eq(IRRELEVANT_FILE_PATH.to_string()))
 		.returning(|_| Some(Box::new(DummyFile::empty())));
 
-	assert!(CSVReader::from(&mock_file_loader, IRRELEVANT_FILE_PATH).is_ok());
+	assert!(load_from_path(&mock_file_loader).is_ok());
 }
 
 #[test]
@@ -30,7 +32,7 @@ fn not_build_from_given_file() {
 		.with(eq(IRRELEVANT_FILE_PATH.to_string()))
 		.returning(|_| None);
 
-	let result = CSVReader::from(&mock_file_loader, IRRELEVANT_FILE_PATH);
+	let result = load_from_path(&mock_file_loader);
 
 	assert_error_type(&result, &AuthorsError::NotFound(String::new()));
 	assert_error_contains_msg(&result, IRRELEVANT_FILE_PATH);
@@ -43,7 +45,7 @@ fn build_using_fallback() {
 		.expect_load_if_present()
 		.returning(|_| Some(Box::new(DummyFile::empty())));
 
-	assert!(CSVReader::from_cwd_fallback_home(&mock_file_loader).is_ok());
+	assert!(load_from_cwd(&mock_file_loader).is_ok());
 }
 
 #[test]
@@ -51,7 +53,7 @@ fn not_build_using_fallback() {
 	let mut mock_file_loader = MockFileLoader::new();
 	mock_file_loader.expect_load_if_present().returning(|_| None);
 
-	let result = CSVReader::from_cwd_fallback_home(&mock_file_loader);
+	let result = load_from_cwd(&mock_file_loader);
 
 	assert_error_type(&result, &AuthorsError::NotFound(String::new()));
 	assert_error_contains_msg(&result, "$PWD or $HOME");
@@ -100,7 +102,7 @@ fn fallback_sensibly() {
 		.returning(|_| None)
 		.in_sequence(&mut seq);
 
-	let result = CSVReader::from_cwd_fallback_home(&mock_file_loader);
+	let result = load_from_cwd(&mock_file_loader);
 
 	assert_error_type(&result, &AuthorsError::NotFound(String::new()));
 	assert_error_contains_msg(&result, "$PWD or $HOME");
@@ -115,7 +117,7 @@ fn provide_all_authors_in_file() {
 			"b,username,something@gmail.com",
 		])))
 	});
-	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
+	let provider = load_from_cwd(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let retrieved_authors = provider.all();
 
@@ -131,7 +133,7 @@ fn provide_only_author_matching_an_alias() {
 			"b,username,something@gmail.com",
 		])))
 	});
-	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
+	let provider = load_from_cwd(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let retrieved_authors = provider.find(vec!["a".to_string()]);
 
@@ -148,7 +150,7 @@ fn provide_all_authors_matching_an_alias() {
 			"b,username2,something2@gmail.com",
 		])))
 	});
-	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
+	let provider = load_from_cwd(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let retrieved_authors = provider.find(vec!["b".to_string()]);
 
@@ -167,9 +169,20 @@ fn provide_no_author_when_alias_doesnt_match() {
 				"a,Name Surname,someone@users.noreply.github.com",
 			])))
 		});
-	let provider = CSVReader::from_cwd_fallback_home(&mock_file_loader).expect("Could not setup FSProvider for test");
+	let provider = load_from_cwd(&mock_file_loader).expect("Could not setup FSProvider for test");
 
 	let retrieved_authors = provider.find(vec!["z".to_string()]);
 
 	assert_eq!(retrieved_authors.len(), 0);
+}
+
+fn load_from_path(file_loader: &MockFileLoader) -> Result<CSVReader> {
+	CSVReader::load(&LoadMode::FromPath {
+		file_loader,
+		path: IRRELEVANT_FILE_PATH,
+	})
+}
+
+fn load_from_cwd(file_loader: &MockFileLoader) -> Result<CSVReader> {
+	CSVReader::load(&LoadMode::FromCwd { file_loader })
 }

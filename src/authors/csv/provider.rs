@@ -1,6 +1,7 @@
 use super::super::author::{Author, AuthorsProvider};
 use super::mapper;
 use crate::authors::err::AuthorsError;
+use crate::authors::load_mode::LoadMode;
 use crate::common::conf;
 use crate::common::fs::file::File;
 use crate::common::fs::wrapper::{FileLoader, OptionalFile};
@@ -12,7 +13,14 @@ pub struct CSVReader {
 }
 
 impl CSVReader {
-	pub fn from(file_loader: &impl FileLoader, authors_file: &str) -> Result<Self> {
+	pub fn load(load_mode: &LoadMode) -> Result<Self> {
+		match load_mode {
+			LoadMode::FromPath { file_loader, path } => CSVReader::from_file(file_loader.to_owned(), path),
+			LoadMode::FromCwd { file_loader } => CSVReader::from_cwd_fallback_home(file_loader.to_owned()),
+		}
+	}
+
+	fn from_file(file_loader: &dyn FileLoader, authors_file: &str) -> Result<Self> {
 		let given_file = file_loader.load_if_present(authors_file.to_string());
 		match given_file {
 			Some(file) => Ok(Self { src: file }),
@@ -20,7 +28,7 @@ impl CSVReader {
 		}
 	}
 
-	pub fn from_cwd_fallback_home(file_loader: &impl FileLoader) -> Result<Self> {
+	fn from_cwd_fallback_home(file_loader: &dyn FileLoader) -> Result<Self> {
 		let file_path = &conf::authors_file();
 		let dir_path = &conf::authors_dir();
 
@@ -34,14 +42,14 @@ impl CSVReader {
 			.ok_or(AuthorsError::NotFound("$PWD or $HOME".to_string()).into())
 	}
 
-	fn xdg_or_home_fallback(file_loader: &impl FileLoader, authors_dir: &str, file_path: &str) -> OptionalFile {
+	fn xdg_or_home_fallback(file_loader: &dyn FileLoader, authors_dir: &str, file_path: &str) -> OptionalFile {
 		env::var("XDG_CONFIG_HOME")
 			.ok()
 			.and_then(|xdg_config| file_loader.load_if_present(format!("{xdg_config}/{authors_dir}/{file_path}")))
 			.or_else(|| Self::home_fallback(file_loader, authors_dir, file_path))
 	}
 
-	fn home_fallback(file_loader: &impl FileLoader, authors_dir: &str, file_path: &str) -> OptionalFile {
+	fn home_fallback(file_loader: &dyn FileLoader, authors_dir: &str, file_path: &str) -> OptionalFile {
 		let home = env::var("HOME").ok()?;
 		file_loader
 			.load_if_present(format!("{home}/.config/{authors_dir}/{file_path}"))

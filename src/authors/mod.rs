@@ -1,6 +1,7 @@
 pub mod author;
 pub mod di;
 pub mod err;
+pub mod load_mode;
 
 pub mod csv {
 	mod mapper;
