@@ -4,7 +4,7 @@ use crate::{
 	git::{
 		commit_message::{CommitMessage, GitWrapper},
 		err::GitError,
-		libgit_wrapper::LibGitWrapper,
+		libgit::wrapper::LibGitWrapper,
 	},
 };
 use git2::{Config, Repository, RepositoryInitOptions, Signature};

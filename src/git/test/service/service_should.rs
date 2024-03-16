@@ -3,7 +3,7 @@ use mockall::predicate::eq;
 use crate::common::conf;
 use crate::common::fs::test::util::dummy_file::DummyFile;
 use crate::error::assert_error_type;
-use crate::git::editor::MockEditor;
+use crate::git::editor::simple_editor::MockEditor;
 use crate::git::test::service::util::mock_helpers::{ok_file, ok_file_loader};
 use crate::{
 	common::fs::wrapper::MockFileLoader,

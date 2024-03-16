@@ -1,7 +1,7 @@
-use super::conf_provider::GitConfProvider;
-use super::editor::SimpleEditor;
+use super::editor::conf_provider::GitConfProvider;
+use super::editor::simple_editor::SimpleEditor;
 use super::hook::Hook;
-use super::libgit_wrapper::LibGitWrapper;
+use super::libgit::wrapper::LibGitWrapper;
 use super::service::GitService;
 use crate::common::fs::wrapper::FsWrapper;
 use crate::common::runner::CommandRunner;

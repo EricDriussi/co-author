@@ -1,7 +1,7 @@
-use super::conf_provider::ConfProvider;
-use super::err::GitError;
+use super::conf_provider::DefaultEditorGetter;
 use crate::{
 	common::{fs::file::File, runner::Runner},
+	git::err::GitError,
 	Result,
 };
 use std::env;
@@ -11,12 +11,12 @@ pub trait Editor {
 	fn open(&self, editmsg: &dyn File) -> Result<()>;
 }
 
-pub struct SimpleEditor<R: Runner, C: ConfProvider> {
+pub struct SimpleEditor<R: Runner, C: DefaultEditorGetter> {
 	runner: R,
 	conf_provider: C,
 }
 
-impl<R: Runner, C: ConfProvider> Editor for SimpleEditor<R, C> {
+impl<R: Runner, C: DefaultEditorGetter> Editor for SimpleEditor<R, C> {
 	fn open(&self, editmsg: &dyn File) -> Result<()> {
 		let editing_operation_result = match self.conf_provider.get_editor() {
 			None => self.env_fallback(editmsg.path()),
@@ -27,7 +27,7 @@ impl<R: Runner, C: ConfProvider> Editor for SimpleEditor<R, C> {
 	}
 }
 
-impl<R: Runner, C: ConfProvider> SimpleEditor<R, C> {
+impl<R: Runner, C: DefaultEditorGetter> SimpleEditor<R, C> {
 	pub fn new(runner: R, conf_provider: C) -> Self {
 		Self { runner, conf_provider }
 	}

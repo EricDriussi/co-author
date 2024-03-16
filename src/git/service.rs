@@ -1,10 +1,8 @@
+use super::commit_message::{CommitMessage, GitWrapper};
 use super::commit_mode::CommitMode;
+use super::editor::simple_editor::Editor;
 use super::err::GitError;
 use super::hook::HookRunner;
-use super::{
-	commit_message::{CommitMessage, GitWrapper},
-	editor::Editor,
-};
 use crate::common::conf;
 use crate::common::fs::file::File;
 use crate::common::fs::wrapper::FileLoader;

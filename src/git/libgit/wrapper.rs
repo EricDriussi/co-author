@@ -1,11 +1,15 @@
-use super::{commit_message::GitWrapper, err::GitError};
-use crate::common::{
-	conf,
-	fs::{file::File, wrapper::FileLoader},
-};
+use crate::git::err::GitError;
 use crate::Result;
+use crate::{
+	common::{
+		conf,
+		fs::{file::File, wrapper::FileLoader},
+	},
+	git::commit_message::GitWrapper,
+};
 use git2::{Repository, Signature};
-pub mod editmsg_handler;
+
+use super::editmsg_status_formatter;
 
 pub struct LibGitWrapper {
 	repo: Repository,
@@ -44,7 +48,7 @@ impl GitWrapper for LibGitWrapper {
 	}
 
 	fn formatted_status(&self) -> Result<String> {
-		Ok(editmsg_handler::get_status_for_commit_file(&self.repo))
+		Ok(editmsg_status_formatter::get_status_for_commit_file(&self.repo))
 	}
 
 	fn prev_commit_msg(&self) -> Result<String> {

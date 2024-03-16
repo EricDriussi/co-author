@@ -1,7 +1,7 @@
 use super::mock_file::MockFile;
 use crate::{
 	common::fs::wrapper::MockFileLoader,
-	git::{commit_message::MockGitWrapper, editor::MockEditor, hook::MockHookRunner},
+	git::{commit_message::MockGitWrapper, editor::simple_editor::MockEditor, hook::MockHookRunner},
 };
 
 pub fn ok_file_loader(file: MockFile) -> MockFileLoader {

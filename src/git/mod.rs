@@ -1,19 +1,29 @@
 mod commit_message;
 pub mod commit_mode;
-mod conf_provider;
 pub mod di;
-mod editor;
 pub mod err;
 mod hook;
-mod libgit_wrapper;
 mod service;
+
+mod libgit {
+	pub mod editmsg_status_formatter;
+	pub mod wrapper;
+	#[cfg(test)]
+	mod wrapper_should;
+}
+
+mod editor {
+	pub mod conf_provider;
+	pub mod simple_editor;
+
+	#[cfg(test)]
+	mod simple_editor_should;
+}
 
 #[cfg(test)]
 mod test {
-	mod editor_should;
-	mod git_should;
+	mod commit_message_should;
 	mod hook_should;
-	mod libgit_wrapper_should;
 	mod service {
 		mod commit_with_editor_should;
 		mod commit_without_editor_should;

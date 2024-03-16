@@ -2,8 +2,10 @@ use crate::{
 	common::{fs::test::util::dummy_file::DummyFile, runner::MockRunner},
 	error::assert_error_type,
 	git::{
-		conf_provider::MockConfProvider,
-		editor::{Editor, SimpleEditor},
+		editor::{
+			conf_provider::MockDefaultEditorGetter,
+			simple_editor::{Editor, SimpleEditor},
+		},
 		err::GitError,
 	},
 };
@@ -17,7 +19,7 @@ use std::env;
 #[test]
 fn open_with_git_conf_editor() {
 	let a_user_editor = "an_editor";
-	let mut mock_conf_provider = MockConfProvider::new();
+	let mut mock_conf_provider = MockDefaultEditorGetter::new();
 	mock_conf_provider
 		.expect_get_editor()
 		.returning(|| Some(a_user_editor.to_string()));
@@ -77,8 +79,8 @@ fn successful_runner_for(editor: &str) -> MockRunner {
 	mock_runner
 }
 
-fn mock_conf_provider_with_no_editor() -> MockConfProvider {
-	let mut mock_conf_provider = MockConfProvider::new();
+fn mock_conf_provider_with_no_editor() -> MockDefaultEditorGetter {
+	let mut mock_conf_provider = MockDefaultEditorGetter::new();
 	mock_conf_provider.expect_get_editor().returning(|| None);
 	mock_conf_provider
 }
