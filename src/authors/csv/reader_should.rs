@@ -1,8 +1,6 @@
-use std::path::PathBuf;
-
-use crate::authors::csv::provider::CSVReader;
+use super::reader::LoadMode;
+use crate::authors::csv::reader::CSVReader;
 use crate::authors::err::AuthorsError;
-use crate::authors::load_mode::LoadMode;
 use crate::common::conf;
 use crate::common::fs::test::util::dummy_file::DummyFile;
 use crate::error::{assert_error_contains_msg, assert_error_type};
@@ -10,6 +8,7 @@ use crate::Result;
 use crate::{authors::author::AuthorsProvider, common::fs::wrapper::MockFileLoader};
 use mockall::predicate::{self, eq};
 use mockall::Sequence;
+use std::path::PathBuf;
 
 const IRRELEVANT_FILE_PATH: &str = "a/path/file.hi";
 

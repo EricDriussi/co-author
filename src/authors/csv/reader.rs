@@ -1,12 +1,21 @@
 use super::super::author::{Author, AuthorsProvider};
 use super::mapper;
 use crate::authors::err::AuthorsError;
-use crate::authors::load_mode::LoadMode;
 use crate::common::conf;
 use crate::common::fs::file::File;
 use crate::common::fs::wrapper::{FileLoader, OptionalFile};
 use crate::Result;
 use std::env;
+
+pub enum LoadMode<'a> {
+	FromCwd {
+		file_loader: &'a dyn FileLoader,
+	},
+	FromPath {
+		file_loader: &'a dyn FileLoader,
+		path: &'a str,
+	},
+}
 
 pub struct CSVReader {
 	src: Box<dyn File>,

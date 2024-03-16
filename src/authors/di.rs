@@ -1,6 +1,5 @@
 use super::author::AuthorsProvider;
-use super::csv::provider::CSVReader;
-use super::load_mode::LoadMode;
+use super::csv::reader::{CSVReader, LoadMode};
 use crate::common::fs::wrapper::FsWrapper;
 use crate::Result;
 
