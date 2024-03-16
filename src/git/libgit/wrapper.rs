@@ -1,3 +1,4 @@
+use crate::git::commit_message::CommitMessage;
 use crate::git::err::GitError;
 use crate::Result;
 use crate::{
@@ -23,26 +24,14 @@ impl GitWrapper for LibGitWrapper {
 			.signature()
 			.map_err(|_| GitError::LibGit("User name and/or email not set".to_string()))?;
 
-		let commit_message = self
-			.editmsg
-			.non_empty_lines()
-			.into_iter()
-			.filter(|line| !line.starts_with('#'))
-			.collect::<Vec<String>>()
-			.join("\n");
+		let commit_message = CommitMessage::from(&self.editmsg.non_empty_lines().join("\n"));
 
-		let commit_only_has_co_author_lines = commit_message
-			.split('\n')
-			.filter(|line| !line.starts_with(&conf::co_author_prefix()))
-			.collect::<Vec<&str>>()
-			.join("\n")
-			.is_empty();
-
-		if commit_only_has_co_author_lines {
+		let commit_has_no_content = commit_message.subject().is_empty() && commit_message.body().is_empty();
+		if commit_has_no_content {
 			return Err(Box::new(GitError::LibGit("Commit message cannot be empty".to_string())));
 		}
 
-		self.try_to_commit(&signature, &commit_message)
+		self.try_to_commit(&signature, &commit_message.to_string())
 			.map_err(|_| GitError::LibGit("Something went wrong!".to_string()))?;
 		Ok(())
 	}
@@ -51,15 +40,10 @@ impl GitWrapper for LibGitWrapper {
 		Ok(editmsg_status_formatter::get_status_for_commit_file(&self.repo))
 	}
 
-	fn prev_commit_msg(&self) -> Result<String> {
+	fn prev_commit_msg(&self) -> Result<CommitMessage> {
 		let last_commit = self.repo.head().and_then(|head_ref| head_ref.peel_to_commit())?;
 
-		let first_line = last_commit
-			.message()
-			.and_then(|msg| msg.lines().next())
-			.unwrap_or_default();
-
-		Ok(first_line.to_string())
+		Ok(CommitMessage::from(last_commit.message().unwrap_or_default()))
 	}
 }
 

@@ -27,7 +27,11 @@ impl<W: GitWrapper, H: HookRunner, E: Editor> GitService<W, H, E> {
 	}
 
 	pub fn last_commit_message(&self) -> String {
-		self.git_wrapper.prev_commit_msg().unwrap_or_default()
+		self.git_wrapper
+			.prev_commit_msg()
+			.unwrap_or_default()
+			.subject()
+			.to_string()
 	}
 
 	pub fn commit(&mut self, commit_mode: CommitMode) -> Result<()> {
@@ -46,7 +50,7 @@ impl<W: GitWrapper, H: HookRunner, E: Editor> GitService<W, H, E> {
 
 	fn pre(&mut self, body: &CommitMessage) -> Result<()> {
 		self.hook_runner.run_pre_commit()?;
-		self.editmsg.write(body.formatted())
+		self.editmsg.write(body.to_string())
 	}
 
 	fn editor(&mut self) -> Result<()> {

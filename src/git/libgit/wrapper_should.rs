@@ -45,7 +45,7 @@ fn create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
 	let commit_message = CommitMessage::new("irrelevant message", authors);
 
 	let editmsg_path = format!("{path}/.git/COMMIT_EDITMSG");
-	std::fs::write(editmsg_path, commit_message.formatted()).expect("Could not write to test editmsg file");
+	std::fs::write(editmsg_path, commit_message.to_string()).expect("Could not write to test editmsg file");
 
 	let result = repo.commit();
 
@@ -64,7 +64,7 @@ fn error_out_if_commit_message_is_empty() {
 	let commit_message = CommitMessage::new("", no_authors);
 
 	let editmsg_path = format!("{path}/.git/COMMIT_EDITMSG");
-	std::fs::write(editmsg_path, commit_message.formatted()).expect("Could not write to test editmsg file");
+	std::fs::write(editmsg_path, commit_message.to_string()).expect("Could not write to test editmsg file");
 
 	let result = repo.commit();
 
@@ -121,7 +121,7 @@ fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-fn only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
+fn get_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
 	let path = random_tmp_path_in(TEST_DIR_PATH);
 	let git_repo = init_repo(&path)?;
 	create_and_add_file_to_git_tree(&git_repo, "foo")?;
@@ -131,14 +131,13 @@ fn only_return_the_first_line_from_the_last_commit() -> Result<(), Box<dyn std::
 	let tree = git_repo.find_tree(id)?;
 	let repo = LibGitWrapper::from(&path, &FsWrapper::new())?;
 
-	let first_line = "FIRST LINE".to_string();
-	let msg = format!("{first_line}\nSECOND_LINE");
+	let msg = "a commit message!".to_string();
 	add_commit(&git_repo, &tree, msg.as_str())?;
 
 	let result = repo.prev_commit_msg();
 
 	fs::remove_dir_all(path).ok();
-	assert!(matches!(result, Ok(line) if line.to_string().contains(first_line.as_str())));
+	assert!(matches!(result, Ok(line) if line.to_string().contains(msg.as_str())));
 	Ok(())
 }
 

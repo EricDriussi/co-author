@@ -22,7 +22,12 @@ mod editor {
 
 #[cfg(test)]
 mod test {
-	mod commit_message_should;
+	mod commit_message {
+		mod helper;
+		mod should_create;
+		mod should_parse;
+	}
+
 	mod hook_should;
 	mod service {
 		mod commit_with_editor_should;

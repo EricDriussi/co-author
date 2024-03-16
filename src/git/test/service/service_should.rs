@@ -3,6 +3,7 @@ use mockall::predicate::eq;
 use crate::common::conf;
 use crate::common::fs::test::util::dummy_file::DummyFile;
 use crate::error::assert_error_type;
+use crate::git::commit_message::CommitMessage;
 use crate::git::editor::simple_editor::MockEditor;
 use crate::git::test::service::util::mock_helpers::{ok_file, ok_file_loader};
 use crate::{
@@ -48,7 +49,7 @@ fn return_message_when_present() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	mock_git_wrapper
 		.expect_prev_commit_msg()
-		.returning(|| Ok(msg.to_string()));
+		.returning(|| Ok(CommitMessage::new(msg, vec![])));
 	let service = GitService::new(
 		mock_git_wrapper,
 		MockHookRunner::new(),
