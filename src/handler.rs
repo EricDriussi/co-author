@@ -1,11 +1,11 @@
 use crate::{
 	args::Args,
 	authors::{self, author::Author},
-	cli::prompt::Prompt,
+	ui::cli::Cli,
 	Result,
 };
 
-pub fn handle_authors(args: &Args, cli: &mut Prompt) -> Result<Vec<String>> {
+pub fn handle_authors(args: &Args, cli: &mut Cli) -> Result<Vec<String>> {
 	let authors_prov = match &args.file {
 		Some(file) => authors::di::init_for(file)?,
 		None => authors::di::init()?,
@@ -29,7 +29,7 @@ pub fn handle_authors(args: &Args, cli: &mut Prompt) -> Result<Vec<String>> {
 		};
 	}
 
-	let aliases = cli.prompt_aliases(&authors_prov.all())?;
+	let aliases = cli.prompt_for_aliases(&authors_prov.all())?;
 	if args.sort {
 		Ok(sort(authors_prov.find(aliases).iter().map(Author::signature).collect()))
 	} else {
@@ -37,11 +37,11 @@ pub fn handle_authors(args: &Args, cli: &mut Prompt) -> Result<Vec<String>> {
 	}
 }
 
-pub fn handle_commit_msg(args: &Args, cli: &mut Prompt, prev: &str) -> Result<String> {
+pub fn handle_commit_msg(args: &Args, cli: &mut Cli, prev: &str) -> Result<String> {
 	match (args.message.clone(), args.pre_populate) {
 		(Some(msg), _) => Ok(msg),
-		(None, false) => cli.prompt_commit_message(),
-		(None, true) => cli.prompt_pre_populated_commit_message(prev),
+		(None, false) => cli.prompt_for_message(),
+		(None, true) => cli.prompt_for_pre_populated_message(prev),
 	}
 }
 

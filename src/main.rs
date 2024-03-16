@@ -30,7 +30,7 @@ fn run(args: &Args) -> Result<()> {
 	let mut git_service = git::di::init(&project_root_dir)?;
 	let prev = git_service.last_commit_message();
 
-	let mut cli = cli::di::init()?;
+	let mut cli = ui::di::init()?;
 	let authors_signatures = handler::handle_authors(args, &mut cli)?;
 
 	if args.editor {
@@ -80,8 +80,8 @@ fn get_project_root_dir() -> Option<String> {
 
 mod args;
 mod authors;
-mod cli;
 mod common;
 mod error;
 mod git;
 mod handler;
+mod ui;

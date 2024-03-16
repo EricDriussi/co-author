@@ -1,10 +1,10 @@
-use crate::{authors::err::AuthorsError, cli::err::CliError, git::err::GitError};
+use crate::{authors::err::AuthorsError, git::err::GitError, ui::err::UiError};
 use std::fmt::Display;
 
 #[derive(Debug)]
 pub enum Error {
 	Authors(AuthorsError),
-	Cli(CliError),
+	Cli(UiError),
 	Git(GitError),
 }
 
@@ -38,8 +38,8 @@ impl From<AuthorsError> for Error {
 	}
 }
 
-impl From<CliError> for Error {
-	fn from(err: CliError) -> Self {
+impl From<UiError> for Error {
+	fn from(err: UiError) -> Self {
 		Error::Cli(err)
 	}
 }
@@ -78,14 +78,14 @@ pub fn assert_error_contains_msg<T>(result: &Result<T, Box<dyn std::error::Error
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::{authors::err::AuthorsError, cli::err::CliError, git::err::GitError};
+	use crate::{authors::err::AuthorsError, git::err::GitError, ui::err::UiError};
 
 	#[test]
 	fn test_error_display() {
 		let an_authors_error = AuthorsError::NotFound("path/to/file".to_string());
 		assert!(format!("{}", Error::Authors(an_authors_error)).contains("=[ERROR]= Authors failure"));
 
-		let a_cli_error = CliError::Interrupted;
+		let a_cli_error = UiError::Interrupted;
 		assert!(format!("{}", Error::Cli(a_cli_error)).contains("=[ERROR]= Cli failure"));
 
 		let a_git_error = GitError::Editor;
