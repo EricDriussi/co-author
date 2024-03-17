@@ -26,8 +26,7 @@ impl GitWrapper for LibGitWrapper {
 
 		let commit_message = CommitMessage::from(&self.editmsg.non_empty_lines().join("\n"));
 
-		let commit_has_no_content = commit_message.subject().is_empty() && commit_message.body().is_empty();
-		if commit_has_no_content {
+		if commit_message.has_no_content() {
 			return Err(Box::new(GitError::LibGit("Commit message cannot be empty".to_string())));
 		}
 

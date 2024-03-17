@@ -35,10 +35,6 @@ impl CommitMessage {
 		Self { subject, body, authors }
 	}
 
-	pub fn body(&self) -> &Vec<String> {
-		&self.body
-	}
-
 	pub fn subject(&self) -> &str {
 		&self.subject
 	}
@@ -57,6 +53,10 @@ impl CommitMessage {
 		};
 
 		format!("{}{}{}", self.subject, body, authors)
+	}
+
+	pub fn has_no_content(&self) -> bool {
+		self.subject.is_empty() && self.body.is_empty()
 	}
 }
 
