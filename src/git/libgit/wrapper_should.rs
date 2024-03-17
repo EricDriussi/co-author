@@ -28,7 +28,7 @@ fn determine_if_is_valid_git_repo() {
 	let valid_repo = LibGitWrapper::from(&path, &FsWrapper::new());
 	assert!(valid_repo.is_ok());
 
-	let invalid_repo = LibGitWrapper::from("/path", &FsWrapper::new());
+	let invalid_repo = LibGitWrapper::from(&PathBuf::from("/a/path"), &FsWrapper::new());
 	fs::remove_dir_all(path).ok();
 	assert!(invalid_repo.is_err());
 }
@@ -44,7 +44,7 @@ fn create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
 	let authors = vec!["random author".to_string()];
 	let commit_message = CommitMessage::new("irrelevant message", authors);
 
-	let editmsg_path = format!("{path}/.git/COMMIT_EDITMSG");
+	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", path.to_string_lossy());
 	std::fs::write(editmsg_path, commit_message.to_string()).expect("Could not write to test editmsg file");
 
 	let result = repo.commit();
@@ -63,7 +63,7 @@ fn error_out_if_commit_message_is_empty() {
 	let no_authors = vec![String::new()];
 	let commit_message = CommitMessage::new("", no_authors);
 
-	let editmsg_path = format!("{path}/.git/COMMIT_EDITMSG");
+	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", path.to_string_lossy());
 	std::fs::write(editmsg_path, commit_message.to_string()).expect("Could not write to test editmsg file");
 
 	let result = repo.commit();
@@ -141,9 +141,8 @@ fn get_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
 	Ok(())
 }
 
-fn init_repo(path: &str) -> Result<Repository, Box<dyn std::error::Error>> {
-	let dir = PathBuf::from(path);
-	let repo = Repository::init_opts(dir, &RepositoryInitOptions::new())?;
+fn init_repo(path: &PathBuf) -> Result<Repository, Box<dyn std::error::Error>> {
+	let repo = Repository::init_opts(path, &RepositoryInitOptions::new())?;
 	set_user_and_email(&mut repo.config()?)?;
 
 	let mut index = repo.index()?;
@@ -191,7 +190,7 @@ fn create_and_add_file_to_git_tree(repo: &Repository, file_name: &str) -> Result
 	Ok(())
 }
 
-pub fn random_tmp_path_in(path: &str) -> String {
+pub fn random_tmp_path_in(path: &str) -> PathBuf {
 	let random = Uuid::new_v4();
-	format!("{path}/{random}")
+	PathBuf::from(format!("{path}/{random}"))
 }

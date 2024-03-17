@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::git::commit_message::CommitMessage;
 use crate::git::err::GitError;
 use crate::Result;
@@ -47,10 +49,10 @@ impl GitWrapper for LibGitWrapper {
 }
 
 impl LibGitWrapper {
-	pub fn from(path: &str, file_loader: &dyn FileLoader) -> Result<Self> {
+	pub fn from(path: &PathBuf, file_loader: &dyn FileLoader) -> Result<Self> {
 		let repo = Repository::discover(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
 		let editmsg = file_loader
-			.load_or_create(format!("{path}/{}", conf::editmsg()))
+			.load_or_create(format!("{}/{}", path.to_string_lossy(), conf::editmsg()))
 			.ok_or(GitError::Editor)?;
 		if Self::no_staged_changes(&repo) {
 			Err(Box::new(GitError::LibGit("No staged changes".to_string())))

@@ -6,6 +6,7 @@ use crate::{
 	ui::cli::Cli,
 };
 
+// TODO: eval creating an orchestrator that is constructed with args and cli and has a function for authors and another one for commit_msg
 pub fn handle_authors(args: &Args, cli: &mut Cli) -> Result<Vec<String>> {
 	let authors_prov = match &args.file {
 		Some(file) => authors::di::init_for(file)?,

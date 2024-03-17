@@ -5,6 +5,7 @@ pub type OptionalFile = Option<Box<dyn File>>;
 
 #[cfg_attr(test, mockall::automock)]
 pub trait FileLoader {
+	// TODO: why Strings and not PathBufs?
 	fn load_if_present(&self, file_path: String) -> OptionalFile;
 	fn load_or_create(&self, file_path: String) -> OptionalFile;
 }

@@ -12,8 +12,8 @@ type GitHook = Hook<CommandRunner>;
 type Service = GitService<LibGitWrapper, GitHook, TextEditor>;
 
 pub fn init() -> Result<Service> {
-	let dir = std::env::current_dir().map_err(|_| "Not in a valid git repo")?;
-	match LibGitWrapper::from(&dir.to_string_lossy(), &FsWrapper::new()) {
+	let cwd = std::env::current_dir().map_err(|_| "Not in a valid git repo")?;
+	match LibGitWrapper::from(&cwd, &FsWrapper::new()) {
 		Ok(wrapper) => GitService::new(
 			wrapper,
 			Hook::new(CommandRunner::new()),
