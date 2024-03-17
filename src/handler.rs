@@ -45,8 +45,7 @@ pub fn handle_commit_msg(args: &Args, cli: &mut Cli, prev: &str) -> Result<Strin
 	}
 }
 
-// TODO: Don't mutate
-pub fn sort<String: Ord>(mut vector: Vec<String>) -> Vec<String> {
+fn sort<String: Ord>(mut vector: Vec<String>) -> Vec<String> {
 	vector.sort();
 	vector
 }

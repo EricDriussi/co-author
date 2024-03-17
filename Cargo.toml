@@ -35,11 +35,7 @@ unsafe_code = "forbid"
 enum_glob_use = "deny" # No * imports
 pedantic = "deny" # Strict checks
 unwrap_used = "deny" # No unwraps
-must_use_candidate = "allow"
-missing_errors_doc = "allow"
-missing_panics_doc = "allow"
-module_name_repetitions = "allow" # TODO: Remove this?
-new_without_default = "allow"
+module_name_repetitions = "allow"
 
 [profile.dev]
 opt-level = 1 # Very build-time optimized
