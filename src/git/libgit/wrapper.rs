@@ -48,7 +48,7 @@ impl GitWrapper for LibGitWrapper {
 
 impl LibGitWrapper {
 	pub fn from(path: &str, file_loader: &dyn FileLoader) -> Result<Self> {
-		let repo = Repository::open(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
+		let repo = Repository::discover(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
 		let editmsg = file_loader
 			.load_or_create(format!("{path}/{}", conf::editmsg()))
 			.ok_or(GitError::Editor)?;
