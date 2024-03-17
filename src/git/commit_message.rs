@@ -10,7 +10,7 @@ pub struct CommitMessage {
 
 impl CommitMessage {
 	pub fn new(message: &str, authors: Vec<String>) -> Self {
-		let mut lines = message.lines().map(|line| line.trim());
+		let mut lines = message.lines().map(str::trim);
 		let subject = lines.next().unwrap_or_default().to_string();
 		let body = lines
 			.filter(|line| !line.is_empty())
@@ -23,7 +23,7 @@ impl CommitMessage {
 	pub fn from(message: &str) -> Self {
 		let mut non_empty_lines = message
 			.lines()
-			.map(|line| line.trim())
+			.map(str::trim)
 			.filter(|line| !line.is_empty())
 			.filter(|line| !line.starts_with('#'));
 

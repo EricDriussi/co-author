@@ -52,7 +52,7 @@ impl TestCaseBuilder {
 	}
 
 	pub fn authors(mut self, authors: &[&str]) -> Self {
-		self.test_case.message.authors = authors.iter().map(|author| author.to_string()).collect();
+		self.test_case.message.authors = authors.iter().map(ToString::to_string).collect();
 		self
 	}
 

@@ -35,7 +35,7 @@ fn test_cases() -> Vec<TestCase> {
 			.subject(A_SUBJECT)
 			.body("")
 			.authors(&[])
-			.expected(&A_SUBJECT)
+			.expected(A_SUBJECT)
 			.create(),
 		TestCase::build_for("empty")
 			.subject("")
