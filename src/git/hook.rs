@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use super::err::GitError;
 use crate::{
 	common::{conf, runner::Runner},
@@ -31,6 +33,9 @@ impl<R: Runner> Hook<R> {
 
 	fn run_hook(&self, hook: &str) -> Result<()> {
 		let hook_path = format!("{}/{}", self.path, hook);
+		if !Path::new(&hook_path).exists() {
+			return Ok(());
+		}
 		Ok(self
 			.runner
 			.run(self.shell, hook_path.as_str())
