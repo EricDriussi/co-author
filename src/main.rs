@@ -1,5 +1,6 @@
 use args::Args;
 use clap::Parser;
+use orch::Orchestrator;
 use std::{error::Error, process, result};
 
 // TODO: improve tests
@@ -11,7 +12,7 @@ use std::{error::Error, process, result};
 
 fn main() {
 	let args = Args::parse();
-	if let Err(e) = run(&args) {
+	if let Err(e) = run(args) {
 		eprintln!("[Error] {e}");
 		process::exit(1);
 	}
@@ -21,10 +22,10 @@ pub type Result<T> = result::Result<T, Box<dyn Error>>;
 // TODO: use custom error once git module and handler.rs are refactored
 // pub type Result<T> = result::Result<T, Error>;
 
-fn run(args: &Args) -> Result<()> {
-	let mut cli = ui::di::init()?;
-	let authors_signatures = handler::handle_authors(args, &mut cli)?;
-	handler::handle_commit_msg(args, &mut cli, authors_signatures)
+fn run(args: Args) -> Result<()> {
+	let mut orchestrator = Orchestrator::new(args, ui::di::init()?)?;
+	let authors_signatures = orchestrator.handle_authors()?;
+	orchestrator.handle_commit_msg(authors_signatures)
 }
 
 mod args;
@@ -32,5 +33,5 @@ mod authors;
 mod common;
 mod error;
 mod git;
-mod handler;
+mod orch;
 mod ui;
