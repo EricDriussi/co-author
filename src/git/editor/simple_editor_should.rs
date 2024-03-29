@@ -1,5 +1,5 @@
 use crate::{
-	common::{fs::test::util::dummy_file::DummyFile, runner::MockRunner},
+	common::runner::MockRunner,
 	error::assert_error_type,
 	git::{
 		editor::{
@@ -25,7 +25,7 @@ fn open_with_git_conf_editor() {
 		.returning(|| Some(a_user_editor.to_string()));
 	let editor = SimpleEditor::new(successful_runner_for(a_user_editor), mock_conf_provider);
 
-	let result = editor.open(&DummyFile::empty());
+	let result = editor.open("");
 
 	assert!(result.is_ok());
 }
@@ -40,7 +40,7 @@ fn open_with_env_editor() {
 		mock_conf_provider_with_no_editor(),
 	);
 
-	let result = editor.open(&DummyFile::empty());
+	let result = editor.open("");
 
 	assert!(result.is_ok());
 }
@@ -65,7 +65,7 @@ fn fallback_sensibly() {
 		.in_sequence(&mut seq);
 	let editor = SimpleEditor::new(mock_runner, mock_conf_provider_with_no_editor());
 
-	let result = editor.open(&DummyFile::empty());
+	let result = editor.open("");
 
 	assert_error_type(&result, &GitError::Editor);
 }
