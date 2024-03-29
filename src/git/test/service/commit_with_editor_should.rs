@@ -1,3 +1,4 @@
+use crate::common::file_writer::Writer;
 use crate::error::assert_error_contains_msg;
 use crate::git::commit_mode::CommitMode;
 use crate::git::editor::simple_editor::{Editor, MockEditor};
@@ -254,7 +255,9 @@ fn report_commit_error() {
 	assert_error_contains_msg(&result, ERR_MSG);
 }
 
-fn do_commit<W: GitWrapper, H: HookRunner, E: Editor>(service: Result<GitService<W, H, E>>) -> Result<()> {
+fn do_commit<G: GitWrapper, H: HookRunner, E: Editor, W: Writer>(
+	service: Result<GitService<G, H, E, W>>,
+) -> Result<()> {
 	service
 		.expect("could not set up git service in tests")
 		.commit(CommitMode::WithEditor {

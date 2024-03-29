@@ -1,6 +1,5 @@
-use mockall::predicate::eq;
-
 use crate::common::conf;
+use crate::common::file_writer::MockWriter;
 use crate::common::fs::test::util::dummy_file::DummyFile;
 use crate::error::assert_error_type;
 use crate::git::commit_message::CommitMessage;
@@ -10,6 +9,7 @@ use crate::{
 	common::fs::wrapper::MockFileLoader,
 	git::{commit_message::MockGitWrapper, err::GitError, hook::MockHookRunner, service::GitService},
 };
+use mockall::predicate::eq;
 
 #[test]
 fn get_editmsg_path_from_conf() {

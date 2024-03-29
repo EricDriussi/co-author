@@ -1,14 +1,10 @@
 use super::conf_provider::DefaultEditorGetter;
-use crate::{
-	common::{fs::file::File, runner::Runner},
-	git::err::GitError,
-	Result,
-};
+use crate::{common::runner::Runner, git::err::GitError, Result};
 use std::env;
 
 #[cfg_attr(test, mockall::automock)]
 pub trait Editor {
-	fn open(&self, editmsg: &dyn File) -> Result<()>;
+	fn open(&self, editmsg: &str) -> Result<()>;
 }
 
 pub struct SimpleEditor<R: Runner, C: DefaultEditorGetter> {
@@ -17,10 +13,10 @@ pub struct SimpleEditor<R: Runner, C: DefaultEditorGetter> {
 }
 
 impl<R: Runner, C: DefaultEditorGetter> Editor for SimpleEditor<R, C> {
-	fn open(&self, editmsg: &dyn File) -> Result<()> {
+	fn open(&self, editmsg: &str) -> Result<()> {
 		let editing_operation_result = match self.conf_provider.get_editor() {
-			None => self.env_fallback(editmsg.path()),
-			Some(git_editor) => self.runner.spawn(&git_editor, editmsg.path()),
+			None => self.env_fallback(editmsg),
+			Some(git_editor) => self.runner.spawn(&git_editor, editmsg),
 		};
 
 		Ok(editing_operation_result.map_err(|_| GitError::Editor)?)

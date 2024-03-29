@@ -4,25 +4,27 @@ use super::editor::simple_editor::Editor;
 use super::err::GitError;
 use super::hook::HookRunner;
 use crate::common::conf;
-use crate::common::fs::file::File;
-use crate::common::fs::wrapper::FileLoader;
+use crate::common::file_writer::Writer;
 use crate::Result;
+use std::path::PathBuf;
 
-pub struct GitService<W: GitWrapper, H: HookRunner, E: Editor> {
-	git_wrapper: W,
+pub struct GitService<G: GitWrapper, H: HookRunner, E: Editor, W: Writer> {
+	git_wrapper: G,
 	hook_runner: H,
-	editmsg: Box<dyn File>,
 	editmsg_editor: E,
+	file_writer: W,
+	editmsg_path: String,
 }
 
-impl<W: GitWrapper, H: HookRunner, E: Editor> GitService<W, H, E> {
-	pub fn new(git_wrapper: W, runner: H, file_loader: &dyn FileLoader, editmsg_editor: E) -> Result<Self> {
-		let editmsg = file_loader.load_or_create(conf::editmsg()).ok_or(GitError::Editmsg)?;
+impl<G: GitWrapper, H: HookRunner, E: Editor, W: Writer> GitService<G, H, E, W> {
+	pub fn new(git_wrapper: G, runner: H, editmsg_editor: E, file_writer: W) -> Result<Self> {
+		let editmsg_path = conf::editmsg();
 		Ok(Self {
 			git_wrapper,
 			hook_runner: runner,
-			editmsg,
 			editmsg_editor,
+			file_writer,
+			editmsg_path,
 		})
 	}
 
@@ -50,13 +52,18 @@ impl<W: GitWrapper, H: HookRunner, E: Editor> GitService<W, H, E> {
 
 	fn pre(&mut self, body: &CommitMessage) -> Result<()> {
 		self.hook_runner.run_pre_commit()?;
-		self.editmsg.write(body.to_string())
+		Ok(self
+			.file_writer
+			.overwrite(&PathBuf::from(&self.editmsg_path), &body.to_string())
+			.map_err(|_| GitError::Editmsg)?)
 	}
 
 	fn editor(&mut self) -> Result<()> {
 		let status = self.git_wrapper.formatted_status()?;
-		self.editmsg.write(status)?;
-		self.editmsg_editor.open(self.editmsg.as_ref())
+		self.file_writer
+			.append(&PathBuf::from(&self.editmsg_path), &status)
+			.map_err(|_| GitError::Editmsg)?;
+		self.editmsg_editor.open(&self.editmsg_path)
 	}
 
 	fn run_commit(&self) -> Result<()> {
