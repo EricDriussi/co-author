@@ -1,22 +1,17 @@
 use std::path::PathBuf;
 
+use crate::common::file_reader::Reader;
 use crate::git::commit_message::CommitMessage;
 use crate::git::err::GitError;
 use crate::Result;
-use crate::{
-	common::{
-		conf,
-		fs::{file::File, wrapper::FileLoader},
-	},
-	git::commit_message::GitWrapper,
-};
+use crate::{common::conf, git::commit_message::GitWrapper};
 use git2::{Repository, Signature};
 
 use super::editmsg_status_formatter;
 
 pub struct LibGitWrapper {
 	repo: Repository,
-	editmsg: Box<dyn File>,
+	editmsg: Vec<String>,
 }
 
 impl GitWrapper for LibGitWrapper {
@@ -26,7 +21,7 @@ impl GitWrapper for LibGitWrapper {
 			.signature()
 			.map_err(|_| GitError::LibGit("User name and/or email not set".to_string()))?;
 
-		let commit_message = CommitMessage::from(&self.editmsg.non_empty_lines().join("\n"));
+		let commit_message = CommitMessage::from(&self.editmsg.join("\n"));
 
 		if commit_message.has_no_content() {
 			return Err(Box::new(GitError::LibGit("Commit message cannot be empty".to_string())));
@@ -49,11 +44,11 @@ impl GitWrapper for LibGitWrapper {
 }
 
 impl LibGitWrapper {
-	pub fn from(path: &PathBuf, file_loader: &dyn FileLoader) -> Result<Self> {
+	pub fn from(path: &PathBuf, file_reader: &dyn Reader) -> Result<Self> {
 		let repo = Repository::discover(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
-		let editmsg = file_loader
-			.load_or_create(format!("{}/{}", path.to_string_lossy(), conf::editmsg()))
-			.ok_or(GitError::Editor)?;
+		let editmsg = file_reader
+			.read_non_empty_lines(&path.join(conf::editmsg()))
+			.unwrap_or_default();
 		if Self::no_staged_changes(&repo) {
 			Err(Box::new(GitError::LibGit("No staged changes".to_string())))
 		} else {
