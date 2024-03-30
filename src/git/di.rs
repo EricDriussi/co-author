@@ -3,8 +3,8 @@ use super::editor::simple_editor::SimpleEditor;
 use super::hook::Hook;
 use super::libgit::wrapper::LibGitWrapper;
 use super::service::GitService;
-use crate::common::file_reader::SimpleReader;
-use crate::common::file_writer::SimpleWriter;
+use crate::common::fs::file_reader::SimpleReader;
+use crate::common::fs::file_writer::SimpleWriter;
 use crate::common::runner::CommandRunner;
 use crate::Result;
 

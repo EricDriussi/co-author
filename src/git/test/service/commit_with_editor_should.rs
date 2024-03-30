@@ -1,4 +1,4 @@
-use crate::common::file_writer::{MockWriter, Writer};
+use crate::common::fs::file_writer::{MockWriter, Writer};
 use crate::error::assert_error_contains_msg;
 use crate::git::commit_mode::CommitMode;
 use crate::git::editor::simple_editor::{Editor, MockEditor};

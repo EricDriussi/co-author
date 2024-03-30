@@ -4,7 +4,7 @@ use super::editor::simple_editor::Editor;
 use super::err::GitError;
 use super::hook::HookRunner;
 use crate::common::conf;
-use crate::common::file_writer::Writer;
+use crate::common::fs::file_writer::Writer;
 use crate::Result;
 use std::path::PathBuf;
 

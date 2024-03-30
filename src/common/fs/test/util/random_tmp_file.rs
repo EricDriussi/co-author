@@ -12,3 +12,9 @@ pub fn create() -> (fs::File, String) {
 		file_path,
 	)
 }
+
+pub fn path() -> String {
+	let random = Uuid::new_v4();
+	let dir_path = "/tmp/coa/files";
+	format!("{dir_path}/{random}")
+}

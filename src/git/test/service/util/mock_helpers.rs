@@ -1,5 +1,5 @@
 use crate::{
-	common::file_writer::MockWriter,
+	common::fs::file_writer::MockWriter,
 	git::{commit_message::MockGitWrapper, editor::simple_editor::MockEditor, hook::MockHookRunner},
 };
 

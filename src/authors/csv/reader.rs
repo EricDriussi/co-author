@@ -2,7 +2,7 @@ use super::super::author::{Author, AuthorsProvider};
 use super::mapper;
 use crate::authors::err::AuthorsError;
 use crate::common::conf;
-use crate::common::file_reader::{Lines, Reader};
+use crate::common::fs::file_reader::{Lines, Reader};
 use crate::Result;
 use std::env;
 use std::path::{Path, PathBuf};

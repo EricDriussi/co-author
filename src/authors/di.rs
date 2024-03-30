@@ -1,6 +1,6 @@
 use super::author::AuthorsProvider;
 use super::csv::reader::{CSVReader, LoadMode};
-use crate::common::file_reader::SimpleReader;
+use crate::common::fs::file_reader::SimpleReader;
 use crate::Result;
 use std::path::PathBuf;
 

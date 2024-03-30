@@ -1,4 +1,4 @@
-use crate::common::file_writer::MockWriter;
+use crate::common::fs::file_writer::MockWriter;
 use crate::git::commit_message::CommitMessage;
 use crate::git::editor::simple_editor::MockEditor;
 use crate::git::{commit_message::MockGitWrapper, hook::MockHookRunner, service::GitService};

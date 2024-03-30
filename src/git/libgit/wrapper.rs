@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::common::file_reader::Reader;
+use crate::common::fs::file_reader::Reader;
 use crate::git::commit_message::CommitMessage;
 use crate::git::err::GitError;
 use crate::Result;

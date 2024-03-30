@@ -3,7 +3,7 @@ use crate::authors::author::AuthorsProvider;
 use crate::authors::csv::reader::CSVReader;
 use crate::authors::err::AuthorsError;
 use crate::common::conf;
-use crate::common::file_reader::MockReader;
+use crate::common::fs::file_reader::MockReader;
 use crate::error::{assert_error_contains_msg, assert_error_type};
 use crate::Result;
 use mockall::predicate::{self, eq};

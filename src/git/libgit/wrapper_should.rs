@@ -1,5 +1,5 @@
 use crate::{
-	common::file_reader::SimpleReader,
+	common::fs::file_reader::SimpleReader,
 	error::assert_error_type,
 	git::{
 		commit_message::{CommitMessage, GitWrapper},
