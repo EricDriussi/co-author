@@ -2,9 +2,11 @@ use crate::{
 	common::fs::file_reader::SimpleReader,
 	error::assert_error_type,
 	git::{
-		commit_message::{CommitMessage, GitWrapper},
+		core::{
+			commit_message::{CommitMessage, GitWrapper},
+			libgit::wrapper::LibGitWrapper,
+		},
 		err::GitError,
-		libgit::wrapper::LibGitWrapper,
 	},
 };
 use git2::{Config, Repository, RepositoryInitOptions, Signature};

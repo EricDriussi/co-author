@@ -1,6 +1,6 @@
 use crate::{
 	common::fs::file_writer::MockWriter,
-	git::{commit_message::MockGitWrapper, editor::simple_editor::MockEditor, hook::MockHookRunner},
+	git::core::{commit_message::MockGitWrapper, editor::file_editor::MockEditor, hook::MockHookRunner},
 };
 
 pub fn ok_file_writer() -> MockWriter {

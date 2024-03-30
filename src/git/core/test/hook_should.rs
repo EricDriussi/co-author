@@ -1,7 +1,7 @@
 use crate::Result;
 use crate::{
 	common::runner::MockRunner,
-	git::hook::{Hook, HookRunner},
+	git::core::hook::{Hook, HookRunner},
 };
 use mockall::predicate::{always, eq};
 use parameterized::parameterized;

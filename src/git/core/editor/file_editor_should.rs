@@ -2,9 +2,9 @@ use crate::{
 	common::runner::MockRunner,
 	error::assert_error_type,
 	git::{
-		editor::{
-			conf_provider::MockDefaultEditorGetter,
-			simple_editor::{Editor, SimpleEditor},
+		core::{
+			conf_provider::MockConfProvider,
+			editor::file_editor::{Editor, FileEditor},
 		},
 		err::GitError,
 	},
@@ -19,11 +19,11 @@ use std::env;
 #[test]
 fn open_with_git_conf_editor() {
 	let a_user_editor = "an_editor";
-	let mut mock_conf_provider = MockDefaultEditorGetter::new();
+	let mut mock_conf_provider = MockConfProvider::new();
 	mock_conf_provider
 		.expect_get_editor()
 		.returning(|| Some(a_user_editor.to_string()));
-	let editor = SimpleEditor::new(successful_runner_for(a_user_editor), mock_conf_provider);
+	let editor = FileEditor::new(successful_runner_for(a_user_editor), mock_conf_provider);
 
 	let result = editor.open("");
 
@@ -35,7 +35,7 @@ fn open_with_git_conf_editor() {
 fn open_with_env_editor() {
 	let a_user_editor = "an_editor";
 	env::set_var("EDITOR", a_user_editor);
-	let editor = SimpleEditor::new(
+	let editor = FileEditor::new(
 		successful_runner_for(a_user_editor),
 		mock_conf_provider_with_no_editor(),
 	);
@@ -63,7 +63,7 @@ fn fallback_sensibly() {
 		.returning(|_, _| Err("ERROR".into()))
 		.times(1)
 		.in_sequence(&mut seq);
-	let editor = SimpleEditor::new(mock_runner, mock_conf_provider_with_no_editor());
+	let editor = FileEditor::new(mock_runner, mock_conf_provider_with_no_editor());
 
 	let result = editor.open("");
 
@@ -79,8 +79,8 @@ fn successful_runner_for(editor: &str) -> MockRunner {
 	mock_runner
 }
 
-fn mock_conf_provider_with_no_editor() -> MockDefaultEditorGetter {
-	let mut mock_conf_provider = MockDefaultEditorGetter::new();
+fn mock_conf_provider_with_no_editor() -> MockConfProvider {
+	let mut mock_conf_provider = MockConfProvider::new();
 	mock_conf_provider.expect_get_editor().returning(|| None);
 	mock_conf_provider
 }

@@ -1,13 +1,11 @@
-use std::path::PathBuf;
-
+use super::status_formatter;
+use crate::common::conf;
 use crate::common::fs::file_reader::Reader;
-use crate::git::commit_message::CommitMessage;
+use crate::git::core::commit_message::{CommitMessage, GitWrapper};
 use crate::git::err::GitError;
 use crate::Result;
-use crate::{common::conf, git::commit_message::GitWrapper};
 use git2::{Repository, Signature};
-
-use super::editmsg_status_formatter;
+use std::path::PathBuf;
 
 pub struct LibGitWrapper<R: Reader> {
 	repo: Repository,
@@ -40,7 +38,7 @@ impl<R: Reader> GitWrapper for LibGitWrapper<R> {
 	}
 
 	fn formatted_status(&self) -> Result<String> {
-		Ok(editmsg_status_formatter::get_status_for_commit_file(&self.repo))
+		Ok(status_formatter::get_status_for_commit_file(&self.repo))
 	}
 
 	fn prev_commit_msg(&self) -> Result<CommitMessage> {

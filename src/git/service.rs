@@ -1,8 +1,8 @@
-use super::commit_message::{CommitMessage, GitWrapper};
 use super::commit_mode::CommitMode;
-use super::editor::simple_editor::Editor;
+use super::core::commit_message::{CommitMessage, GitWrapper};
+use super::core::editor::file_editor::Editor;
+use super::core::hook::HookRunner;
 use super::err::GitError;
-use super::hook::HookRunner;
 use crate::common::conf;
 use crate::common::fs::file_writer::Writer;
 use crate::Result;

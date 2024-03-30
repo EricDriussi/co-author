@@ -1,7 +1,8 @@
 use crate::common::fs::file_writer::MockWriter;
-use crate::git::commit_message::CommitMessage;
-use crate::git::editor::simple_editor::MockEditor;
-use crate::git::{commit_message::MockGitWrapper, hook::MockHookRunner, service::GitService};
+use crate::git::core::commit_message::CommitMessage;
+use crate::git::core::editor::file_editor::MockEditor;
+use crate::git::core::{commit_message::MockGitWrapper, hook::MockHookRunner};
+use crate::git::service::GitService;
 
 #[test]
 fn return_message_when_present() {

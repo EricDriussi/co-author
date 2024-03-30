@@ -1,7 +1,7 @@
 use git2::Config;
 
 #[cfg_attr(test, mockall::automock)]
-pub trait DefaultEditorGetter {
+pub trait ConfProvider {
 	fn get_editor(&self) -> Option<String>;
 }
 
@@ -13,7 +13,7 @@ impl GitConfProvider {
 	}
 }
 
-impl DefaultEditorGetter for GitConfProvider {
+impl ConfProvider for GitConfProvider {
 	fn get_editor(&self) -> Option<String> {
 		Config::open_default().ok()?.get_string("core.editor").ok()
 	}

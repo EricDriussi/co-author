@@ -1,10 +1,9 @@
-use std::path::Path;
-
-use super::err::GitError;
 use crate::{
 	common::{conf, runner::Runner},
+	git::err::GitError,
 	Result,
 };
+use std::path::Path;
 
 #[cfg_attr(test, mockall::automock)]
 pub trait HookRunner {

@@ -1,11 +1,11 @@
+use super::mock_helpers::{ok_git_wrapper, ok_hook_runner};
 use crate::common::fs::file_writer::{MockWriter, Writer};
 use crate::error::assert_error_contains_msg;
 use crate::git::commit_mode::CommitMode;
-use crate::git::editor::simple_editor::{Editor, MockEditor};
-use crate::git::test::service::util::mock_helpers::{ok_git_wrapper, ok_hook_runner};
+use crate::git::core::editor::file_editor::{Editor, MockEditor};
 use crate::git::{
-	commit_message::{GitWrapper, MockGitWrapper},
-	hook::{HookRunner, MockHookRunner},
+	core::commit_message::{GitWrapper, MockGitWrapper},
+	core::hook::{HookRunner, MockHookRunner},
 	service::GitService,
 };
 use crate::Result;

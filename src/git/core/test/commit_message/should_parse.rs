@@ -1,5 +1,5 @@
 use super::helper::*;
-use crate::git::commit_message::CommitMessage;
+use crate::git::core::commit_message::CommitMessage;
 
 fn test_cases() -> Vec<TestCase> {
 	vec![
