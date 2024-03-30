@@ -134,7 +134,7 @@ fn provide_only_author_matching_an_alias() {
 	});
 	let provider = load_from_cwd(&mock_file_loader).expect("Could not setup FSProvider for test");
 
-	let retrieved_authors = provider.find(vec!["a".to_string()]);
+	let retrieved_authors = provider.find(&["a".to_string()]);
 
 	assert_eq!(retrieved_authors.len(), 1);
 }
@@ -151,7 +151,7 @@ fn provide_all_authors_matching_an_alias() {
 	});
 	let provider = load_from_cwd(&mock_file_loader).expect("Could not setup FSProvider for test");
 
-	let retrieved_authors = provider.find(vec!["b".to_string()]);
+	let retrieved_authors = provider.find(&["b".to_string()]);
 
 	assert_eq!(retrieved_authors.len(), 2);
 }
@@ -166,7 +166,7 @@ fn provide_no_author_when_alias_doesnt_match() {
 		.returning(|_| Ok(vec!["a,Name Surname,someone@users.noreply.github.com".to_string()]));
 	let provider = load_from_cwd(&mock_file_loader).expect("Could not setup FSProvider for test");
 
-	let retrieved_authors = provider.find(vec!["z".to_string()]);
+	let retrieved_authors = provider.find(&["z".to_string()]);
 
 	assert_eq!(retrieved_authors.len(), 0);
 }

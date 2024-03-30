@@ -61,7 +61,7 @@ impl CSVReader {
 }
 
 impl AuthorsProvider for CSVReader {
-	fn find(&self, aliases: Vec<String>) -> Vec<Author> {
+	fn find(&self, aliases: &[String]) -> Vec<Author> {
 		self.lines
 			.iter()
 			.filter_map(|line| mapper::to_author(line.as_str()))

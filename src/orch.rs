@@ -40,11 +40,11 @@ impl Orchestrator {
 			};
 		}
 		if let Some(list) = &self.args.list {
-			let given_aliases = list.split(',').map(ToString::to_string).collect();
+			let given_aliases = list.split(',').map(ToString::to_string).collect::<Vec<String>>();
 			return if self.args.sort {
 				Ok(Self::sort(
 					self.provider
-						.find(given_aliases)
+						.find(&given_aliases)
 						.iter()
 						.map(Author::signature)
 						.collect(),
@@ -52,7 +52,7 @@ impl Orchestrator {
 			} else {
 				Ok(self
 					.provider
-					.find(given_aliases)
+					.find(&given_aliases)
 					.iter()
 					.map(Author::signature)
 					.collect())
@@ -62,10 +62,10 @@ impl Orchestrator {
 		let aliases = self.cli.prompt_for_aliases(&self.provider.all())?;
 		if self.args.sort {
 			Ok(Self::sort(
-				self.provider.find(aliases).iter().map(Author::signature).collect(),
+				self.provider.find(&aliases).iter().map(Author::signature).collect(),
 			))
 		} else {
-			Ok(self.provider.find(aliases).iter().map(Author::signature).collect())
+			Ok(self.provider.find(&aliases).iter().map(Author::signature).collect())
 		}
 	}
 

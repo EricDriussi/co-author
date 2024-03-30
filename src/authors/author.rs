@@ -1,6 +1,6 @@
 use crate::common::conf;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Author {
 	alias: String,
 	name: String,
@@ -29,16 +29,7 @@ impl Author {
 	}
 }
 
-impl PartialEq for Author {
-	fn eq(&self, other: &Self) -> bool {
-		let same_alias = self.alias == other.alias;
-		let same_name = self.name == other.name;
-		let same_email = self.email == other.email;
-		same_alias && same_name && same_email
-	}
-}
-
 pub trait AuthorsProvider {
-	fn find(&self, aliases: Vec<String>) -> Vec<Author>;
+	fn find(&self, aliases: &[String]) -> Vec<Author>;
 	fn all(&self) -> Vec<Author>;
 }
