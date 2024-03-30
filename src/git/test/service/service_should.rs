@@ -15,8 +15,7 @@ fn return_message_when_present() {
 		MockHookRunner::new(),
 		MockEditor::new(),
 		MockWriter::new(),
-	)
-	.expect("could not set up git service in tests");
+	);
 
 	let result = service.last_commit_message();
 
@@ -34,8 +33,7 @@ fn return_empty_string_when_message_is_not_present() {
 		MockHookRunner::new(),
 		MockEditor::new(),
 		MockWriter::new(),
-	)
-	.expect("could not set up git service in tests");
+	);
 
 	let result = service.last_commit_message();
 

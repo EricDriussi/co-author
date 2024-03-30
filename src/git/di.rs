@@ -15,12 +15,12 @@ pub type Service = GitService<LibGitWrapper, GitHook, TextEditor, SimpleWriter>;
 pub fn init() -> Result<Service> {
 	let cwd = std::env::current_dir().map_err(|_| "Not in a valid git repo")?;
 	match LibGitWrapper::from(&cwd, &SimpleReader::new()) {
-		Ok(wrapper) => GitService::new(
+		Ok(wrapper) => Ok(GitService::new(
 			wrapper,
 			Hook::new(CommandRunner::new()),
 			SimpleEditor::new(CommandRunner::new(), GitConfProvider::new()),
 			SimpleWriter::new(),
-		),
+		)),
 		Err(e) => Err(e),
 	}
 }

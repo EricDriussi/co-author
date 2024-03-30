@@ -17,15 +17,15 @@ pub struct GitService<G: GitWrapper, H: HookRunner, E: Editor, W: Writer> {
 }
 
 impl<G: GitWrapper, H: HookRunner, E: Editor, W: Writer> GitService<G, H, E, W> {
-	pub fn new(git_wrapper: G, runner: H, editmsg_editor: E, file_writer: W) -> Result<Self> {
+	pub fn new(git_wrapper: G, runner: H, editmsg_editor: E, file_writer: W) -> Self {
 		let editmsg_path = conf::editmsg();
-		Ok(Self {
+		Self {
 			git_wrapper,
 			hook_runner: runner,
 			editmsg_editor,
 			file_writer,
 			editmsg_path,
-		})
+		}
 	}
 
 	pub fn last_commit_message(&self) -> String {

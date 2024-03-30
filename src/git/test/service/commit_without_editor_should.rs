@@ -170,13 +170,9 @@ fn report_commit_error() {
 	assert_error_contains_msg(&result, ERR_MSG);
 }
 
-fn do_commit<G: GitWrapper, H: HookRunner, E: Editor, W: Writer>(
-	service: Result<GitService<G, H, E, W>>,
-) -> Result<()> {
-	service
-		.expect("could not set up git service in tests")
-		.commit(CommitMode::WithoutEditor {
-			message: COMMIT_MSG,
-			authors: vec![AUTHOR.to_string()],
-		})
+fn do_commit<G: GitWrapper, H: HookRunner, E: Editor, W: Writer>(mut service: GitService<G, H, E, W>) -> Result<()> {
+	service.commit(CommitMode::WithoutEditor {
+		message: COMMIT_MSG,
+		authors: vec![AUTHOR.to_string()],
+	})
 }

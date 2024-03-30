@@ -1,23 +1,12 @@
-use super::mock_file::MockFile;
 use crate::{
-	common::fs::wrapper::MockFileLoader,
+	common::file_writer::MockWriter,
 	git::{commit_message::MockGitWrapper, editor::simple_editor::MockEditor, hook::MockHookRunner},
 };
 
-pub fn ok_file_loader(file: MockFile) -> MockFileLoader {
-	let mut mock_file_loader = MockFileLoader::new();
-	let mut mock_file_opt = Some(file);
-	#[allow(clippy::unwrap_used)]
-	mock_file_loader
-		.expect_load_or_create()
-		// This is an ugly workaround to appease the borrow checker
-		.returning(move |_| Some(Box::new(mock_file_opt.take().unwrap())));
-	mock_file_loader
-}
-
-pub fn ok_file() -> MockFile {
-	let mut mock_file = MockFile::new();
-	mock_file.expect_write().returning(|_| Ok(()));
+pub fn ok_file_writer() -> MockWriter {
+	let mut mock_file = MockWriter::new();
+	mock_file.expect_overwrite().returning(|_, _| Ok(()));
+	mock_file.expect_append().returning(|_, _| Ok(()));
 	mock_file
 }
 

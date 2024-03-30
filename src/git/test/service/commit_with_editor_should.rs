@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use crate::common::file_writer::{MockWriter, Writer};
 use crate::error::assert_error_contains_msg;
 use crate::git::commit_mode::CommitMode;
@@ -13,6 +11,8 @@ use crate::git::{
 use crate::Result;
 use mockall::predicate::{always, eq};
 use mockall::Sequence;
+
+use super::util::mock_helpers::ok_file_writer;
 
 const ERR_MSG: &str = "an error";
 const COMMIT_MSG: &str = "a message";
@@ -191,14 +191,11 @@ fn stop_and_report_when_editor_cannot_be_opened() {
 	let mut mock_hook_runner = MockHookRunner::new();
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	let mut mock_editmsg_editor = MockEditor::new();
-	let mut mock_file_writer = MockWriter::new();
 
 	mock_hook_runner.expect_run_pre_commit().returning(|| Ok(()));
-	mock_file_writer.expect_overwrite().returning(|_, _| Ok(()));
 	mock_git_wrapper
 		.expect_formatted_status()
 		.returning(|| Ok("something".to_string()));
-	mock_file_writer.expect_append().returning(|_, _| Ok(()));
 	mock_editmsg_editor
 		.expect_open()
 		.returning(move |_| Err(ERR_MSG.into()));
@@ -209,7 +206,7 @@ fn stop_and_report_when_editor_cannot_be_opened() {
 		mock_git_wrapper,
 		mock_hook_runner,
 		mock_editmsg_editor,
-		mock_file_writer,
+		ok_file_writer(),
 	));
 
 	assert_error_contains_msg(&result, ERR_MSG);
@@ -219,14 +216,11 @@ fn stop_and_report_when_editor_cannot_be_opened() {
 fn stop_and_report_commit_msg_hook_failure() {
 	let mut mock_hook_runner = MockHookRunner::new();
 	let mut mock_git_wrapper = MockGitWrapper::new();
-	let mut mock_file_writer = MockWriter::new();
 
-	mock_file_writer.expect_overwrite().returning(|_, _| Ok(()));
 	mock_hook_runner.expect_run_pre_commit().returning(|| Ok(()));
 	mock_git_wrapper
 		.expect_formatted_status()
 		.returning(|| Ok("something".to_string()));
-	mock_file_writer.expect_append().returning(|_, _| Ok(()));
 	mock_hook_runner
 		.expect_run_commit_msg()
 		.returning(move || Err(ERR_MSG.into()));
@@ -236,7 +230,7 @@ fn stop_and_report_commit_msg_hook_failure() {
 		mock_git_wrapper,
 		mock_hook_runner,
 		ok_editor(),
-		mock_file_writer,
+		ok_file_writer(),
 	));
 
 	assert_error_contains_msg(&result, ERR_MSG);
@@ -245,32 +239,25 @@ fn stop_and_report_commit_msg_hook_failure() {
 #[test]
 fn report_commit_error() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
-	let mut mock_file_writer = MockWriter::new();
 
-	mock_file_writer.expect_overwrite().returning(|_, _| Ok(()));
 	mock_git_wrapper
 		.expect_formatted_status()
 		.returning(|| Ok("something".to_string()));
-	mock_file_writer.expect_append().returning(|_, _| Ok(()));
 	mock_git_wrapper.expect_commit().returning(move || Err(ERR_MSG.into()));
 
 	let result = do_commit(GitService::new(
 		mock_git_wrapper,
 		ok_hook_runner(),
 		ok_editor(),
-		mock_file_writer,
+		ok_file_writer(),
 	));
 
 	assert_error_contains_msg(&result, ERR_MSG);
 }
 
-fn do_commit<G: GitWrapper, H: HookRunner, E: Editor, W: Writer>(
-	service: Result<GitService<G, H, E, W>>,
-) -> Result<()> {
-	service
-		.expect("could not set up git service in tests")
-		.commit(CommitMode::WithEditor {
-			message: Some(COMMIT_MSG),
-			authors: vec![AUTHOR.to_string()],
-		})
+fn do_commit<G: GitWrapper, H: HookRunner, E: Editor, W: Writer>(mut service: GitService<G, H, E, W>) -> Result<()> {
+	service.commit(CommitMode::WithEditor {
+		message: Some(COMMIT_MSG),
+		authors: vec![AUTHOR.to_string()],
+	})
 }
