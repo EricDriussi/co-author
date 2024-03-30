@@ -35,7 +35,6 @@ mod test {
 		mod service_should;
 
 		pub mod util {
-			pub mod mock_file;
 			pub mod mock_helpers;
 		}
 	}
