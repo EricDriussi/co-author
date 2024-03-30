@@ -9,19 +9,26 @@ use git2::{Repository, Signature};
 
 use super::editmsg_status_formatter;
 
-pub struct LibGitWrapper {
+pub struct LibGitWrapper<R: Reader> {
 	repo: Repository,
-	editmsg: Vec<String>,
+	path: PathBuf,
+	reader: R,
 }
 
-impl GitWrapper for LibGitWrapper {
+impl<R: Reader> GitWrapper for LibGitWrapper<R> {
 	fn commit(&self) -> Result<()> {
 		let signature = self
 			.repo
 			.signature()
 			.map_err(|_| GitError::LibGit("User name and/or email not set".to_string()))?;
 
-		let commit_message = CommitMessage::from(&self.editmsg.join("\n"));
+		let commit_message = CommitMessage::from(
+			&self
+				.reader
+				.read_non_empty_lines(&self.path.join(conf::editmsg()))
+				.unwrap_or_default()
+				.join("\n"),
+		);
 
 		if commit_message.has_no_content() {
 			return Err(Box::new(GitError::LibGit("Commit message cannot be empty".to_string())));
@@ -43,16 +50,17 @@ impl GitWrapper for LibGitWrapper {
 	}
 }
 
-impl LibGitWrapper {
-	pub fn from(path: &PathBuf, file_reader: &dyn Reader) -> Result<Self> {
+impl<R: Reader> LibGitWrapper<R> {
+	pub fn from(path: &PathBuf, file_reader: R) -> Result<Self> {
 		let repo = Repository::discover(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
-		let editmsg = file_reader
-			.read_non_empty_lines(&path.join(conf::editmsg()))
-			.unwrap_or_default();
 		if Self::no_staged_changes(&repo) {
 			Err(Box::new(GitError::LibGit("No staged changes".to_string())))
 		} else {
-			Ok(Self { repo, editmsg })
+			Ok(Self {
+				repo,
+				path: path.clone(),
+				reader: file_reader,
+			})
 		}
 	}
 

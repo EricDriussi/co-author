@@ -10,11 +10,11 @@ use crate::Result;
 
 type TextEditor = SimpleEditor<CommandRunner, GitConfProvider>;
 type GitHook = Hook<CommandRunner>;
-pub type Service = GitService<LibGitWrapper, GitHook, TextEditor, SimpleWriter>;
+pub type Service = GitService<LibGitWrapper<SimpleReader>, GitHook, TextEditor, SimpleWriter>;
 
 pub fn init() -> Result<Service> {
 	let cwd = std::env::current_dir().map_err(|_| "Not in a valid git repo")?;
-	match LibGitWrapper::from(&cwd, &SimpleReader::new()) {
+	match LibGitWrapper::from(&cwd, SimpleReader::new()) {
 		Ok(wrapper) => Ok(GitService::new(
 			wrapper,
 			Hook::new(CommandRunner::new()),
