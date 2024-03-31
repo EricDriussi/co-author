@@ -71,7 +71,7 @@ fn error_out_if_commit_message_is_empty() {
 	let result = repo.commit();
 
 	fs::remove_dir_all(path).ok();
-	assert_error_type(&result, &GitError::LibGit(String::new()));
+	assert_error_type(&result.map_err(Into::into), &GitError::LibGit(String::new()));
 }
 
 #[test]
@@ -95,8 +95,8 @@ fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 
 	add_commit(&git_repo, &tree, "IRRELEVANT")?;
 
-	let repo = LibGitWrapper::from(&path, SimpleReader::new())?;
-	let contents = repo.formatted_status();
+	let repo = LibGitWrapper::from(&path, SimpleReader::new()).expect("Could not setup test repo");
+	let contents = repo.formatted_status().map_err(|e| e.to_string());
 
 	fs::remove_dir_all(path).ok();
 	assert_eq!(
@@ -131,7 +131,7 @@ fn get_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
 	let mut index = git_repo.index()?;
 	let id = index.write_tree()?;
 	let tree = git_repo.find_tree(id)?;
-	let repo = LibGitWrapper::from(&path, SimpleReader::new())?;
+	let repo = LibGitWrapper::from(&path, SimpleReader::new()).expect("Could not setup test repo");
 
 	let msg = "a commit message!".to_string();
 	add_commit(&git_repo, &tree, msg.as_str())?;

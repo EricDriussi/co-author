@@ -28,7 +28,7 @@ fn return_empty_string_when_message_is_not_present() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	mock_git_wrapper
 		.expect_prev_commit_msg()
-		.returning(|| Err("ERR".to_string().into()));
+		.returning(|| Err("ERR".into()));
 	let service = GitService::new(
 		mock_git_wrapper,
 		MockHookRunner::new(),

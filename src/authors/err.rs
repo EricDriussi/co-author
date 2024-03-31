@@ -1,12 +1,18 @@
-use crate::Error;
-use std::fmt::Display;
+use crate::error::Error;
+use std::{any::Any, fmt::Display};
 
 #[derive(Debug)]
 pub enum AuthorsError {
 	NotFound(String),
 }
 
-impl Error for AuthorsError {}
+impl Error for AuthorsError {
+	fn as_any(&self) -> &dyn Any {
+		self
+	}
+}
+
+impl std::error::Error for AuthorsError {}
 
 impl PartialEq for AuthorsError {
 	fn eq(&self, other: &Self) -> bool {

@@ -1,4 +1,5 @@
 pub mod conf;
+pub mod err;
 pub mod runner;
 
 pub mod fs {

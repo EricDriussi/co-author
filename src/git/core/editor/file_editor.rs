@@ -17,12 +17,10 @@ pub struct FileEditor<R: Runner, C: ConfProvider> {
 
 impl<R: Runner, C: ConfProvider> Editor for FileEditor<R, C> {
 	fn open(&self, editmsg: &str) -> Result<()> {
-		let editing_operation_result = match self.conf_provider.get_editor() {
+		match self.conf_provider.get_editor() {
 			None => self.env_fallback(editmsg),
-			Some(git_editor) => self.runner.spawn(&git_editor, editmsg),
-		};
-
-		Ok(editing_operation_result.map_err(|_| GitError::Editor)?)
+			Some(git_editor) => Ok(self.runner.spawn(&git_editor, editmsg).map_err(|_| GitError::Editor)?),
+		}
 	}
 }
 
@@ -34,13 +32,15 @@ impl<R: Runner, C: ConfProvider> FileEditor<R, C> {
 	fn env_fallback(&self, path: &str) -> Result<()> {
 		match env::var("EDITOR") {
 			Err(_) => self.vim_fallback(path),
-			Ok(editor) => self.runner.spawn(&editor, path),
+			Ok(editor) => Ok(self.runner.spawn(&editor, path).map_err(|_| GitError::Editor)?),
 		}
 	}
 
 	fn vim_fallback(&self, path: &str) -> Result<()> {
-		self.runner
+		Ok(self
+			.runner
 			.spawn("vim", path)
 			.or_else(|_| self.runner.spawn("vi", path))
+			.map_err(|_| GitError::Editor)?)
 	}
 }

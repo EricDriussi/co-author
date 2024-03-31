@@ -1,5 +1,5 @@
-use crate::Error;
-use std::{fmt::Display, io};
+use crate::error::Error;
+use std::{any::Any, fmt::Display, io};
 
 #[derive(Debug)]
 pub enum UiError {
@@ -8,7 +8,13 @@ pub enum UiError {
 	Unknown,
 }
 
-impl Error for UiError {}
+impl Error for UiError {
+	fn as_any(&self) -> &dyn Any {
+		self
+	}
+}
+
+impl std::error::Error for UiError {}
 
 impl PartialEq for UiError {
 	fn eq(&self, other: &Self) -> bool {

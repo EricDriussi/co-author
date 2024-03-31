@@ -74,15 +74,21 @@ impl Orchestrator {
 
 		if self.args.editor {
 			if self.args.pre_populate {
-				return self.service.commit(CommitMode::WithEditor {
-					message: Some(prev.as_str()),
-					authors: authors_signatures,
-				});
+				return self
+					.service
+					.commit(CommitMode::WithEditor {
+						message: Some(prev.as_str()),
+						authors: authors_signatures,
+					})
+					.map_err(Into::into);
 			}
-			return self.service.commit(CommitMode::WithEditor {
-				message: None,
-				authors: authors_signatures,
-			});
+			return self
+				.service
+				.commit(CommitMode::WithEditor {
+					message: None,
+					authors: authors_signatures,
+				})
+				.map_err(Into::into);
 		}
 
 		let msg = match (self.args.message.clone(), self.args.pre_populate) {
@@ -91,10 +97,12 @@ impl Orchestrator {
 			(None, true) => self.cli.prompt_for_pre_populated_message(&prev)?,
 		};
 
-		self.service.commit(CommitMode::WithoutEditor {
-			message: msg.as_str(),
-			authors: authors_signatures,
-		})
+		self.service
+			.commit(CommitMode::WithoutEditor {
+				message: msg.as_str(),
+				authors: authors_signatures,
+			})
+			.map_err(Into::into)
 	}
 
 	fn sort<String: Ord>(mut vector: Vec<String>) -> Vec<String> {

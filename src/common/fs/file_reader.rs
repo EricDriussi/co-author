@@ -1,4 +1,4 @@
-use crate::Result;
+use crate::{common::err::SystemError, Result};
 use std::{
 	fs::File,
 	io::{BufRead, BufReader},
@@ -22,10 +22,12 @@ impl SimpleReader {
 
 impl Reader for SimpleReader {
 	fn read_non_empty_lines(&self, path: &Path) -> Result<Lines> {
-		Ok(BufReader::new(File::open(path)?)
-			.lines()
-			.map_while(core::result::Result::ok)
-			.filter(|line| !line.trim().is_empty())
-			.collect())
+		Ok(
+			BufReader::new(File::open(path).map_err(|e| SystemError::Read(e.to_string()))?)
+				.lines()
+				.map_while(core::result::Result::ok)
+				.filter(|line| !line.trim().is_empty())
+				.collect(),
+		)
 	}
 }

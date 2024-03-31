@@ -2,6 +2,7 @@ use super::super::author::{Author, AuthorsProvider};
 use super::mapper;
 use crate::authors::err::AuthorsError;
 use crate::common::conf;
+use crate::common::err::SystemError;
 use crate::common::fs::file_reader::{Lines, Reader};
 use crate::Result;
 use std::env;
@@ -34,7 +35,7 @@ impl CSVReader {
 	fn from_cwd_fallback_home(file_reader: &dyn Reader) -> Result<Self> {
 		let file_path = &conf::authors_file();
 		let dir_path = &conf::authors_dir();
-		let cwd = env::current_dir()?;
+		let cwd = env::current_dir().map_err(|_| SystemError::EnvVar("CWD".to_string()))?;
 
 		file_reader
 			.read_non_empty_lines(&cwd.join(file_path))

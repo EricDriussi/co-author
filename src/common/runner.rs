@@ -1,3 +1,4 @@
+use super::err::SystemError;
 use crate::Result;
 use std::process::Command;
 
@@ -17,15 +18,23 @@ impl CommandRunner {
 
 impl Runner for CommandRunner {
 	fn spawn(&self, cmd: &str, arg: &str) -> Result<()> {
-		Ok(Command::new(cmd).arg(arg).spawn().map(|_| ())?)
+		Ok(Command::new(cmd)
+			.arg(arg)
+			.spawn()
+			.map(|_| ())
+			.map_err(|e| SystemError::Runner(cmd.to_string(), e.to_string()))?)
 	}
 
 	fn run(&self, cmd: &str, arg: &str) -> Result<()> {
-		Command::new(cmd)
+		if Command::new(cmd)
 			.arg(arg)
-			.status()?
+			.status()
+			.map_err(|e| SystemError::Runner(cmd.to_string(), e.to_string()))?
 			.success()
-			.then_some(())
-			.ok_or("Command returned error code".into())
+		{
+			Ok(())
+		} else {
+			Err(SystemError::Runner(cmd.to_string(), "exit code 1".to_string()).into())
+		}
 	}
 }

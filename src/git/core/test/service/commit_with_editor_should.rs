@@ -154,7 +154,7 @@ fn stop_and_report_pre_commit_hook_failure() {
 		mock_file_writer,
 	));
 
-	assert_error_contains_msg(&result, ERR_MSG);
+	assert_error_contains_msg(&result.map_err(Into::into), ERR_MSG);
 }
 
 #[test]
@@ -181,7 +181,7 @@ fn stop_and_report_add_status_to_editmsg_error() {
 		mock_file_writer,
 	));
 
-	assert_error_contains_msg(&result, ERR_MSG);
+	assert_error_contains_msg(&result.map_err(Into::into), ERR_MSG);
 }
 
 #[test]
@@ -207,7 +207,7 @@ fn stop_and_report_when_editor_cannot_be_opened() {
 		ok_file_writer(),
 	));
 
-	assert_error_contains_msg(&result, ERR_MSG);
+	assert_error_contains_msg(&result.map_err(Into::into), ERR_MSG);
 }
 
 #[test]
@@ -231,7 +231,7 @@ fn stop_and_report_commit_msg_hook_failure() {
 		ok_file_writer(),
 	));
 
-	assert_error_contains_msg(&result, ERR_MSG);
+	assert_error_contains_msg(&result.map_err(Into::into), ERR_MSG);
 }
 
 #[test]
@@ -250,7 +250,7 @@ fn report_commit_error() {
 		ok_file_writer(),
 	));
 
-	assert_error_contains_msg(&result, ERR_MSG);
+	assert_error_contains_msg(&result.map_err(Into::into), ERR_MSG);
 }
 
 fn do_commit<G: GitWrapper, H: HookRunner, E: Editor, W: Writer>(mut service: GitService<G, H, E, W>) -> Result<()> {

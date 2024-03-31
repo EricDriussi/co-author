@@ -1,63 +1,58 @@
-use crate::{authors::err::AuthorsError, git::err::GitError, ui::err::UiError};
-use std::fmt::Display;
+use crate::{authors::err::AuthorsError, common::err::SystemError, git::err::GitError, ui::err::UiError};
+use std::any::Any;
 
-#[derive(Debug)]
-pub enum Error {
-	Authors(AuthorsError),
-	Cli(UiError),
-	Git(GitError),
+pub trait Error: std::error::Error + Any {
+	fn as_any(&self) -> &dyn Any;
 }
 
-impl std::error::Error for Error {}
-
-impl PartialEq for Error {
-	fn eq(&self, other: &Self) -> bool {
-		match (self, other) {
-			(Error::Authors(a), Error::Authors(b)) => a == b,
-			(Error::Cli(a), Error::Cli(b)) => a == b,
-			(Error::Git(a), Error::Git(b)) => a == b,
-			_ => false,
-		}
+impl From<UiError> for Box<dyn Error> {
+	fn from(e: UiError) -> Box<dyn Error> {
+		Box::new(e)
 	}
 }
 
-impl Display for Error {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "=[ERROR]= ")?;
-		match self {
-			Error::Authors(err) => err.fmt(f),
-			Error::Cli(err) => err.fmt(f),
-			Error::Git(err) => err.fmt(f),
-		}
+impl From<AuthorsError> for Box<dyn Error> {
+	fn from(e: AuthorsError) -> Box<dyn Error> {
+		Box::new(e)
 	}
 }
 
-impl From<AuthorsError> for Error {
-	fn from(err: AuthorsError) -> Self {
-		Error::Authors(err)
+impl From<GitError> for Box<dyn Error> {
+	fn from(e: GitError) -> Box<dyn Error> {
+		Box::new(e)
 	}
 }
 
-impl From<UiError> for Error {
-	fn from(err: UiError) -> Self {
-		Error::Cli(err)
+impl From<SystemError> for Box<dyn Error> {
+	fn from(e: SystemError) -> Box<dyn Error> {
+		Box::new(e)
 	}
 }
 
-impl From<GitError> for Error {
-	fn from(err: GitError) -> Self {
-		Error::Git(err)
+impl From<git2::Error> for Box<dyn Error> {
+	fn from(e: git2::Error) -> Box<dyn Error> {
+		Box::new(GitError::LibGit(e.to_string()))
+	}
+}
+
+impl From<std::env::VarError> for Box<dyn Error> {
+	fn from(e: std::env::VarError) -> Box<dyn Error> {
+		Box::new(SystemError::EnvVar(e.to_string()))
 	}
 }
 
 #[cfg(test)]
-pub fn assert_error_type<T, E: std::error::Error + 'static + PartialEq>(
-	result: &Result<T, Box<dyn std::error::Error>>,
-	expected_error: &E,
-) {
+impl From<&str> for Box<dyn Error> {
+	fn from(e: &str) -> Box<dyn Error> {
+		Box::new(SystemError::Unknown(e.to_string()))
+	}
+}
+
+#[cfg(test)]
+pub fn assert_error_type<T, E: Error + 'static + PartialEq>(result: &crate::Result<T>, expected_error: &E) {
 	assert!(result.is_err(), "Not an Error");
 	assert!(
-		matches!(result, Err(ref e) if e.downcast_ref::<E>().map_or(false, |err| *err == *expected_error)),
+		matches!(result, Err(ref e) if e.as_any().downcast_ref::<E>().map_or(false, |err| *err == *expected_error)),
 		"Expected error type: {:?}, but got: {:?}",
 		expected_error,
 		result.as_ref().err(),
@@ -65,7 +60,7 @@ pub fn assert_error_type<T, E: std::error::Error + 'static + PartialEq>(
 }
 
 #[cfg(test)]
-pub fn assert_error_contains_msg<T>(result: &Result<T, Box<dyn std::error::Error>>, expected_msg: &str) {
+pub fn assert_error_contains_msg<T>(result: &crate::Result<T>, expected_msg: &str) {
 	assert!(result.is_err(), "Not an Error");
 	assert!(
 		matches!(result, Err(e) if e.to_string().contains(expected_msg)),
@@ -73,22 +68,4 @@ pub fn assert_error_contains_msg<T>(result: &Result<T, Box<dyn std::error::Error
 		expected_msg,
 		result.as_ref().err(),
 	);
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use crate::{authors::err::AuthorsError, git::err::GitError, ui::err::UiError};
-
-	#[test]
-	fn test_error_display() {
-		let an_authors_error = AuthorsError::NotFound("path/to/file".to_string());
-		assert!(format!("{}", Error::Authors(an_authors_error)).contains("=[ERROR]= Authors failure"));
-
-		let a_cli_error = UiError::Interrupted;
-		assert!(format!("{}", Error::Cli(a_cli_error)).contains("=[ERROR]= Cli failure"));
-
-		let a_git_error = GitError::Editor;
-		assert!(format!("{}", Error::Git(a_git_error)).contains("=[ERROR]= Git failure"));
-	}
 }
