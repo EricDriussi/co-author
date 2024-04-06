@@ -1,11 +1,9 @@
 use super::super::author::{Author, AuthorsProvider};
 use super::mapper;
 use crate::authors::err::AuthorsError;
-use crate::common::conf;
-use crate::common::err::SystemError;
 use crate::common::fs::file_reader::{Lines, Reader};
+use crate::common::{conf, env};
 use crate::Result;
-use std::env;
 use std::path::{Path, PathBuf};
 
 pub enum LoadMode<'a> {
@@ -35,7 +33,7 @@ impl CSVReader {
 	fn from_cwd_fallback_home(file_reader: &dyn Reader) -> Result<Self> {
 		let file_path = &conf::authors_file();
 		let dir_path = &conf::authors_dir();
-		let cwd = env::current_dir().map_err(|_| SystemError::EnvVar("CWD".to_string()))?;
+		let cwd = env::cwd()?;
 
 		file_reader
 			.read_non_empty_lines(&cwd.join(file_path))
@@ -48,12 +46,12 @@ impl CSVReader {
 	}
 
 	fn xdg_or_home_fallback(file_reader: &dyn Reader, authors_dir: &str, file_path: &str) -> Result<Lines> {
-		let home = PathBuf::from(env::var("XDG_CONFIG_HOME")?);
+		let home = PathBuf::from(env::xdg_home()?);
 		file_reader.read_non_empty_lines(&home.join(authors_dir).join(file_path))
 	}
 
 	fn home_fallback(file_reader: &dyn Reader, authors_dir: &str, file_path: &str) -> Result<Lines> {
-		let home = env::var("HOME")?;
+		let home = env::home()?;
 		file_reader
 			.read_non_empty_lines(&PathBuf::from(format!("{home}/.config/{authors_dir}/{file_path}")))
 			.or_else(|_| file_reader.read_non_empty_lines(&PathBuf::from(format!("{home}/.{authors_dir}/{file_path}"))))

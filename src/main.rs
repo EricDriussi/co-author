@@ -4,7 +4,6 @@ use error::Error;
 use orch::Orchestrator;
 use std::{process, result};
 
-// TODO: add env wrapper
 // TODO: fix bug with first commit in new repo
 // TODO: automatically create on the fly aliases for authors
 // TODO: add amend option -> update authors if given and update message if given (how does this work with --editor?)

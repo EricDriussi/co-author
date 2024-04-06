@@ -1,9 +1,8 @@
 use crate::{
-	common::runner::Runner,
+	common::{env, runner::Runner},
 	git::{core::conf_provider::ConfProvider, err::GitError},
 	Result,
 };
-use std::env;
 
 #[cfg_attr(test, mockall::automock)]
 pub trait Editor {
@@ -30,7 +29,7 @@ impl<R: Runner, C: ConfProvider> FileEditor<R, C> {
 	}
 
 	fn env_fallback(&self, path: &str) -> Result<()> {
-		match env::var("EDITOR") {
+		match env::editor() {
 			Err(_) => self.vim_fallback(path),
 			Ok(editor) => Ok(self.runner.spawn(&editor, path).map_err(|_| GitError::Editor)?),
 		}
