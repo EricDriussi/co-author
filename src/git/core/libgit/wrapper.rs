@@ -75,19 +75,22 @@ impl<R: Reader> LibGitWrapper<R> {
 	}
 
 	fn add_commit(&self, signature: &Signature, commit_message: &str) -> Result<()> {
-		let oid = self.repo.index()?.write_tree()?;
-		let tree = self.repo.find_tree(oid)?;
-		let parent_commit = self.repo.head()?.peel_to_commit()?;
-		Ok(self
-			.repo
-			.commit(
+		let tree = self.repo.find_tree(self.repo.index()?.write_tree()?)?;
+
+		match self.repo.head() {
+			Ok(head_ref) => self.repo.commit(
 				Some("HEAD"),
 				signature,
 				signature,
 				commit_message,
 				&tree,
-				&[&parent_commit],
-			)
-			.map(|_| ())?)
+				&[&head_ref.peel_to_commit()?],
+			),
+			Err(_) => self
+				.repo
+				.commit(Some("HEAD"), signature, signature, commit_message, &tree, &[]),
+		}
+		.map(|_| ())
+		.map_err(Into::into)
 	}
 }
