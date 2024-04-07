@@ -1,8 +1,7 @@
 use args::Args;
 use clap::Parser;
 use error::Error;
-use orch::Orchestrator;
-use std::{process, result};
+use orchestrator::Orchestrator;
 
 // TODO: fix bug with first commit in new repo
 // TODO: automatically create on the fly aliases for authors
@@ -13,15 +12,19 @@ fn main() {
 	let args = Args::parse();
 	if let Err(e) = run(args) {
 		eprintln!("[Error] {e}");
-		process::exit(1);
+		std::process::exit(1);
 	}
 }
 
-pub type Result<T> = result::Result<T, Box<dyn Error>>;
+pub type Result<T> = std::result::Result<T, Box<dyn Error>>;
 fn run(args: Args) -> Result<()> {
-	let mut orchestrator = Orchestrator::new(args, ui::di::init()?)?;
-	let authors_signatures = orchestrator.handle_authors()?;
-	orchestrator.handle_commit_msg(authors_signatures)
+	let cli = ui::di::init()?;
+	let service = git::di::init()?;
+	let provider = authors::di::init(args.file.clone())?;
+
+	let mut orchestrator = Orchestrator::new(args, cli, service, provider);
+	let authors_signatures = orchestrator.get_authors()?;
+	orchestrator.commit(authors_signatures)
 }
 
 mod args;
@@ -29,5 +32,5 @@ mod authors;
 mod common;
 mod error;
 mod git;
-mod orch;
+mod orchestrator;
 mod ui;
