@@ -35,7 +35,7 @@ impl Display for SystemError {
 			SystemError::Runner(cmd, err) => write!(f, "Command {cmd} failed with: {err}"),
 			SystemError::Read(err) => write!(f, "Could not read {err}"),
 			SystemError::Write(err) => write!(f, "Could not write {err}"),
-			SystemError::EnvVar(var) => write!(f, "Could not get {var} from env var"),
+			SystemError::EnvVar(var) => write!(f, "Could not get env var {var}"),
 		}
 	}
 }
@@ -59,8 +59,8 @@ mod tests {
 			"System failure: Could not write file"
 		);
 		assert_eq!(
-			format!("{}", SystemError::EnvVar("var".to_string())),
-			"System failure: Could not get var from env var"
+			format!("{}", SystemError::EnvVar("whatever".to_string())),
+			"System failure: Could not get env var whatever"
 		);
 	}
 }

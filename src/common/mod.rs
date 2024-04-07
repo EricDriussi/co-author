@@ -8,11 +8,11 @@ pub mod fs {
 	pub mod file_writer;
 
 	#[cfg(test)]
-	pub mod test {
+	mod test {
 		mod file_reader_should;
 		mod file_writer_should;
 
-		pub mod util {
+		mod util {
 			pub mod random_tmp_file;
 		}
 	}

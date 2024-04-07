@@ -1,20 +1,16 @@
-use crate::common::fs::{
-	file_writer::{SimpleWriter, Writer},
-	test::util::random_tmp_file,
-};
-use std::{
-	fs::{self, OpenOptions},
-	io::{BufReader, Read, Write},
-	path::PathBuf,
-};
+use crate::common::fs::file_writer::{FileWriter, Writer};
+use crate::common::fs::test::util::random_tmp_file;
+use std::fs::{self, OpenOptions};
+use std::io::{BufReader, Read, Write};
+use std::path::PathBuf;
 
 const EXPECTED: &str = "some text sample";
 
 #[test]
 fn overwrite_file_content() {
 	let (_, path) = random_tmp_file::create();
-	let writer = SimpleWriter::new();
 
+	let writer = FileWriter::new();
 	let result = writer.overwrite(&PathBuf::from(path.clone()), EXPECTED);
 
 	let mut actual = String::new();
@@ -34,9 +30,9 @@ fn overwrite_file_content() {
 
 #[test]
 fn create_file_when_overwriting() {
-	let writer = SimpleWriter::new();
 	let path_to_no_file = random_tmp_file::path();
 
+	let writer = FileWriter::new();
 	let result = writer.overwrite(&PathBuf::from(path_to_no_file.as_str()), EXPECTED);
 
 	let mut actual = String::new();
@@ -60,9 +56,9 @@ fn append_to_file() {
 	let pre_existing_content = EXPECTED;
 	file.write_all(pre_existing_content.as_bytes())
 		.expect("Could not write to file for test");
-	let writer = SimpleWriter::new();
-	let expected_new_content = "some more text!";
 
+	let writer = FileWriter::new();
+	let expected_new_content = "some more text!";
 	let result = writer.append(&PathBuf::from(path.clone()), expected_new_content);
 
 	let mut actual = String::new();
@@ -82,9 +78,9 @@ fn append_to_file() {
 
 #[test]
 fn error_when_appending_to_a_non_existent_file() {
-	let writer = SimpleWriter::new();
 	let path_to_no_file = random_tmp_file::path();
 
+	let writer = FileWriter::new();
 	let result = writer.append(&PathBuf::from(path_to_no_file), EXPECTED);
 
 	assert!(result.is_err());

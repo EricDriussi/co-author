@@ -1,9 +1,7 @@
 use crate::{common::err::SystemError, Result};
-use std::{
-	fs::File,
-	io::{BufRead, BufReader},
-	path::Path,
-};
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+use std::path::Path;
 
 pub type Lines = Vec<String>;
 
@@ -12,15 +10,15 @@ pub trait Reader {
 	fn read_non_empty_lines(&self, path: &Path) -> Result<Lines>;
 }
 
-pub struct SimpleReader;
+pub struct FileReader;
 
-impl SimpleReader {
-	pub fn new() -> SimpleReader {
-		SimpleReader
+impl FileReader {
+	pub fn new() -> FileReader {
+		FileReader
 	}
 }
 
-impl Reader for SimpleReader {
+impl Reader for FileReader {
 	fn read_non_empty_lines(&self, path: &Path) -> Result<Lines> {
 		Ok(
 			BufReader::new(File::open(path).map_err(|e| SystemError::Read(e.to_string()))?)

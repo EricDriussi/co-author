@@ -1,9 +1,8 @@
+use crate::common::err::SystemError;
+use crate::Result;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::path::Path;
-
-use crate::common::err::SystemError;
-use crate::Result;
 
 #[cfg_attr(test, mockall::automock)]
 pub trait Writer {
@@ -11,11 +10,11 @@ pub trait Writer {
 	fn append(&self, path: &Path, content: &str) -> Result<()>;
 }
 
-pub struct SimpleWriter;
+pub struct FileWriter;
 
-impl SimpleWriter {
-	pub fn new() -> SimpleWriter {
-		SimpleWriter
+impl FileWriter {
+	pub fn new() -> FileWriter {
+		FileWriter
 	}
 
 	fn write(mut file: File, content: &str) -> Result<()> {
@@ -25,7 +24,7 @@ impl SimpleWriter {
 	}
 }
 
-impl Writer for SimpleWriter {
+impl Writer for FileWriter {
 	fn overwrite(&self, path: &Path, content: &str) -> Result<()> {
 		let file = OpenOptions::new()
 			.write(true)

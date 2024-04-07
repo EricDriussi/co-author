@@ -1,5 +1,5 @@
 use crate::{
-	common::fs::file_reader::SimpleReader,
+	common::fs::file_reader::FileReader,
 	error::assert_error_type,
 	git::{
 		core::{
@@ -23,14 +23,14 @@ fn determine_if_is_valid_git_repo() {
 	let path = random_tmp_path_in(TEST_DIR_PATH);
 	let git_repo = init_repo(&path).expect("Could not create test repo");
 
-	let repo_with_no_staged_changes = LibGitWrapper::from(&path, SimpleReader::new());
+	let repo_with_no_staged_changes = LibGitWrapper::from(&path, FileReader::new());
 	assert!(repo_with_no_staged_changes.is_err());
 
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
-	let valid_repo = LibGitWrapper::from(&path, SimpleReader::new());
+	let valid_repo = LibGitWrapper::from(&path, FileReader::new());
 	assert!(valid_repo.is_ok());
 
-	let invalid_repo = LibGitWrapper::from(&PathBuf::from("/a/path"), SimpleReader::new());
+	let invalid_repo = LibGitWrapper::from(&PathBuf::from("/a/path"), FileReader::new());
 	fs::remove_dir_all(path).ok();
 	assert!(invalid_repo.is_err());
 }
@@ -48,7 +48,7 @@ fn create_a_commit_on_an_already_existing_git_repo_with_staged_changes() {
 	let editmsg_path = format!("{}/.git/COMMIT_EDITMSG", path.to_string_lossy());
 	std::fs::write(editmsg_path, commit_message.to_string()).expect("Could not write to test editmsg file");
 
-	let repo = LibGitWrapper::from(&path, SimpleReader::new()).expect("Could not setup test repo");
+	let repo = LibGitWrapper::from(&path, FileReader::new()).expect("Could not setup test repo");
 	let result = repo.commit();
 
 	fs::remove_dir_all(path).ok();
@@ -61,7 +61,7 @@ fn error_out_if_commit_message_is_empty() {
 	let git_repo = init_repo(&path).expect("Could not create test repo");
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
 
-	let repo = LibGitWrapper::from(&path, SimpleReader::new()).expect("Could not setup test repo");
+	let repo = LibGitWrapper::from(&path, FileReader::new()).expect("Could not setup test repo");
 	let no_authors = vec![String::new()];
 	let commit_message = CommitMessage::new("", no_authors);
 
@@ -95,7 +95,7 @@ fn test_prepares_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
 
 	add_commit(&git_repo, &tree, "IRRELEVANT")?;
 
-	let repo = LibGitWrapper::from(&path, SimpleReader::new()).expect("Could not setup test repo");
+	let repo = LibGitWrapper::from(&path, FileReader::new()).expect("Could not setup test repo");
 	let contents = repo.formatted_status().map_err(|e| e.to_string());
 
 	fs::remove_dir_all(path).ok();
@@ -131,7 +131,7 @@ fn get_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
 	let mut index = git_repo.index()?;
 	let id = index.write_tree()?;
 	let tree = git_repo.find_tree(id)?;
-	let repo = LibGitWrapper::from(&path, SimpleReader::new()).expect("Could not setup test repo");
+	let repo = LibGitWrapper::from(&path, FileReader::new()).expect("Could not setup test repo");
 
 	let msg = "a commit message!".to_string();
 	add_commit(&git_repo, &tree, msg.as_str())?;

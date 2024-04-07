@@ -7,13 +7,16 @@ pub fn cwd() -> Result<PathBuf> {
 }
 
 pub fn home() -> Result<String> {
-	Ok(std::env::var("HOME").map_err(|_| SystemError::EnvVar("HOME".to_string()))?)
+	let home = "HOME";
+	Ok(std::env::var(home).map_err(|_| SystemError::EnvVar(home.to_string()))?)
 }
 
 pub fn xdg_home() -> Result<String> {
-	Ok(std::env::var("XDG_CONFIG_HOME").map_err(|_| SystemError::EnvVar("XDG_CONFIG_HOME".to_string()))?)
+	let xdg_home = "XDG_CONFIG_HOME";
+	Ok(std::env::var(xdg_home).map_err(|_| SystemError::EnvVar(xdg_home.to_string()))?)
 }
 
 pub fn editor() -> Result<String> {
-	Ok(std::env::var("EDITOR").map_err(|_| SystemError::EnvVar("EDITOR".to_string()))?)
+	let editor = "EDITOR";
+	Ok(std::env::var(editor).map_err(|_| SystemError::EnvVar(editor.to_string()))?)
 }
