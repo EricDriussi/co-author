@@ -12,20 +12,20 @@ impl Cli {
 		Self { reader }
 	}
 
-	pub fn prompt_for_message(&mut self) -> Result<String> {
+	pub fn message_prompt(&mut self) -> Result<String> {
 		let prompt_msg = "Enter your commit message:";
 		let input = self.reader.readline(&format!("{prompt_msg}\n"))?;
 		Ok(input.trim().to_string())
 	}
 
-	pub fn prompt_for_aliases(&mut self, authors: &[Author]) -> Result<Vec<String>> {
+	pub fn aliases_prompt(&mut self, authors: &[Author]) -> Result<Vec<String>> {
 		let pretty_authors = Self::prettify_authors(authors);
 		let prompt_msg = "Enter co-authors aliases separated by spaces:";
 		let input = self.reader.readline(&format!("\n{pretty_authors}\n\n{prompt_msg}\n"))?;
 		Ok(input.split_whitespace().map(ToString::to_string).collect())
 	}
 
-	pub fn prompt_for_pre_populated_message(&mut self, prev_commit_msg: &str) -> Result<String> {
+	pub fn pre_populated_message_prompt(&mut self, prev_commit_msg: &str) -> Result<String> {
 		let prompt_msg = "Update your commit message:";
 		let input = self
 			.reader

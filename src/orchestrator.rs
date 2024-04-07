@@ -35,7 +35,7 @@ impl Orchestrator {
 
 		let aliases = match &self.args.list {
 			Some(list) => list.split(',').map(ToString::to_string).collect::<Vec<String>>(),
-			None => self.cli.prompt_for_aliases(&self.provider.all())?,
+			None => self.cli.aliases_prompt(&self.provider.all())?,
 		};
 		let authors: Vec<_> = self.provider.find(&aliases).iter().map(Author::signature).collect();
 
@@ -62,10 +62,10 @@ impl Orchestrator {
 
 		let msg = match (self.args.message.clone(), self.args.pre_populate) {
 			(Some(msg), _) => msg,
-			(None, false) => self.cli.prompt_for_message()?,
+			(None, false) => self.cli.message_prompt()?,
 			(None, true) => self
 				.cli
-				.prompt_for_pre_populated_message(&self.service.last_commit_message())?,
+				.pre_populated_message_prompt(&self.service.last_commit_message())?,
 		};
 
 		self.service.commit(CommitMode::WithoutEditor {

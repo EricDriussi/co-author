@@ -11,7 +11,7 @@ fn prompt_for_message() {
 		.returning(|_| Ok("whatever".to_string()));
 	let mut cli = Cli::new(Box::new(reader));
 
-	let _ = cli.prompt_for_message();
+	let _ = cli.message_prompt();
 	// Only interested in params passed to the mock (withf)
 }
 
@@ -26,7 +26,7 @@ fn trim_message() {
 		.returning(move |_| Ok(padded_msg.clone()));
 	let mut cli = Cli::new(Box::new(reader));
 
-	let result = cli.prompt_for_message();
+	let result = cli.message_prompt();
 
 	assert!(matches!(result, Ok(msg) if msg == trimmed_msg));
 }
@@ -41,8 +41,23 @@ fn prompt_for_aliases() {
 		.returning(|_| Ok("whatever".to_string()));
 	let mut cli = Cli::new(Box::new(reader));
 
-	let _ = cli.prompt_for_aliases(&[]);
+	let _ = cli.aliases_prompt(&[]);
 	// Only interested in params passed to the mock (withf)
+}
+
+#[test]
+fn space_split_aliases() {
+	let aliases = " a b cd   ";
+	let mut reader = MockInputReader::new();
+	reader
+		.expect_readline()
+		.times(1)
+		.returning(move |_| Ok(aliases.to_string()));
+	let mut cli = Cli::new(Box::new(reader));
+
+	let result = cli.aliases_prompt(&[]);
+
+	assert!(matches!(result, Ok(aliases) if aliases == ["a", "b", "cd"]));
 }
 
 #[test]
@@ -58,23 +73,8 @@ fn pretty_print_authors_when_prompting_for_aliases() {
 		.returning(move |_| Ok("whatever".to_string()));
 	let mut cli = Cli::new(Box::new(reader));
 
-	let _ = cli.prompt_for_aliases(&[author]);
-	// Only interested in params passed to the mock (withf())
-}
-
-#[test]
-fn space_split_aliases() {
-	let aliases = " a b cd   ";
-	let mut reader = MockInputReader::new();
-	reader
-		.expect_readline()
-		.times(1)
-		.returning(move |_| Ok(aliases.to_string()));
-	let mut cli = Cli::new(Box::new(reader));
-
-	let result = cli.prompt_for_aliases(&[]);
-
-	assert!(matches!(result, Ok(aliases) if aliases == ["a", "b", "cd"]));
+	let _ = cli.aliases_prompt(&[author]);
+	// Only interested in params passed to the mock (withf)
 }
 
 fn contains_in_order(prompt_msg: &str, components: &[&str]) -> bool {
