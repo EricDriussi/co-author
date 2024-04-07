@@ -4,13 +4,10 @@ use std::{any::Any, fmt::Display};
 #[derive(Debug)]
 pub enum SystemError {
 	Runner(String, String),
-	Unknown(String),
 	Read(String),
 	Write(String),
 	EnvVar(String),
 }
-
-impl std::error::Error for SystemError {}
 
 impl Error for SystemError {
 	fn as_any(&self) -> &dyn Any {
@@ -18,13 +15,14 @@ impl Error for SystemError {
 	}
 }
 
+impl std::error::Error for SystemError {}
+
 impl PartialEq for SystemError {
 	fn eq(&self, other: &Self) -> bool {
 		matches!((self, other), |(
 			SystemError::Runner(_, _),
 			SystemError::Runner(_, _),
-		)| (SystemError::Unknown(_), SystemError::Unknown(_))
-			| (SystemError::Read(_), SystemError::Read(_))
+		)| (SystemError::Read(_), SystemError::Read(_))
 			| (SystemError::Write(_), SystemError::Write(_))
 			| (SystemError::EnvVar(_), SystemError::EnvVar(_)))
 	}
@@ -35,7 +33,6 @@ impl Display for SystemError {
 		write!(f, "System failure: ")?;
 		match self {
 			SystemError::Runner(cmd, err) => write!(f, "Command {cmd} failed with: {err}"),
-			SystemError::Unknown(err) => write!(f, "{err}"),
 			SystemError::Read(err) => write!(f, "Could not read {err}"),
 			SystemError::Write(err) => write!(f, "Could not write {err}"),
 			SystemError::EnvVar(var) => write!(f, "Could not get {var} from env var"),
@@ -52,10 +49,6 @@ mod tests {
 		assert_eq!(
 			format!("{}", SystemError::Runner("cmd".to_string(), "error".to_string())),
 			"System failure: Command cmd failed with: error"
-		);
-		assert_eq!(
-			format!("{}", SystemError::Unknown("oops".to_string())),
-			"System failure: oops"
 		);
 		assert_eq!(
 			format!("{}", SystemError::Read("file".to_string())),

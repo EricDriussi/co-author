@@ -24,7 +24,7 @@ impl Display for AuthorsError {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, "Authors failure: ")?;
 		match self {
-			AuthorsError::NotFound(location) => write!(f, "No file at {location}"),
+			AuthorsError::NotFound(location) => write!(f, "No authors file at {location}"),
 		}
 	}
 }
@@ -37,7 +37,7 @@ mod tests {
 	fn test_authors_error_display() {
 		assert_eq!(
 			format!("{}", AuthorsError::NotFound("path/to/file".to_string())),
-			"Authors failure: No file at path/to/file"
+			"Authors failure: No authors file at path/to/file"
 		);
 	}
 }

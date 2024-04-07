@@ -35,16 +35,10 @@ impl From<git2::Error> for Box<dyn Error> {
 	}
 }
 
-impl From<std::env::VarError> for Box<dyn Error> {
-	fn from(e: std::env::VarError) -> Box<dyn Error> {
-		Box::new(SystemError::EnvVar(e.to_string()))
-	}
-}
-
 #[cfg(test)]
 impl From<&str> for Box<dyn Error> {
 	fn from(e: &str) -> Box<dyn Error> {
-		Box::new(SystemError::Unknown(e.to_string()))
+		Box::new(UiError::Unknown(e.to_string()))
 	}
 }
 

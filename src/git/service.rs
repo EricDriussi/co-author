@@ -2,7 +2,6 @@ use super::commit_mode::CommitMode;
 use super::core::commit_message::{CommitMessage, GitWrapper};
 use super::core::editor::file_editor::Editor;
 use super::core::hook::HookRunner;
-use super::err::GitError;
 use crate::common::conf;
 use crate::common::fs::file_writer::Writer;
 use crate::Result;
@@ -52,17 +51,13 @@ impl<G: GitWrapper, H: HookRunner, E: Editor, W: Writer> GitService<G, H, E, W> 
 
 	fn pre(&mut self, body: &CommitMessage) -> Result<()> {
 		self.hook_runner.run_pre_commit()?;
-		Ok(self
-			.file_writer
+		self.file_writer
 			.overwrite(&PathBuf::from(&self.editmsg_path), &body.to_string())
-			.map_err(|_| GitError::Editmsg)?)
 	}
 
 	fn editor(&mut self) -> Result<()> {
 		let status = self.git_wrapper.formatted_status()?;
-		self.file_writer
-			.append(&PathBuf::from(&self.editmsg_path), &status)
-			.map_err(|_| GitError::Editmsg)?;
+		self.file_writer.append(&PathBuf::from(&self.editmsg_path), &status)?;
 		self.editmsg_editor.open(&self.editmsg_path)
 	}
 

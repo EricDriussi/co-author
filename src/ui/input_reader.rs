@@ -13,7 +13,7 @@ impl InputReader for DefaultEditor {
 		Ok(self.readline(&format!("{prompt_msg}> ")).map_err(|e| match e {
 			ReadlineError::Interrupted => UiError::Interrupted,
 			ReadlineError::Io(e) => UiError::Io(e),
-			_ => UiError::Unknown,
+			e => UiError::Unknown(e.to_string()),
 		})?)
 	}
 
@@ -23,7 +23,7 @@ impl InputReader for DefaultEditor {
 			.map_err(|e| match e {
 				ReadlineError::Interrupted => UiError::Interrupted,
 				ReadlineError::Io(e) => UiError::Io(e),
-				_ => UiError::Unknown,
+				e => UiError::Unknown(e.to_string()),
 			})?)
 	}
 }
