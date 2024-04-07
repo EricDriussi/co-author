@@ -11,15 +11,15 @@ pub enum LoadMode<'a> {
 	FromPath { file_reader: &'a dyn Reader, path: PathBuf },
 }
 
-pub struct CSVReader {
+pub struct CSVProvider {
 	lines: Vec<String>,
 }
 
-impl CSVReader {
+impl CSVProvider {
 	pub fn load(load_mode: &LoadMode) -> Result<Self> {
 		match load_mode {
-			LoadMode::FromPath { file_reader, path } => CSVReader::from_file(file_reader.to_owned(), path),
-			LoadMode::FromCwd { file_reader } => CSVReader::from_cwd_fallback_home(file_reader.to_owned()),
+			LoadMode::FromPath { file_reader, path } => CSVProvider::from_file(file_reader.to_owned(), path),
+			LoadMode::FromCwd { file_reader } => CSVProvider::from_cwd_fallback_home(file_reader.to_owned()),
 		}
 	}
 
@@ -59,7 +59,7 @@ impl CSVReader {
 	}
 }
 
-impl AuthorsProvider for CSVReader {
+impl AuthorsProvider for CSVProvider {
 	fn find(&self, aliases: &[String]) -> Vec<Author> {
 		self.lines
 			.iter()

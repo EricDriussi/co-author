@@ -6,8 +6,8 @@ fn present_a_co_author_compliant_signature() {
 	let name = "alice";
 	let email = "alice@wonderland.not";
 	let author = Author::from("a", name, email);
-	let co_author_prefix = conf::co_author_prefix();
 
+	let co_author_prefix = conf::co_author_prefix();
 	assert_eq!(author.signature(), format!("{co_author_prefix}: {name} <{email}>"));
 }
 
@@ -28,7 +28,7 @@ fn get_name() {
 }
 
 #[test]
-fn be_equal_to_another_author_with_equal_data() {
+fn be_equal_to_another_author_with_same_data() {
 	let alias = "a";
 	let name = "alice";
 	let email = "alice@wonderland.not";

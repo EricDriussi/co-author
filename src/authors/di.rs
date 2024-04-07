@@ -1,16 +1,16 @@
 use super::author::AuthorsProvider;
-use super::csv::reader::{CSVReader, LoadMode};
+use super::csv::provider::{CSVProvider, LoadMode};
 use crate::common::fs::file_reader::SimpleReader;
 use crate::Result;
 use std::path::PathBuf;
 
 pub fn init(file: Option<String>) -> Result<Box<dyn AuthorsProvider>> {
 	let provider = match file {
-		Some(file) => CSVReader::load(&LoadMode::FromPath {
+		Some(file) => CSVProvider::load(&LoadMode::FromPath {
 			file_reader: &SimpleReader::new(),
 			path: PathBuf::from(&file),
 		})?,
-		None => CSVReader::load(&LoadMode::FromCwd {
+		None => CSVProvider::load(&LoadMode::FromCwd {
 			file_reader: &SimpleReader::new(),
 		})?,
 	};

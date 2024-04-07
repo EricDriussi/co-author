@@ -4,12 +4,14 @@ pub mod err;
 
 pub mod csv {
 	mod mapper;
-	pub mod reader;
+	pub mod provider;
 
 	#[cfg(test)]
 	mod mapper_should;
 	#[cfg(test)]
-	mod reader_should;
+	mod provider_should_give;
+	#[cfg(test)]
+	mod provider_should_load;
 }
 
 #[cfg(test)]

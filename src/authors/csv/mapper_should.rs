@@ -5,8 +5,9 @@ fn map_from_valid_csv_line() {
 	let alias = "a";
 	let name = "alice";
 	let email = "alice@wonderland.not";
+	let csv_line = format!("{alias},{name},{email}");
 
-	let author_from_csv = mapper::to_author(format!("{alias},{name},{email}").as_str());
+	let author_from_csv = mapper::to_author(csv_line.as_str());
 
 	assert_eq!(author_from_csv, Some(Author::from(alias, name, email)));
 }
