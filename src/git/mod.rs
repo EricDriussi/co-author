@@ -1,18 +1,24 @@
 pub mod commit_mode;
 pub mod di;
 pub mod err;
-mod service;
 
 mod core {
-	pub mod commit_message;
+	mod commit_message;
 	pub mod conf_provider;
 	pub mod hook;
+	pub mod service;
 
 	pub mod libgit {
 		mod status_formatter;
 		pub mod wrapper;
+
 		#[cfg(test)]
-		mod wrapper_should;
+		mod test {
+			mod helper;
+			mod wrapper_should;
+			mod wrapper_should_build;
+			mod wrapper_should_commit;
+		}
 	}
 
 	pub mod editor {

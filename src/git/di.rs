@@ -2,7 +2,7 @@ use super::core::conf_provider::GitConfProvider;
 use super::core::editor::file_editor::FileEditor;
 use super::core::hook::Hook;
 use super::core::libgit::wrapper::LibGitWrapper;
-use super::service::GitService;
+use super::core::service::GitService;
 use crate::common::env;
 use crate::common::fs::file_reader::FileReader;
 use crate::common::fs::file_writer::FileWriter;

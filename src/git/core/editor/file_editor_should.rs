@@ -1,18 +1,10 @@
-use crate::{
-	common::runner::MockRunner,
-	error::assert_error_type,
-	git::{
-		core::{
-			conf_provider::MockConfProvider,
-			editor::file_editor::{Editor, FileEditor},
-		},
-		err::GitError,
-	},
-};
-use mockall::{
-	predicate::{always, eq},
-	Sequence,
-};
+use crate::common::runner::MockRunner;
+use crate::error::assert_error_type;
+use crate::git::core::conf_provider::MockConfProvider;
+use crate::git::core::editor::file_editor::{Editor, FileEditor};
+use crate::git::err::GitError;
+use mockall::predicate::{always, eq};
+use mockall::Sequence;
 use serial_test::serial;
 use std::env;
 

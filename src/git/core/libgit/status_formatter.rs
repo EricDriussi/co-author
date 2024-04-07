@@ -1,14 +1,15 @@
+use crate::{git::err::GitError, Result};
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 
-const ERR_MSG: &str = "GIT ERROR";
-
-pub fn get_status_for_commit_file(repo: &Repository) -> String {
+pub fn get_status_for_commit_file(repo: &Repository) -> Result<String> {
 	let mut options = StatusOptions::new();
 	options.include_untracked(true);
 
-	let head = repo.head().expect(ERR_MSG);
-	let branch_name = head.shorthand().expect(ERR_MSG);
-	let file_statuses = repo.statuses(Some(&mut options)).expect(ERR_MSG);
+	let head = repo.head()?;
+	let branch_name = head
+		.shorthand()
+		.ok_or_else(|| GitError::LibGit("Could not get branch name".to_string()))?;
+	let file_statuses = repo.statuses(Some(&mut options))?;
 
 	let heading = format!(
 		"
@@ -21,13 +22,13 @@ pub fn get_status_for_commit_file(repo: &Repository) -> String {
 # On branch {branch_name}\n"
 	);
 
-	format!(
+	Ok(format!(
 		"{}{}{}{}",
 		heading,
 		changes_to_be_committed(&file_statuses),
 		changes_not_staged_for_commit(&file_statuses),
 		untracked_files(&file_statuses)
-	)
+	))
 }
 
 fn changes_to_be_committed(file_statuses: &Statuses) -> String {

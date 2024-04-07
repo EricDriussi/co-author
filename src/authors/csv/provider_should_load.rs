@@ -7,18 +7,19 @@ use crate::error::{assert_error_contains_msg, assert_error_type};
 use crate::Result;
 use mockall::predicate::eq;
 use mockall::Sequence;
+use serial_test::serial;
 use std::path::PathBuf;
 
 #[test]
 fn load_from_given_file() {
-	let mut mock_file_reader = MockReader::new();
-	mock_file_reader
+	let mut mock_reader = MockReader::new();
+	mock_reader
 		.expect_read_non_empty_lines()
 		.with(eq(PathBuf::from(String::new())))
 		.returning(|_| Ok(vec![]));
 
 	let result = CSVProvider::load(&LoadMode::FromPath {
-		file_reader: &mock_file_reader,
+		file_reader: &mock_reader,
 		path: PathBuf::from(String::new()),
 	});
 
@@ -29,14 +30,14 @@ fn load_from_given_file() {
 fn not_load_from_given_file() {
 	let irrelevant_file = "a/path/file.hi";
 	let irrelevant_file_path = PathBuf::from(irrelevant_file);
-	let mut mock_file_reader = MockReader::new();
-	mock_file_reader
+	let mut mock_reader = MockReader::new();
+	mock_reader
 		.expect_read_non_empty_lines()
 		.with(eq(irrelevant_file_path.clone()))
 		.returning(|_| Err("oops".into()));
 
 	let result = CSVProvider::load(&LoadMode::FromPath {
-		file_reader: &mock_file_reader,
+		file_reader: &mock_reader,
 		path: irrelevant_file_path,
 	});
 
@@ -46,26 +47,26 @@ fn not_load_from_given_file() {
 
 #[test]
 fn load_using_fallback() {
-	let mut mock_file_reader = MockReader::new();
-	mock_file_reader.expect_read_non_empty_lines().returning(|_| Ok(vec![]));
+	let mut mock_reader = MockReader::new();
+	mock_reader.expect_read_non_empty_lines().returning(|_| Ok(vec![]));
 
-	assert!(load_from_cwd(&mock_file_reader).is_ok());
+	assert!(load_from_cwd(&mock_reader).is_ok());
 }
 
 #[test]
 fn not_load_using_fallback() {
-	let mut mock_file_reader = MockReader::new();
-	mock_file_reader
+	let mut mock_reader = MockReader::new();
+	mock_reader
 		.expect_read_non_empty_lines()
 		.returning(|_| Err("oops".into()));
 
-	let result = load_from_cwd(&mock_file_reader);
+	let result = load_from_cwd(&mock_reader);
 
 	assert_error_type(&result, &AuthorsError::NotFound(String::new()));
 	assert_error_contains_msg(&result, "$PWD or $HOME");
 }
 
-#[test]
+#[serial]
 fn fallback_sensibly() {
 	let cwd = "/tmp";
 	let xdg_config = "a_path";
@@ -76,39 +77,39 @@ fn fallback_sensibly() {
 	let file_path = &conf::authors_file();
 	let dir_path = &conf::authors_dir();
 	let mut seq = Sequence::new();
-	let mut mock_file_reader = MockReader::new();
-	mock_file_reader
+	let mut mock_reader = MockReader::new();
+	mock_reader
 		.expect_read_non_empty_lines()
 		.with(eq(PathBuf::from(format!("{cwd}/{file_path}"))))
 		.returning(|_| Err("oops".into()))
 		.times(1)
 		.in_sequence(&mut seq);
-	mock_file_reader
+	mock_reader
 		.expect_read_non_empty_lines()
 		.with(eq(PathBuf::from(format!("{xdg_config}/{dir_path}/{file_path}"))))
 		.returning(|_| Err("oops".into()))
 		.times(1)
 		.in_sequence(&mut seq);
-	mock_file_reader
+	mock_reader
 		.expect_read_non_empty_lines()
 		.with(eq(PathBuf::from(format!("{home}/.config/{dir_path}/{file_path}"))))
 		.times(1)
 		.returning(|_| Err("oops".into()))
 		.in_sequence(&mut seq);
-	mock_file_reader
+	mock_reader
 		.expect_read_non_empty_lines()
 		.with(eq(PathBuf::from(format!("{home}/.{dir_path}/{file_path}"))))
 		.times(1)
 		.returning(|_| Err("oops".into()))
 		.in_sequence(&mut seq);
-	mock_file_reader
+	mock_reader
 		.expect_read_non_empty_lines()
 		.with(eq(PathBuf::from(format!("{home}/{file_path}"))))
 		.times(1)
 		.returning(|_| Err("oops".into()))
 		.in_sequence(&mut seq);
 
-	let result = load_from_cwd(&mock_file_reader);
+	let result = load_from_cwd(&mock_reader);
 
 	assert_error_type(&result, &AuthorsError::NotFound(String::new()));
 	assert_error_contains_msg(&result, "$PWD or $HOME");

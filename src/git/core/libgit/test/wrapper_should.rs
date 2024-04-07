@@ -1,0 +1,85 @@
+use crate::common::fs::file_reader::FileReader;
+use crate::git::core::commit_message::GitWrapper;
+use crate::git::core::libgit::test::helper::{
+	create_and_add_file_to_git_tree, init_repo, random_tmp_path_in, TEST_DIR_PATH,
+};
+use crate::git::core::libgit::wrapper::LibGitWrapper;
+use git2::Repository;
+use std::fs::{self};
+
+#[test]
+fn prepare_editmsg_file() -> Result<(), Box<dyn std::error::Error>> {
+	let path = random_tmp_path_in(TEST_DIR_PATH);
+	let git_repo = init_repo(&path)?;
+	let foo = "foo";
+	create_and_add_file_to_git_tree(&git_repo, foo)?;
+
+	let tree = git_repo.find_tree(git_repo.index()?.write_tree()?)?;
+	add_commit(&git_repo, &tree.clone(), "IRRELEVANT")?;
+
+	// add bar
+	create_and_add_file_to_git_tree(&git_repo, "bar")?;
+	// modify foo but don't add changes
+	std::fs::write(path.join(foo), "text")?;
+	// add baz but keep untracked
+	std::fs::write(path.join("baz"), "text")?;
+
+	add_commit(&git_repo, &tree, "IRRELEVANT")?;
+
+	let repo = LibGitWrapper::from(&path, FileReader::new()).expect("Could not setup test repo");
+	let contents = repo.formatted_status().map_err(|e| e.to_string());
+
+	fs::remove_dir_all(path).ok();
+	assert_eq!(
+		contents?,
+		"
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# A message with only 'Co-Authored' lines will be considered empty.
+#
+# On branch master
+# Changes to be committed:
+#	bar
+#
+# Changes not staged for commit:
+#	foo
+#
+# Untracked files:
+#	baz
+"
+	);
+	Ok(())
+}
+
+#[test]
+fn get_the_last_commit() -> Result<(), Box<dyn std::error::Error>> {
+	let path = random_tmp_path_in(TEST_DIR_PATH);
+	let git_repo = init_repo(&path)?;
+	create_and_add_file_to_git_tree(&git_repo, "foo")?;
+	let repo = LibGitWrapper::from(&path, FileReader::new()).expect("Could not setup test repo");
+
+	let tree = git_repo.find_tree(git_repo.index()?.write_tree()?)?;
+	let msg = "a commit message!".to_string();
+	add_commit(&git_repo, &tree, msg.as_str())?;
+
+	let result = repo.prev_commit_msg();
+
+	fs::remove_dir_all(path.clone()).ok();
+	assert!(matches!(result, Ok(line) if line.to_string().contains(msg.as_str())));
+	Ok(())
+}
+
+fn add_commit(repo: &Repository, tree: &git2::Tree<'_>, msg: &str) -> Result<(), Box<dyn std::error::Error>> {
+	let head_commit = repo.head()?.peel_to_commit()?;
+	repo.commit(
+		Some("HEAD"),
+		&repo.signature()?,
+		&repo.signature()?,
+		msg,
+		tree,
+		&[&head_commit],
+	)?;
+	Ok(())
+}

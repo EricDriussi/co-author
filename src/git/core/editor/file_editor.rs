@@ -1,8 +1,6 @@
-use crate::{
-	common::{env, runner::Runner},
-	git::{core::conf_provider::ConfProvider, err::GitError},
-	Result,
-};
+use crate::common::{env, runner::Runner};
+use crate::git::{core::conf_provider::ConfProvider, err::GitError};
+use crate::Result;
 
 #[cfg_attr(test, mockall::automock)]
 pub trait Editor {

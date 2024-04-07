@@ -1,11 +1,11 @@
 use crate::common::fs::file_writer::MockWriter;
 use crate::git::core::commit_message::CommitMessage;
 use crate::git::core::editor::file_editor::MockEditor;
+use crate::git::core::service::GitService;
 use crate::git::core::{commit_message::MockGitWrapper, hook::MockHookRunner};
-use crate::git::service::GitService;
 
 #[test]
-fn return_message_when_present() {
+fn return_prev_message_when_present() {
 	let msg = "a message";
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	mock_git_wrapper
@@ -24,7 +24,7 @@ fn return_message_when_present() {
 }
 
 #[test]
-fn return_empty_string_when_message_is_not_present() {
+fn return_empty_string_when_prev_message_is_not_present() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	mock_git_wrapper
 		.expect_prev_commit_msg()

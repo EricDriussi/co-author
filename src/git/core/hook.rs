@@ -1,8 +1,6 @@
-use crate::{
-	common::{conf, runner::Runner},
-	git::err::GitError,
-	Result,
-};
+use crate::common::{conf, runner::Runner};
+use crate::git::err::GitError;
+use crate::Result;
 use std::path::Path;
 
 #[cfg_attr(test, mockall::automock)]

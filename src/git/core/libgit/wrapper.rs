@@ -32,13 +32,12 @@ impl<R: Reader> GitWrapper for LibGitWrapper<R> {
 			return Err(Box::new(GitError::LibGit("Commit message cannot be empty".to_string())));
 		}
 
-		self.try_to_commit(&signature, &commit_message.to_string())
-			.map_err(|_| GitError::LibGit("Something went wrong!".to_string()))?;
+		self.add_commit(&signature, &commit_message.to_string())?;
 		Ok(())
 	}
 
 	fn formatted_status(&self) -> Result<String> {
-		Ok(status_formatter::get_status_for_commit_file(&self.repo))
+		status_formatter::get_status_for_commit_file(&self.repo)
 	}
 
 	fn prev_commit_msg(&self) -> Result<CommitMessage> {
@@ -75,7 +74,7 @@ impl<R: Reader> LibGitWrapper<R> {
 		false
 	}
 
-	fn try_to_commit(&self, signature: &Signature, commit_message: &str) -> Result<()> {
+	fn add_commit(&self, signature: &Signature, commit_message: &str) -> Result<()> {
 		let oid = self.repo.index()?.write_tree()?;
 		let tree = self.repo.find_tree(oid)?;
 		let parent_commit = self.repo.head()?.peel_to_commit()?;
