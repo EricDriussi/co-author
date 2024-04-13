@@ -4,7 +4,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
-	/// File containing a csv formatted list of authors (alias,name,email)
+	/// CSV file containing a list of authors (alias,name,email)
 	#[arg(short, long)]
 	pub file: Option<String>,
 

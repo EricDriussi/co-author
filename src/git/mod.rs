@@ -9,7 +9,7 @@ mod core {
 	pub mod service;
 
 	pub mod libgit {
-		mod status_formatter;
+		mod status_builder;
 		pub mod wrapper;
 
 		#[cfg(test)]

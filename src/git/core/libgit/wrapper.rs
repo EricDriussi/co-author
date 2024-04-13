@@ -1,4 +1,4 @@
-use super::status_formatter;
+use super::status_builder;
 use crate::common::conf;
 use crate::common::fs::file_reader::Reader;
 use crate::git::core::commit_message::{CommitMessage, GitWrapper};
@@ -37,7 +37,7 @@ impl<R: Reader> GitWrapper for LibGitWrapper<R> {
 	}
 
 	fn formatted_status(&self) -> Result<String> {
-		status_formatter::get_status_for_commit_file(&self.repo)
+		status_builder::for_editmsg(&self.repo)
 	}
 
 	fn prev_commit_msg(&self) -> Result<CommitMessage> {
@@ -50,7 +50,7 @@ impl<R: Reader> GitWrapper for LibGitWrapper<R> {
 impl<R: Reader> LibGitWrapper<R> {
 	pub fn from(path: &PathBuf, file_reader: R) -> Result<Self> {
 		let repo = Repository::discover(path).map_err(|_| GitError::LibGit("Could not open git repo".to_string()))?;
-		if Self::no_staged_changes(&repo) {
+		if Self::no_staged_changes(&repo)? {
 			Err(Box::new(GitError::LibGit("No staged changes".to_string())))
 		} else {
 			Ok(Self {
@@ -61,23 +61,18 @@ impl<R: Reader> LibGitWrapper<R> {
 		}
 	}
 
-	fn no_staged_changes(repo: &Repository) -> bool {
-		if let Ok(head) = repo.head() {
-			if let Ok(tree) = head.peel_to_tree() {
-				if let Ok(index) = repo.index() {
-					if let Ok(diff) = repo.diff_tree_to_index(Some(&tree), Some(&index), None) {
-						return diff.deltas().count() == 0;
-					}
-				}
-			}
-		}
-		false
+	fn no_staged_changes(repo: &Repository) -> Result<bool> {
+		let tree = repo.head()?.peel_to_tree()?;
+		let index = repo.index()?;
+		let diff = repo.diff_tree_to_index(Some(&tree), Some(&index), None)?;
+		Ok(diff.deltas().count() == 0)
 	}
 
 	fn add_commit(&self, signature: &Signature, commit_message: &str) -> Result<()> {
 		let tree = self.repo.find_tree(self.repo.index()?.write_tree()?)?;
 
 		match self.repo.head() {
+			// If there is a HEAD, take it as parent
 			Ok(head_ref) => self.repo.commit(
 				Some("HEAD"),
 				signature,
@@ -86,6 +81,8 @@ impl<R: Reader> LibGitWrapper<R> {
 				&tree,
 				&[&head_ref.peel_to_commit()?],
 			),
+			// If there is no HEAD, commit without parent
+			// First commit (maybe detached HEAD?)
 			Err(_) => self
 				.repo
 				.commit(Some("HEAD"), signature, signature, commit_message, &tree, &[]),

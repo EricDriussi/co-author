@@ -11,7 +11,7 @@ pub fn home() -> Result<String> {
 	Ok(std::env::var(home).map_err(|_| SystemError::EnvVar(home.to_string()))?)
 }
 
-pub fn xdg_home() -> Result<String> {
+pub fn xdg_config() -> Result<String> {
 	let xdg_home = "XDG_CONFIG_HOME";
 	Ok(std::env::var(xdg_home).map_err(|_| SystemError::EnvVar(xdg_home.to_string()))?)
 }

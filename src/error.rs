@@ -36,13 +36,6 @@ impl From<git2::Error> for Box<dyn Error> {
 }
 
 #[cfg(test)]
-impl From<&str> for Box<dyn Error> {
-	fn from(e: &str) -> Box<dyn Error> {
-		Box::new(UiError::Unknown(e.to_string()))
-	}
-}
-
-#[cfg(test)]
 pub fn assert_error_type<T, E: Error + 'static + PartialEq>(result: &crate::Result<T>, expected_error: &E) {
 	assert!(result.is_err(), "Not an Error");
 	assert!(
@@ -62,4 +55,66 @@ pub fn assert_error_contains_msg<T>(result: &crate::Result<T>, expected_msg: &st
 		expected_msg,
 		result.as_ref().err(),
 	);
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use std::{fmt::Display, io};
+
+	#[derive(Debug)]
+	enum TestError {
+		Unknown(String),
+	}
+
+	impl Error for TestError {
+		fn as_any(&self) -> &dyn Any {
+			self
+		}
+	}
+
+	impl std::error::Error for TestError {}
+
+	impl PartialEq for TestError {
+		fn eq(&self, other: &Self) -> bool {
+			matches!(self, TestError::Unknown(_)) && matches!(other, TestError::Unknown(_))
+		}
+	}
+
+	impl Display for TestError {
+		fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+			write!(f, "Test error: ")?;
+			match self {
+				TestError::Unknown(err) => write!(f, "{err}"),
+			}
+		}
+	}
+
+	#[cfg(test)]
+	impl From<&str> for Box<dyn Error> {
+		fn from(e: &str) -> Box<dyn Error> {
+			Box::new(TestError::Unknown(e.to_string()))
+		}
+	}
+
+	#[cfg(test)]
+	impl From<Box<dyn std::error::Error>> for Box<dyn Error> {
+		fn from(value: Box<dyn std::error::Error>) -> Self {
+			Box::new(TestError::Unknown(value.to_string()))
+		}
+	}
+
+	#[cfg(test)]
+	impl From<io::Error> for Box<dyn Error> {
+		fn from(e: io::Error) -> Box<dyn Error> {
+			Box::new(TestError::Unknown(e.to_string()))
+		}
+	}
+
+	#[cfg(test)]
+	impl From<String> for Box<dyn Error> {
+		fn from(e: String) -> Box<dyn Error> {
+			Box::new(TestError::Unknown(e))
+		}
+	}
 }

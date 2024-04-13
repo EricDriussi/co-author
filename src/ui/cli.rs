@@ -13,7 +13,7 @@ impl Cli {
 	}
 
 	pub fn message_prompt(&mut self) -> Result<String> {
-		let prompt_msg = "Enter your commit message:";
+		let prompt_msg = "Enter commit message:";
 		let input = self.reader.readline(&format!("{prompt_msg}\n"))?;
 		Ok(input.trim().to_string())
 	}
@@ -26,7 +26,7 @@ impl Cli {
 	}
 
 	pub fn pre_populated_message_prompt(&mut self, prev_commit_msg: &str) -> Result<String> {
-		let prompt_msg = "Update your commit message:";
+		let prompt_msg = "Update commit message:";
 		let input = self
 			.reader
 			.readline_with_prompt(&format!("{prompt_msg}\n"), (prev_commit_msg, ""))?;

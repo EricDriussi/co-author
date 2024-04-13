@@ -6,7 +6,7 @@ fn prompt_for_message() {
 	let mut reader = MockInputReader::new();
 	reader
 		.expect_readline()
-		.withf(|prompt_msg| prompt_msg.contains("Enter your commit message"))
+		.withf(|prompt_msg| prompt_msg.contains("Enter commit message"))
 		.times(1)
 		.returning(|_| Ok("whatever".to_string()));
 	let mut cli = Cli::new(Box::new(reader));

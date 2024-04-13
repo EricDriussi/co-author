@@ -15,12 +15,10 @@ pub type Service = GitService<LibGitWrapper<FileReader>, GitHook, Editor, FileWr
 
 pub fn init() -> Result<Service> {
 	let cwd = env::cwd()?;
-
-	let wrapper = LibGitWrapper::from(&cwd, FileReader::new())?;
 	Ok(GitService::new(
-		wrapper,
-		Hook::new(CommandRunner::new()),
-		FileEditor::new(CommandRunner::new(), GitConfProvider::new()),
-		FileWriter::new(),
+		LibGitWrapper::from(&cwd, FileReader)?,
+		Hook::new(CommandRunner),
+		FileEditor::new(CommandRunner, GitConfProvider),
+		FileWriter,
 	))
 }

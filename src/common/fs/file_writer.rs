@@ -13,10 +13,6 @@ pub trait Writer {
 pub struct FileWriter;
 
 impl FileWriter {
-	pub fn new() -> FileWriter {
-		FileWriter
-	}
-
 	fn write(mut file: File, content: &str) -> Result<()> {
 		file.write_all(content.as_bytes())
 			.map_err(|e| SystemError::Write(e.to_string()))?;

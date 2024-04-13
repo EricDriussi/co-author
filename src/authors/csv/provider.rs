@@ -1,7 +1,7 @@
 use super::super::author::{Author, AuthorsProvider};
 use super::mapper;
 use crate::authors::err::AuthorsError;
-use crate::common::fs::file_reader::{Lines, Reader};
+use crate::common::fs::file_reader::Reader;
 use crate::common::{conf, env};
 use crate::Result;
 use std::path::{Path, PathBuf};
@@ -11,8 +11,10 @@ pub enum LoadMode<'a> {
 	FromPath { file_reader: &'a dyn Reader, path: PathBuf },
 }
 
+type Lines = Vec<String>;
+
 pub struct CSVProvider {
-	lines: Vec<String>,
+	lines: Lines,
 }
 
 impl CSVProvider {
@@ -37,20 +39,20 @@ impl CSVProvider {
 
 		file_reader
 			.read_non_empty_lines(&cwd.join(file_path))
-			.or_else(|_| Self::xdg_or_home_fallback(file_reader, dir_path, file_path))
-			.or_else(|_| Self::home_fallback(file_reader, dir_path, file_path))
+			.or_else(|_| Self::from_xdg_config(file_reader, dir_path, file_path))
+			.or_else(|_| Self::from_home(file_reader, dir_path, file_path))
 			.map_or(
 				Err(AuthorsError::NotFound("$PWD or $HOME".to_string()).into()),
 				|lines| Ok(Self { lines }),
 			)
 	}
 
-	fn xdg_or_home_fallback(file_reader: &dyn Reader, authors_dir: &str, file_path: &str) -> Result<Lines> {
-		let home = PathBuf::from(env::xdg_home()?);
-		file_reader.read_non_empty_lines(&home.join(authors_dir).join(file_path))
+	fn from_xdg_config(file_reader: &dyn Reader, authors_dir: &str, file_path: &str) -> Result<Lines> {
+		let config_dir = PathBuf::from(env::xdg_config()?);
+		file_reader.read_non_empty_lines(&config_dir.join(authors_dir).join(file_path))
 	}
 
-	fn home_fallback(file_reader: &dyn Reader, authors_dir: &str, file_path: &str) -> Result<Lines> {
+	fn from_home(file_reader: &dyn Reader, authors_dir: &str, file_path: &str) -> Result<Lines> {
 		let home = env::home()?;
 		file_reader
 			.read_non_empty_lines(&PathBuf::from(format!("{home}/.config/{authors_dir}/{file_path}")))

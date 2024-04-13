@@ -12,15 +12,17 @@ use std::path::PathBuf;
 
 #[test]
 fn load_from_given_file() {
+	let irrelevant_file = "a/path/file.hi";
+	let irrelevant_file_path = PathBuf::from(irrelevant_file);
 	let mut mock_reader = MockReader::new();
 	mock_reader
 		.expect_read_non_empty_lines()
-		.with(eq(PathBuf::from(String::new())))
+		.with(eq(irrelevant_file_path.clone()))
 		.returning(|_| Ok(vec![]));
 
 	let result = CSVProvider::load(&LoadMode::FromPath {
 		file_reader: &mock_reader,
-		path: PathBuf::from(String::new()),
+		path: irrelevant_file_path,
 	});
 
 	assert!(result.is_ok());
@@ -46,7 +48,7 @@ fn not_load_from_given_file() {
 }
 
 #[test]
-fn load_using_fallback() {
+fn load_from_cwd_file() {
 	let mut mock_reader = MockReader::new();
 	mock_reader.expect_read_non_empty_lines().returning(|_| Ok(vec![]));
 
@@ -54,7 +56,7 @@ fn load_using_fallback() {
 }
 
 #[test]
-fn not_load_using_fallback() {
+fn not_load_from_cwd_file() {
 	let mut mock_reader = MockReader::new();
 	mock_reader
 		.expect_read_non_empty_lines()
@@ -67,44 +69,46 @@ fn not_load_using_fallback() {
 }
 
 #[serial]
-fn fallback_sensibly() {
+fn fallback_sensibly_when_loading_from_cwd_file() {
 	let cwd = "/tmp";
 	let xdg_config = "a_path";
 	let home = "a_home";
 	std::env::set_current_dir(PathBuf::from(cwd)).expect("Could not set current dir for tests");
 	std::env::set_var("XDG_CONFIG_HOME", xdg_config);
 	std::env::set_var("HOME", home);
-	let file_path = &conf::authors_file();
-	let dir_path = &conf::authors_dir();
+	let authors_file = &conf::authors_file();
+	let authors_dir = &conf::authors_dir();
 	let mut seq = Sequence::new();
 	let mut mock_reader = MockReader::new();
 	mock_reader
 		.expect_read_non_empty_lines()
-		.with(eq(PathBuf::from(format!("{cwd}/{file_path}"))))
+		.with(eq(PathBuf::from(format!("{cwd}/{authors_file}"))))
 		.returning(|_| Err("oops".into()))
 		.times(1)
 		.in_sequence(&mut seq);
 	mock_reader
 		.expect_read_non_empty_lines()
-		.with(eq(PathBuf::from(format!("{xdg_config}/{dir_path}/{file_path}"))))
+		.with(eq(PathBuf::from(format!("{xdg_config}/{authors_dir}/{authors_file}"))))
 		.returning(|_| Err("oops".into()))
 		.times(1)
 		.in_sequence(&mut seq);
 	mock_reader
 		.expect_read_non_empty_lines()
-		.with(eq(PathBuf::from(format!("{home}/.config/{dir_path}/{file_path}"))))
+		.with(eq(PathBuf::from(format!(
+			"{home}/.config/{authors_dir}/{authors_file}"
+		))))
 		.times(1)
 		.returning(|_| Err("oops".into()))
 		.in_sequence(&mut seq);
 	mock_reader
 		.expect_read_non_empty_lines()
-		.with(eq(PathBuf::from(format!("{home}/.{dir_path}/{file_path}"))))
+		.with(eq(PathBuf::from(format!("{home}/.{authors_dir}/{authors_file}"))))
 		.times(1)
 		.returning(|_| Err("oops".into()))
 		.in_sequence(&mut seq);
 	mock_reader
 		.expect_read_non_empty_lines()
-		.with(eq(PathBuf::from(format!("{home}/{file_path}"))))
+		.with(eq(PathBuf::from(format!("{home}/{authors_file}"))))
 		.times(1)
 		.returning(|_| Err("oops".into()))
 		.in_sequence(&mut seq);

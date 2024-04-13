@@ -10,7 +10,7 @@ const EXPECTED: &str = "some text sample";
 fn overwrite_file_content() {
 	let (_, path) = random_tmp_file::create();
 
-	let writer = FileWriter::new();
+	let writer = FileWriter;
 	let result = writer.overwrite(&PathBuf::from(path.clone()), EXPECTED);
 
 	let mut actual = String::new();
@@ -32,7 +32,7 @@ fn overwrite_file_content() {
 fn create_file_when_overwriting() {
 	let path_to_no_file = random_tmp_file::path();
 
-	let writer = FileWriter::new();
+	let writer = FileWriter;
 	let result = writer.overwrite(&PathBuf::from(path_to_no_file.as_str()), EXPECTED);
 
 	let mut actual = String::new();
@@ -57,7 +57,7 @@ fn append_to_file() {
 	file.write_all(pre_existing_content.as_bytes())
 		.expect("Could not write to file for test");
 
-	let writer = FileWriter::new();
+	let writer = FileWriter;
 	let expected_new_content = "some more text!";
 	let result = writer.append(&PathBuf::from(path.clone()), expected_new_content);
 
@@ -80,7 +80,7 @@ fn append_to_file() {
 fn error_when_appending_to_a_non_existent_file() {
 	let path_to_no_file = random_tmp_file::path();
 
-	let writer = FileWriter::new();
+	let writer = FileWriter;
 	let result = writer.append(&PathBuf::from(path_to_no_file), EXPECTED);
 
 	assert!(result.is_err());

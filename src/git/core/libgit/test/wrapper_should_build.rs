@@ -12,7 +12,7 @@ fn in_repo_with_changes() {
 	let git_repo = init_repo(&path).expect("Could not create test repo");
 
 	create_and_add_file_to_git_tree(&git_repo, "foo").expect("Could not setup test repo");
-	let repo = LibGitWrapper::from(&path, FileReader::new());
+	let repo = LibGitWrapper::from(&path, FileReader);
 	fs::remove_dir_all(path).ok();
 	assert!(repo.is_ok());
 }
@@ -22,7 +22,7 @@ fn not_in_repo_without_changes() {
 	let path = random_tmp_path_in(TEST_DIR_PATH);
 	let _git_repo = init_repo(&path).expect("Could not create test repo");
 
-	let repo = LibGitWrapper::from(&path, FileReader::new());
+	let repo = LibGitWrapper::from(&path, FileReader);
 	fs::remove_dir_all(path).ok();
 	assert!(repo.is_err());
 }
@@ -31,7 +31,7 @@ fn not_in_repo_without_changes() {
 fn not_in_path_wihtout_git_repo() {
 	let path = random_tmp_path_in(TEST_DIR_PATH);
 
-	let repo = LibGitWrapper::from(&PathBuf::from("/a/path"), FileReader::new());
+	let repo = LibGitWrapper::from(&PathBuf::from("/a/path"), FileReader);
 	fs::remove_dir_all(path).ok();
 	assert!(repo.is_err());
 }

@@ -10,12 +10,6 @@ pub trait Runner {
 
 pub struct CommandRunner;
 
-impl CommandRunner {
-	pub fn new() -> Self {
-		Self {}
-	}
-}
-
 impl Runner for CommandRunner {
 	fn spawn(&self, cmd: &str, arg: &str) -> Result<()> {
 		Ok(Command::new(cmd)

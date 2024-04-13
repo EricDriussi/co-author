@@ -8,7 +8,7 @@ fn read_non_empty_lines() {
 	file.write_all(b"one\n\ntwo\n\nthree\n\n")
 		.expect("Could not write to file for test");
 
-	let reader = FileReader::new();
+	let reader = FileReader;
 	let non_empyt_lines = reader.read_non_empty_lines(&PathBuf::from(path.clone()));
 
 	fs::remove_file(path).expect("Could not cleanup file for test");
@@ -23,7 +23,7 @@ fn read_non_empty_lines() {
 fn error_when_reading_lines_from_non_existent_file() {
 	let path_to_no_file = random_tmp_file::path();
 
-	let reader = FileReader::new();
+	let reader = FileReader;
 	let non_empyt_lines = reader.read_non_empty_lines(&PathBuf::from(path_to_no_file.as_str()));
 
 	assert!(non_empyt_lines.is_err());

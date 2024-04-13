@@ -1,7 +1,7 @@
 use crate::{git::err::GitError, Result};
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 
-pub fn get_status_for_commit_file(repo: &Repository) -> Result<String> {
+pub fn for_editmsg(repo: &Repository) -> Result<String> {
 	let mut options = StatusOptions::new();
 	options.include_untracked(true);
 

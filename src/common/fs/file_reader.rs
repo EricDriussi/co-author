@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
-pub type Lines = Vec<String>;
+type Lines = Vec<String>;
 
 #[cfg_attr(test, mockall::automock)]
 pub trait Reader {
@@ -11,12 +11,6 @@ pub trait Reader {
 }
 
 pub struct FileReader;
-
-impl FileReader {
-	pub fn new() -> FileReader {
-		FileReader
-	}
-}
 
 impl Reader for FileReader {
 	fn read_non_empty_lines(&self, path: &Path) -> Result<Lines> {
