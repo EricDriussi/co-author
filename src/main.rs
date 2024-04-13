@@ -19,11 +19,8 @@ pub type Result<T> = std::result::Result<T, Box<dyn Error>>;
 fn run(args: Args) -> Result<()> {
 	let cli = ui::di::init()?;
 	let service = git::di::init()?;
-	let provider = authors::di::init(args.file.clone())?;
-
-	let mut orchestrator = Orchestrator::new(args, cli, service, provider);
-	let authors_signatures = orchestrator.get_authors()?;
-	orchestrator.commit(authors_signatures)
+	let provider = authors::di::init(&args.file)?;
+	Orchestrator::exec(args, cli, service, provider)
 }
 
 mod args;

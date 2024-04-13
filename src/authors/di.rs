@@ -4,7 +4,7 @@ use crate::common::fs::file_reader::FileReader;
 use crate::Result;
 use std::path::PathBuf;
 
-pub fn init(file: Option<String>) -> Result<Box<dyn AuthorsProvider>> {
+pub fn init(file: &Option<String>) -> Result<Box<dyn AuthorsProvider>> {
 	let provider = match file {
 		Some(file) => CSVProvider::load(&LoadMode::FromPath {
 			file_reader: &FileReader::new(),

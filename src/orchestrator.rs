@@ -14,22 +14,24 @@ pub struct Orchestrator {
 }
 
 impl Orchestrator {
-	pub fn new(args: Args, cli: Cli, service: Service, provider: Box<dyn AuthorsProvider>) -> Self {
-		Self {
+	pub fn exec(args: Args, cli: Cli, service: Service, provider: Box<dyn AuthorsProvider>) -> Result<()> {
+		let mut orch = Self {
 			args,
 			cli,
 			service,
 			provider,
-		}
+		};
+		let authors_signatures = orch.get_authors()?;
+		orch.commit(authors_signatures)
 	}
 
-	pub fn get_authors(&mut self) -> Result<Vec<String>> {
+	fn get_authors(&mut self) -> Result<Vec<String>> {
 		if self.args.all {
-			let authors: Vec<_> = self.provider.all().iter().map(Author::signature).collect();
+			let all_authors: Vec<_> = self.provider.all().iter().map(Author::signature).collect();
 			return if self.args.sort {
-				Ok(Self::sort(authors))
+				Ok(Self::sort(all_authors))
 			} else {
-				Ok(authors)
+				Ok(all_authors)
 			};
 		}
 
@@ -37,16 +39,16 @@ impl Orchestrator {
 			Some(list) => list.split(',').map(ToString::to_string).collect::<Vec<String>>(),
 			None => self.cli.aliases_prompt(&self.provider.all())?,
 		};
-		let authors: Vec<_> = self.provider.find(&aliases).iter().map(Author::signature).collect();
+		let found_authors: Vec<_> = self.provider.find(&aliases).iter().map(Author::signature).collect();
 
 		if self.args.sort {
-			Ok(Self::sort(authors))
+			Ok(Self::sort(found_authors))
 		} else {
-			Ok(authors)
+			Ok(found_authors)
 		}
 	}
 
-	pub fn commit(&mut self, authors_signatures: Vec<String>) -> Result<()> {
+	fn commit(&mut self, authors_signatures: Vec<String>) -> Result<()> {
 		if self.args.editor {
 			if self.args.pre_populate {
 				return self.service.commit(CommitMode::WithEditor {
