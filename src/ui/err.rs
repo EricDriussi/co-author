@@ -29,7 +29,7 @@ impl PartialEq for UiError {
 
 impl Display for UiError {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "Cli failure: ")?;
+		write!(f, "Cli: ")?;
 		match self {
 			UiError::Io(ref err) => err.fmt(f),
 			UiError::Interrupted => write!(f, "Interrupted"),
@@ -45,12 +45,12 @@ mod tests {
 
 	#[test]
 	fn test_ui_error_display() {
-		assert_eq!(format!("{}", UiError::Interrupted), "Cli failure: Interrupted");
-		assert_eq!(format!("{}", UiError::Unknown("oops".to_string())), "Cli failure: oops");
+		assert_eq!(format!("{}", UiError::Interrupted), "Cli: Interrupted");
+		assert_eq!(format!("{}", UiError::Unknown("oops".to_string())), "Cli: oops");
 
 		let io_error = io::Error::new(ErrorKind::NotFound, "file not found");
 		let cli_error = UiError::Io(io_error);
-		assert!(format!("{cli_error}").contains("Cli failure: "));
+		assert!(format!("{cli_error}").contains("Cli: "));
 		assert!(format!("{cli_error}").contains("file not found"));
 	}
 }

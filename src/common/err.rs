@@ -30,7 +30,7 @@ impl PartialEq for SystemError {
 
 impl Display for SystemError {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "System failure: ")?;
+		write!(f, "System: ")?;
 		match self {
 			SystemError::Runner(cmd, err) => write!(f, "Command {cmd} failed with: {err}"),
 			SystemError::Read(err) => write!(f, "Could not read {err}"),
@@ -48,19 +48,19 @@ mod tests {
 	fn test_system_error_display() {
 		assert_eq!(
 			format!("{}", SystemError::Runner("cmd".to_string(), "error".to_string())),
-			"System failure: Command cmd failed with: error"
+			"System: Command cmd failed with: error"
 		);
 		assert_eq!(
 			format!("{}", SystemError::Read("file".to_string())),
-			"System failure: Could not read file"
+			"System: Could not read file"
 		);
 		assert_eq!(
 			format!("{}", SystemError::Write("file".to_string())),
-			"System failure: Could not write file"
+			"System: Could not write file"
 		);
 		assert_eq!(
 			format!("{}", SystemError::EnvVar("whatever".to_string())),
-			"System failure: Could not get env var whatever"
+			"System: Could not get env var whatever"
 		);
 	}
 }
