@@ -15,6 +15,7 @@ impl Runner for CommandRunner {
 		Ok(Command::new(cmd)
 			.arg(arg)
 			.spawn()
+			.map(|mut child| (child.wait()))
 			.map(|_| ())
 			.map_err(|e| SystemError::Runner(cmd.to_string(), e.to_string()))?)
 	}
