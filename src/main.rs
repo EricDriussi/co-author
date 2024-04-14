@@ -3,8 +3,6 @@ use clap::Parser;
 use error::Error;
 use orchestrator::Orchestrator;
 
-// TODO: automatically create on the fly aliases for authors
-// TODO: add amend option -> update authors if given and update message if given (how does this work with --editor?)
 // TODO: use with fzf or add fuzzy finding
 
 fn main() {

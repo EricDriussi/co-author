@@ -69,18 +69,18 @@ impl<R: Reader> LibGitWrapper<R> {
 	}
 
 	fn add_commit(&self, signature: &Signature, commit_message: &str) -> Result<()> {
-		let tree = self.repo.find_tree(self.repo.index()?.write_tree()?)?;
-
+		let tree = self.get_tree()?;
 		match self.repo.head() {
 			// If there is a HEAD, take it as parent
-			Ok(head_ref) => self.repo.commit(
-				Some("HEAD"),
+			Ok(head) => self.repo.commit(
+				head.name(),
 				signature,
 				signature,
 				commit_message,
 				&tree,
-				&[&head_ref.peel_to_commit()?],
+				&[&head.peel_to_commit()?],
 			),
+
 			// If there is no HEAD, commit without parent
 			// First commit (maybe detached HEAD?)
 			Err(_) => self
@@ -89,5 +89,24 @@ impl<R: Reader> LibGitWrapper<R> {
 		}
 		.map(|_| ())
 		.map_err(Into::into)
+	}
+
+	fn amend_commit(&self, signature: &Signature, commit_message: &str) -> Result<()> {
+		let head = self.repo.head()?;
+		head.peel_to_commit()?
+			.amend(
+				head.name(),
+				Some(signature),
+				Some(signature),
+				None,
+				Some(commit_message),
+				Some(&self.get_tree()?),
+			)
+			.map(|_| ())
+			.map_err(Into::into)
+	}
+
+	fn get_tree(&self) -> Result<git2::Tree> {
+		Ok(self.repo.find_tree(self.repo.index()?.write_tree()?)?)
 	}
 }
