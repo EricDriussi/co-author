@@ -3,8 +3,6 @@ use clap::Parser;
 use error::Error;
 use orchestrator::Orchestrator;
 
-// TODO: use with fzf or add fuzzy finding
-
 fn main() {
 	let args = Args::parse();
 	if let Err(e) = run(args) {

@@ -1,5 +1,5 @@
 use super::{cli::Cli, input_reader::MockInputReader};
-use crate::authors::author::Author;
+use crate::{authors::author::Author, common::runner::MockRunner};
 
 #[test]
 fn prompt_for_message() {
@@ -9,7 +9,7 @@ fn prompt_for_message() {
 		.withf(|prompt_msg| prompt_msg.contains("Enter commit message"))
 		.times(1)
 		.returning(|_| Ok("whatever".to_string()));
-	let mut cli = Cli::new(Box::new(reader));
+	let mut cli = Cli::new(Box::new(reader), Box::new(MockRunner::new()));
 
 	let _ = cli.message_prompt();
 	// Only interested in params passed to the mock (withf)
@@ -24,7 +24,7 @@ fn trim_message() {
 		.expect_readline()
 		.times(1)
 		.returning(move |_| Ok(padded_msg.clone()));
-	let mut cli = Cli::new(Box::new(reader));
+	let mut cli = Cli::new(Box::new(reader), Box::new(MockRunner::new()));
 
 	let result = cli.message_prompt();
 
@@ -39,7 +39,7 @@ fn prompt_for_aliases() {
 		.withf(|prompt_msg| prompt_msg.contains("Enter co-authors aliases"))
 		.times(1)
 		.returning(|_| Ok("whatever".to_string()));
-	let mut cli = Cli::new(Box::new(reader));
+	let mut cli = Cli::new(Box::new(reader), Box::new(MockRunner::new()));
 
 	let _ = cli.aliases_prompt(&[]);
 	// Only interested in params passed to the mock (withf)
@@ -53,7 +53,7 @@ fn space_split_aliases() {
 		.expect_readline()
 		.times(1)
 		.returning(move |_| Ok(aliases.to_string()));
-	let mut cli = Cli::new(Box::new(reader));
+	let mut cli = Cli::new(Box::new(reader), Box::new(MockRunner::new()));
 
 	let result = cli.aliases_prompt(&[]);
 
@@ -71,9 +71,23 @@ fn pretty_print_authors_when_prompting_for_aliases() {
 		.withf(move |prompt_msg| contains_in_order(prompt_msg, &["⦔", alias, "->", name]))
 		.times(1)
 		.returning(move |_| Ok("whatever".to_string()));
-	let mut cli = Cli::new(Box::new(reader));
+	let mut cli = Cli::new(Box::new(reader), Box::new(MockRunner::new()));
 
 	let _ = cli.aliases_prompt(&[author]);
+	// Only interested in params passed to the mock (withf)
+}
+
+#[test]
+fn prompt_for_aliases_using_fzf() {
+	let mut runner = MockRunner::new();
+	runner
+		.expect_attach()
+		.withf(|cmd, args| cmd == "fzf" && args == ["--multi".to_string(), "--ansi".to_string()])
+		.times(1)
+		.returning(|_, _| Err("irrelevant".into())); // This is done to avoid creating a Child
+	let cli = Cli::new(Box::new(MockInputReader::new()), Box::new(runner));
+
+	let _ = cli.fzf_prompt(&[]);
 	// Only interested in params passed to the mock (withf)
 }
 

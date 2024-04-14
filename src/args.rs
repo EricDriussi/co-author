@@ -35,4 +35,8 @@ pub struct Args {
 	/// Amend last commit, both message and authors will be overwritten
 	#[arg(long, default_value = "false")]
 	pub amend: bool,
+
+	/// Use fzf for author selection
+	#[arg(long, default_value = "false", conflicts_with("list"), conflicts_with("all"))]
+	pub fzf: bool,
 }

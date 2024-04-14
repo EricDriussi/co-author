@@ -26,18 +26,33 @@ impl Orchestrator {
 	}
 
 	fn get_authors(&mut self) -> Result<Vec<String>> {
+		let all_authors = self.provider.all();
 		if self.args.all {
-			let all_authors: Vec<_> = self.provider.all().iter().map(Author::signature).collect();
+			let all_signatures: Vec<_> = all_authors.iter().map(Author::signature).collect();
 			return if self.args.sort {
-				Ok(Self::sort(all_authors))
+				Ok(Self::sort(all_signatures))
 			} else {
-				Ok(all_authors)
+				Ok(all_signatures)
+			};
+		}
+
+		if self.args.fzf {
+			let found_authors: Vec<_> = self
+				.provider
+				.find(&self.cli.fzf_prompt(&all_authors)?)
+				.iter()
+				.map(Author::signature)
+				.collect();
+			return if self.args.sort {
+				Ok(Self::sort(found_authors))
+			} else {
+				Ok(found_authors)
 			};
 		}
 
 		let aliases = match &self.args.list {
 			Some(list) => list.split(',').map(ToString::to_string).collect::<Vec<String>>(),
-			None => self.cli.aliases_prompt(&self.provider.all())?,
+			None => self.cli.aliases_prompt(&all_authors)?,
 		};
 		let found_authors: Vec<_> = self.provider.find(&aliases).iter().map(Author::signature).collect();
 

@@ -1,15 +1,19 @@
+use super::err::UiError;
 use super::input_reader::InputReader;
 use crate::authors::author::Author;
+use crate::common::runner::Runner;
 use crate::Result;
 use colored::Colorize;
+use std::io::Write;
 
 pub struct Cli {
 	reader: Box<dyn InputReader>,
+	runner: Box<dyn Runner>,
 }
 
 impl Cli {
-	pub fn new(reader: Box<dyn InputReader>) -> Self {
-		Self { reader }
+	pub fn new(reader: Box<dyn InputReader>, runner: Box<dyn Runner>) -> Self {
+		Self { reader, runner }
 	}
 
 	pub fn message_prompt(&mut self) -> Result<String> {
@@ -33,6 +37,34 @@ impl Cli {
 		Ok(input.trim().to_string())
 	}
 
+	pub fn fzf_prompt(&self, authors: &[Author]) -> Result<Vec<String>> {
+		let mut fzf_proc = self
+			.runner
+			.attach("fzf", &["--multi".to_string(), "--ansi".to_string()])?;
+		let stdin = fzf_proc
+			.stdin
+			.as_mut()
+			.ok_or(UiError::Fzf("Could not attach stdin".to_string()))?;
+
+		for author in authors.iter().map(Self::fzf_format) {
+			writeln!(stdin, "{author}").map_err(|_| UiError::Fzf("Could not pipe to stdin".to_string()))?;
+		}
+
+		let output = fzf_proc
+			.wait_with_output()
+			.map_err(|_| UiError::Fzf("Could not read output".to_string()))?;
+		let selected_aliases: Vec<String> = String::from_utf8_lossy(&output.stdout)
+			.lines()
+			.map(Self::extract_alias)
+			.collect();
+
+		Ok(selected_aliases)
+	}
+
+	fn extract_alias(line: &str) -> String {
+		line.split_whitespace().next().unwrap_or_default().to_string()
+	}
+
 	fn prettify_authors(authors: &[Author]) -> String {
 		authors.iter().map(Self::prettify).collect::<Vec<String>>().join("\n")
 	}
@@ -45,5 +77,9 @@ impl Cli {
 			"->".green(),
 			author.name()
 		)
+	}
+
+	fn fzf_format(author: &Author) -> String {
+		format!("{} - {}", author.alias().blue(), author.name())
 	}
 }
