@@ -6,16 +6,16 @@ Give credit to your teammates when pairing or mob-programming.
 
 ## Use Case
 
-When working within a team, it's useful to know who to ask when struggling with
+It's useful to know who to ask when struggling with
 a piece of code.
 
-Git blame is great, but it only mentions the committer, which is only part of
-the story when pair/mob programming.
+Git blame is great, but it only mentions the committer, which leaves out the
+pair/mob partners.
 
 It helps to know who else was involved (maybe the committer is busy or left the
-company long ago)
+company long ago).
 
-There are plenty of editor plugins that follow [GitHub's guidelines](https://docs.github.com/en/enterprise-cloud@latest/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors#creating-co-authored-commits-on-the-command-line)
+There are plenty of editor plugins ([VSCode](https://marketplace.visualstudio.com/items?itemName=megamegax.co-author), [JetBrains](https://plugins.jetbrains.com/plugin/10952-co-author)) that follow [GitHub's guidelines](https://docs.github.com/en/enterprise-cloud@latest/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors#creating-co-authored-commits-on-the-command-line)
 for co-authoring commits.
 
 This is a simple CLI tool that achieves the same thing, while being editor independent
@@ -57,7 +57,7 @@ Co-Authored-by: username <something@gmail.com>
 If you group multiple users under the same alias, they will all be retrieved at once.
 
 This is especially useful if you jump between various teams and would rather pick
-groups of people instead of an individual.
+groups of people instead of individuals.
 
 So for a file like:
 
@@ -72,20 +72,22 @@ When given the alias `a`, it will add **both users** as co-authors.
 
 You can modify the behavior in a number of ways, most will bypass the prompt:
 
-```sh
+```
 co-author -h
 Co-Author your git commits from the command line
 
 Usage: co-author [OPTIONS]
 
 Options:
-  -f, --file <FILE>        File containing a csv formatted list of authors (alias,name,email)
+  -f, --file <FILE>        CSV file containing a list of authors (alias,name,email)
   -l, --list <LIST>        List of comma separated author aliases
   -a, --all                Use all available authors
   -m, --message <MESSAGE>  Specify commit message
   -e, --editor             Open default editor for commit message
-  -p, --pre-populate       Pre-populate prompt/editor with last commit message
+  -p, --pre-populate       Pre-populate prompt/editor with (first line of) last commit message
   -s, --sort               Sort authors signatures when adding to commit message
+      --amend              Amend last commit, both message and authors will be overwritten
+      --fzf                Use fzf for author selection
   -h, --help               Print help
   -V, --version            Print version
 ```
@@ -102,7 +104,7 @@ Omits the alias prompt.
 
 Use a pre-defined alias list.
 
-This might be useful if you would rather have multiple **aliases** than
+This might be useful if you would rather have multiple **shell aliases** than
 multiple CSV files.
 
 ```sh
@@ -128,7 +130,7 @@ Omits the message prompt.
 
 ### --editor
 
-Just like git's default behavior: Fill in the commit message in a text editor.
+Just like git's default behavior: Open a text editor to write the commit message.
 
 It will look for the `editor` config in your git setup, falling back to
 `$EDITOR`, `vim` and `vi` in that order.
@@ -137,8 +139,8 @@ Omits the message prompt.
 
 ### --pre-populate
 
-Pre-populate either the prompt or the editor with the last commit message
-(does not consider co-authors as a part of the last commit message).
+Pre-populate either the prompt or the editor with the **subject** of the last commit
+message, so only the first line is recovered.
 
 If you use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 or other standards you might want the same general format, just with a different
@@ -151,3 +153,20 @@ Conflicts with `--message`.
 Sort authors alphabetically by signature (`username <email>`).
 
 If not used it will respect the order in the `authors.csv` file.
+
+### --amend
+
+Amends the last commit, overwriting message and authors with the newly provided ones.
+
+Enables `--pre-populate` flag under the hood.
+
+### --fzf
+
+**Depends on `fzf` being installed.**
+
+Presents a picker for the authors using your `fzf` install (and config).
+Uses the `--multi` flag, so pressing `Tab` will select multiple authors.
+
+Press enter when done do continue with the commit message.
+
+Conflicts with `--all` and `--list`.
