@@ -16,6 +16,7 @@ mod core {
 		mod test {
 			mod helper;
 			mod wrapper_should;
+			mod wrapper_should_amend;
 			mod wrapper_should_build;
 			mod wrapper_should_commit;
 		}
@@ -37,6 +38,8 @@ mod core {
 
 		mod hook_should;
 		mod service {
+			mod amend_with_editor_should;
+			mod amend_without_editor_should;
 			mod commit_with_editor_should;
 			mod commit_without_editor_should;
 			mod mock_helpers;

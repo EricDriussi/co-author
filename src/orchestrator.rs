@@ -49,16 +49,22 @@ impl Orchestrator {
 	}
 
 	fn commit(&mut self, authors_signatures: Vec<String>) -> Result<()> {
+		if self.args.amend {
+			self.args.pre_populate = true;
+		}
+
 		if self.args.editor {
 			if self.args.pre_populate {
 				return self.service.commit(CommitMode::WithEditor {
 					message: Some(self.service.last_commit_message().as_str()),
 					authors: authors_signatures,
+					amend: self.args.amend,
 				});
 			}
 			return self.service.commit(CommitMode::WithEditor {
 				message: None,
 				authors: authors_signatures,
+				amend: self.args.amend,
 			});
 		}
 
@@ -73,6 +79,7 @@ impl Orchestrator {
 		self.service.commit(CommitMode::WithoutEditor {
 			message: msg.as_str(),
 			authors: authors_signatures,
+			amend: self.args.amend,
 		})
 	}
 

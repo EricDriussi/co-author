@@ -23,6 +23,7 @@ pub fn ok_git_wrapper(status: String) -> MockGitWrapper {
 		.expect_formatted_status()
 		.returning(move || Ok(status.clone()));
 	mock_git_wrapper.expect_commit().returning(|| Ok(()));
+	mock_git_wrapper.expect_amend().returning(|| Ok(()));
 	mock_git_wrapper
 }
 

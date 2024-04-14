@@ -31,4 +31,8 @@ pub struct Args {
 	/// Sort authors signatures when adding to commit message
 	#[arg(short, long, default_value = "false")]
 	pub sort: bool,
+
+	/// Amend last commit, both message and authors will be overwritten
+	#[arg(long, default_value = "false")]
+	pub amend: bool,
 }

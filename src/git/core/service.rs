@@ -37,14 +37,22 @@ impl<G: GitWrapper, H: HookRunner, E: Editor, W: Writer> GitService<G, H, E, W> 
 
 	pub fn commit(&mut self, commit_mode: CommitMode) -> Result<()> {
 		match commit_mode {
-			CommitMode::WithoutEditor { message, authors } => {
+			CommitMode::WithoutEditor {
+				message,
+				authors,
+				amend,
+			} => {
 				self.pre(&CommitMessage::new(message, authors))?;
-				self.run_commit()
+				self.run_commit(amend)
 			}
-			CommitMode::WithEditor { message, authors } => {
+			CommitMode::WithEditor {
+				message,
+				authors,
+				amend,
+			} => {
 				self.pre(&CommitMessage::new(message.unwrap_or_default(), authors))?;
 				self.editor()?;
-				self.run_commit()
+				self.run_commit(amend)
 			}
 		}
 	}
@@ -61,8 +69,12 @@ impl<G: GitWrapper, H: HookRunner, E: Editor, W: Writer> GitService<G, H, E, W> 
 		self.editmsg_editor.open(&self.editmsg_path)
 	}
 
-	fn run_commit(&self) -> Result<()> {
+	fn run_commit(&self, amend: bool) -> Result<()> {
 		self.hook_runner.run_commit_msg()?;
-		self.git_wrapper.commit()
+		if amend {
+			self.git_wrapper.amend()
+		} else {
+			self.git_wrapper.commit()
+		}
 	}
 }

@@ -69,6 +69,7 @@ impl Display for CommitMessage {
 #[cfg_attr(test, mockall::automock)]
 pub trait GitWrapper {
 	fn commit(&self) -> Result<()>;
+	fn amend(&self) -> Result<()>;
 	fn formatted_status(&self) -> Result<String>;
 	fn prev_commit_msg(&self) -> Result<CommitMessage>;
 }

@@ -21,12 +21,12 @@ fn on_an_already_existing_git_repo_with_staged_changes() -> Result<()> {
 
 	let amount_of_commits_before = count_commits(&path)?;
 	let repo = LibGitWrapper::from(&path, FileReader)?;
-	let result = repo.commit();
+	let result = repo.amend();
 	let amount_of_commits_after = count_commits(&path)?;
 
 	fs::remove_dir_all(path).ok();
 	assert!(result.is_ok());
-	assert_eq!(amount_of_commits_after, amount_of_commits_before + 1);
+	assert_eq!(amount_of_commits_after, amount_of_commits_before);
 	Ok(())
 }
 
@@ -41,7 +41,7 @@ fn not_if_message_is_empty() -> Result<()> {
 	std::fs::write(editmsg_path, empty_commit_message.to_string())?;
 
 	let repo = LibGitWrapper::from(&path, FileReader)?;
-	let result = repo.commit();
+	let result = repo.amend();
 
 	fs::remove_dir_all(path).ok();
 	assert_error_type(&result, &GitError::LibGit(String::new()));

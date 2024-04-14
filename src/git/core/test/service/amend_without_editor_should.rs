@@ -37,12 +37,12 @@ fn succeed() {
 		.returning(|| Ok(()))
 		.in_sequence(&mut seq);
 	mock_git_wrapper
-		.expect_commit()
+		.expect_amend()
 		.times(1)
 		.returning(|| Ok(()))
 		.in_sequence(&mut seq);
 
-	let result = do_commit(GitService::new(
+	let result = do_amend(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		MockEditor::new(),
@@ -53,12 +53,12 @@ fn succeed() {
 }
 
 #[test]
-fn not_amend() {
+fn not_create_new_commit() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
-	mock_git_wrapper.expect_commit().times(1).returning(|| Ok(()));
-	mock_git_wrapper.expect_amend().times(0);
+	mock_git_wrapper.expect_amend().times(1).returning(|| Ok(()));
+	mock_git_wrapper.expect_commit().times(0);
 
-	let result = do_commit(GitService::new(
+	let result = do_amend(GitService::new(
 		mock_git_wrapper,
 		ok_hook_runner(),
 		MockEditor::new(),
@@ -76,7 +76,7 @@ fn write_commit_msg_and_authors() {
 		.withf(move |_, param| param.contains(COMMIT_MSG) && param.contains(AUTHOR))
 		.returning(|_, _| Ok(()));
 
-	let result = do_commit(GitService::new(
+	let result = do_amend(GitService::new(
 		ok_git_wrapper(String::new()),
 		ok_hook_runner(),
 		MockEditor::new(),
@@ -93,9 +93,9 @@ fn not_add_status_to_editmsg_file() {
 	mock_writer.expect_overwrite().times(1).returning(|_, _| Ok(()));
 	mock_git_wrapper.expect_formatted_status().times(0);
 	mock_writer.expect_append().times(0);
-	mock_git_wrapper.expect_commit().returning(|| Ok(()));
+	mock_git_wrapper.expect_amend().returning(|| Ok(()));
 
-	let result = do_commit(GitService::new(
+	let result = do_amend(GitService::new(
 		mock_git_wrapper,
 		ok_hook_runner(),
 		MockEditor::new(),
@@ -112,7 +112,7 @@ fn not_open_editor() {
 	mock_writer.expect_overwrite().returning(|_, _| Ok(()));
 	mock_editor.expect_open().times(0);
 
-	let result = do_commit(GitService::new(
+	let result = do_amend(GitService::new(
 		ok_git_wrapper(String::new()),
 		ok_hook_runner(),
 		mock_editor,
@@ -133,9 +133,9 @@ fn stop_and_report_pre_commit_hook_failure() {
 		.returning(move || Err(ERR_MSG.into()));
 	mock_writer.expect_overwrite().times(0);
 	mock_hook_runner.expect_run_commit_msg().times(0);
-	mock_git_wrapper.expect_commit().times(0);
+	mock_git_wrapper.expect_amend().times(0);
 
-	let result = do_commit(GitService::new(
+	let result = do_amend(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		MockEditor::new(),
@@ -156,9 +156,9 @@ fn stop_and_report_commit_msg_hook_failure() {
 	mock_hook_runner
 		.expect_run_commit_msg()
 		.returning(move || Err(ERR_MSG.into()));
-	mock_git_wrapper.expect_commit().times(0);
+	mock_git_wrapper.expect_amend().times(0);
 
-	let result = do_commit(GitService::new(
+	let result = do_amend(GitService::new(
 		mock_git_wrapper,
 		mock_hook_runner,
 		MockEditor::new(),
@@ -169,13 +169,13 @@ fn stop_and_report_commit_msg_hook_failure() {
 }
 
 #[test]
-fn report_commit_error() {
+fn report_amend_error() {
 	let mut mock_git_wrapper = MockGitWrapper::new();
 	let mut mock_writer = MockWriter::new();
 	mock_writer.expect_overwrite().returning(|_, _| Ok(()));
-	mock_git_wrapper.expect_commit().returning(move || Err(ERR_MSG.into()));
+	mock_git_wrapper.expect_amend().returning(move || Err(ERR_MSG.into()));
 
-	let result = do_commit(GitService::new(
+	let result = do_amend(GitService::new(
 		mock_git_wrapper,
 		ok_hook_runner(),
 		MockEditor::new(),
@@ -185,10 +185,10 @@ fn report_commit_error() {
 	assert_error_contains_msg(&result, ERR_MSG);
 }
 
-fn do_commit<G: GitWrapper, H: HookRunner, E: Editor, W: Writer>(mut service: GitService<G, H, E, W>) -> Result<()> {
+fn do_amend<G: GitWrapper, H: HookRunner, E: Editor, W: Writer>(mut service: GitService<G, H, E, W>) -> Result<()> {
 	service.commit(CommitMode::WithoutEditor {
 		message: COMMIT_MSG,
 		authors: vec![AUTHOR.to_string()],
-		amend: false,
+		amend: true,
 	})
 }

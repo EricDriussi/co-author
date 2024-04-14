@@ -46,3 +46,14 @@ pub fn random_tmp_path_in(path: &str) -> PathBuf {
 	let random = Uuid::new_v4();
 	PathBuf::from(format!("{path}/{random}"))
 }
+
+pub fn count_commits(path: &Path) -> Result<usize> {
+	let repo = Repository::open(path)?;
+	let mut revwalk = repo.revwalk()?;
+	revwalk.push_head()?;
+	let mut commit_count = 0;
+	for _oid in revwalk {
+		commit_count += 1;
+	}
+	Ok(commit_count)
+}

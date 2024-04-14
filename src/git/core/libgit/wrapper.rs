@@ -36,6 +36,28 @@ impl<R: Reader> GitWrapper for LibGitWrapper<R> {
 		Ok(())
 	}
 
+	fn amend(&self) -> Result<()> {
+		let signature = self
+			.repo
+			.signature()
+			.map_err(|_| GitError::LibGit("User name and/or email not set".to_string()))?;
+
+		let commit_message = CommitMessage::from(
+			&self
+				.reader
+				.read_non_empty_lines(&self.path.join(conf::editmsg()))
+				.unwrap_or_default()
+				.join("\n"),
+		);
+
+		if commit_message.has_no_content() {
+			return Err(Box::new(GitError::LibGit("Commit message cannot be empty".to_string())));
+		}
+
+		self.amend_commit(&signature, &commit_message.to_string())?;
+		Ok(())
+	}
+
 	fn formatted_status(&self) -> Result<String> {
 		status_builder::for_editmsg(&self.repo)
 	}
