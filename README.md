@@ -94,18 +94,14 @@ Options:
 
 ### --file
 
-Use a specific file path.
-
-You might want to use one per project/team.
-
-Omits the alias prompt.
+Specify a different authors file path.
 
 ### --list
 
 Use a pre-defined alias list.
 
-This might be useful if you would rather have multiple **shell aliases** than
-multiple CSV files.
+This makes the alias selection scriptable.
+It also helps when working with different teams.
 
 ```sh
 alias coa_proj_a="co-author --list a,b,c"
