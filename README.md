@@ -2,7 +2,7 @@
 
 Give credit to your teammates when pairing or mob-programming.
 
-[co-author](https://github.com/EricDriussi/co-author/assets/46979145/0946f729-e970-4e23-afcf-008d4d05e6a8)
+[co-author.webm](https://github.com/EricDriussi/co-author/assets/46979145/60994940-cfb1-4e73-a8e4-42b77ec132ee)
 
 ## Use Case
 
@@ -36,9 +36,10 @@ falling back to `$XDG_CONFIG_HOME/co-author/`, `$HOME/.config/co-author/`,
 This file should follow the structure `alias,name,email`:
 
 ```csv
-a,Name Surname,someone@users.noreply.github.com
-b,username,something@gmail.com
-cd,Another Person,someone@something.hi
+j,John Doe,john@users.noreply.github.com
+aj,Alice Johnson,alice@example.com
+bb,Bob Brown,bob@example.com
+e,Erica Lee,erica@example.com
 ```
 
 If no options are passed, it will prompt you for a space-separated list of
@@ -50,8 +51,8 @@ It will produce a commit message with the following structure:
 a commit message
 
 
-Co-Authored-by: Name Surname <someone@users.noreply.github.com>
-Co-Authored-by: username <something@gmail.com>
+Co-Authored-by: John Doe <john@users.noreply.github.com>
+Co-Authored-by: Erica Lee <erica@example.com>
 ```
 
 If you group multiple users under the same alias, they will all be retrieved at once.
@@ -62,11 +63,11 @@ groups of people instead of individuals.
 So for a file like:
 
 ```csv
-a,Name Surname,someone@users.noreply.github.com
-a,username,something@gmail.com
+j,John Doe,john@users.noreply.github.com
+j,Jane Smith,jane@example.com
 ```
 
-When given the alias `a`, it will add **both users** as co-authors.
+When given the alias `j`, it will add **both users** as co-authors.
 
 ## Options
 
@@ -163,6 +164,8 @@ Enables `--pre-populate` flag under the hood.
 Presents a picker for the authors using your `fzf` install (and config).
 Uses the `--multi` flag, so pressing `Tab` will select multiple authors.
 
-Press enter when done do continue with the commit message.
+Press enter when done to continue with the commit message.
+
+[fzf.webm](https://github.com/EricDriussi/co-author/assets/46979145/62c9c4c1-2026-4323-837d-e87fded1cff3)
 
 Conflicts with `--all` and `--list`.

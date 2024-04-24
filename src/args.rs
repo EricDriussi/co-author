@@ -39,4 +39,5 @@ pub struct Args {
 	/// Use fzf for author selection
 	#[arg(long, default_value = "false", conflicts_with("list"), conflicts_with("all"))]
 	pub fzf: bool,
+	// FIXME: if multiple authors have the same alias, selecting one with fzf will add them all as co-authors
 }
