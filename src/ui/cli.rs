@@ -4,7 +4,11 @@ use crate::authors::author::Author;
 use crate::common::runner::Runner;
 use crate::Result;
 use colored::Colorize;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use std::io::Write;
+
+const FZF_SEPARATOR: &str = " - ";
 
 pub struct Cli {
 	reader: Box<dyn InputReader>,
@@ -37,7 +41,7 @@ impl Cli {
 		Ok(input.trim().to_string())
 	}
 
-	pub fn fzf_prompt(&self, authors: &[Author]) -> Result<Vec<String>> {
+	pub fn fzf_prompt(&self, authors: &[Author]) -> Result<Vec<u64>> {
 		let mut fzf_proc = self
 			.runner
 			.attach("fzf", &["--multi".to_string(), "--ansi".to_string()])?;
@@ -53,16 +57,18 @@ impl Cli {
 		let output = fzf_proc
 			.wait_with_output()
 			.map_err(|_| UiError::Fzf("Could not read output".to_string()))?;
-		let selected_aliases: Vec<String> = String::from_utf8_lossy(&output.stdout)
+		let selected_aliases: Vec<u64> = String::from_utf8_lossy(&output.stdout)
 			.lines()
-			.map(Self::extract_alias)
+			.map(|line| Self::hash_of(&line.replace(FZF_SEPARATOR, "")))
 			.collect();
 
 		Ok(selected_aliases)
 	}
 
-	fn extract_alias(line: &str) -> String {
-		line.split_whitespace().next().unwrap_or_default().to_string()
+	fn hash_of(str: &str) -> u64 {
+		let mut hasher = DefaultHasher::new();
+		str.hash(&mut hasher);
+		hasher.finish()
 	}
 
 	fn prettify_authors(authors: &[Author]) -> String {
@@ -80,6 +86,6 @@ impl Cli {
 	}
 
 	fn fzf_format(author: &Author) -> String {
-		format!("{} - {}", author.alias().blue(), author.name())
+		format!("{}{}{}", author.alias().blue(), FZF_SEPARATOR, author.name())
 	}
 }

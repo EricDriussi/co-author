@@ -1,5 +1,7 @@
 use crate::{authors::author::Author, common::conf};
 use parameterized::parameterized;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 #[test]
 fn present_a_co_author_compliant_signature() {
@@ -28,6 +30,15 @@ fn get_name() {
 }
 
 #[test]
+fn get_hash() {
+	let alias = "a";
+	let name = "alice";
+	let author = Author::from(alias, name, "alice@wonderland.not");
+
+	assert_eq!(author.hash(), hash_of(&format!("{alias}{name}")));
+}
+
+#[test]
 fn be_equal_to_another_author_with_same_data() {
 	let alias = "a";
 	let name = "alice";
@@ -46,4 +57,10 @@ fn be_equal_to_another_author_with_same_data() {
 })]
 fn not_be_equal_to_another_author_with_different_data(different_author: Author) {
 	assert_ne!(Author::from("a", "alice", "alice@wonderland.not"), different_author);
+}
+
+fn hash_of(str: &str) -> u64 {
+	let mut hasher = DefaultHasher::new();
+	str.hash(&mut hasher);
+	hasher.finish()
 }

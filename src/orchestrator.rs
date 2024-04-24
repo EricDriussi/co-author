@@ -39,7 +39,7 @@ impl Orchestrator {
 		if self.args.fzf {
 			let found_authors: Vec<_> = self
 				.provider
-				.find(&self.cli.fzf_prompt(&all_authors)?)
+				.find_by_hashes(&self.cli.fzf_prompt(&all_authors)?)
 				.iter()
 				.map(Author::signature)
 				.collect();
@@ -54,7 +54,12 @@ impl Orchestrator {
 			Some(list) => list.split(',').map(ToString::to_string).collect::<Vec<String>>(),
 			None => self.cli.aliases_prompt(&all_authors)?,
 		};
-		let found_authors: Vec<_> = self.provider.find(&aliases).iter().map(Author::signature).collect();
+		let found_authors: Vec<_> = self
+			.provider
+			.find_by_aliases(&aliases)
+			.iter()
+			.map(Author::signature)
+			.collect();
 
 		if self.args.sort {
 			Ok(Self::sort(found_authors))

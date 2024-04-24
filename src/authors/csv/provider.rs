@@ -62,11 +62,19 @@ impl CSVProvider {
 }
 
 impl AuthorsProvider for CSVProvider {
-	fn find(&self, aliases: &[String]) -> Vec<Author> {
+	fn find_by_aliases(&self, aliases: &[String]) -> Vec<Author> {
 		self.lines
 			.iter()
 			.filter_map(|line| mapper::to_author(line.as_str()))
 			.filter(|author| aliases.contains(&author.alias()))
+			.collect()
+	}
+
+	fn find_by_hashes(&self, hashes: &[u64]) -> Vec<Author> {
+		self.lines
+			.iter()
+			.filter_map(|line| mapper::to_author(line.as_str()))
+			.filter(|author| hashes.contains(&author.hash()))
 			.collect()
 	}
 

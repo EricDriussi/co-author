@@ -1,4 +1,6 @@
 use crate::common::conf;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 #[derive(Debug, PartialEq)]
 pub struct Author {
@@ -27,9 +29,17 @@ impl Author {
 	pub fn name(&self) -> String {
 		self.name.clone()
 	}
+
+	pub fn hash(&self) -> u64 {
+		let mut hasher = DefaultHasher::new();
+		let to_hash = format!("{}{}", self.alias, self.name);
+		to_hash.hash(&mut hasher);
+		hasher.finish()
+	}
 }
 
 pub trait AuthorsProvider {
-	fn find(&self, aliases: &[String]) -> Vec<Author>;
+	fn find_by_aliases(&self, aliases: &[String]) -> Vec<Author>;
+	fn find_by_hashes(&self, hashes: &[u64]) -> Vec<Author>;
 	fn all(&self) -> Vec<Author>;
 }
