@@ -33,7 +33,7 @@ unsafe_code = "forbid"
 
 [lints.clippy]
 enum_glob_use = "deny" # No * imports
-pedantic = "deny" # Strict checks
+pedantic = { level = "deny", priority = -1 }
 unwrap_used = "deny" # No unwraps
 module_name_repetitions = "allow"
 
