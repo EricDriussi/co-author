@@ -33,7 +33,6 @@ impl Writer for FileWriter {
 
 	fn append(&self, path: &Path, content: &str) -> Result<()> {
 		let file = OpenOptions::new()
-			.write(true)
 			.append(true)
 			.open(path)
 			.map_err(|e| SystemError::Write(e.to_string()))?;
